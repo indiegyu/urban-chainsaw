@@ -2,7 +2,8 @@ name: Daily Blog Post Generation
 
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "0 8  * * *"   # 08:00 UTC — 오전 포스트
+    - cron: "0 16 * * *"   # 16:00 UTC — 오후 포스트 (하루 2편)
   workflow_dispatch:
   push:
     branches:

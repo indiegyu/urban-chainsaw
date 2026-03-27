@@ -1,0 +1,83 @@
+name: Daily YouTube Shorts
+
+on:
+  schedule:
+    - cron: "0 15 * * *"   # 15:00 UTC 매일 (long-form 6시간 후)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  produce-shorts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore OAuth token
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YT_REFRESH_TOKEN:      ${{ secrets.YT_FULL_REFRESH_TOKEN }}
+          GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: python3 scripts/video/make_token.py
+
+      - name: Produce Shorts video
+        id: assemble
+        env:
+          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python -u scripts/video/assemble_shorts.py 2>&1 | tee /tmp/shorts.log
+             && exit ${PIPESTATUS[0]}
+
+      - name: Upload Shorts to YouTube
+        id: upload
+        env:
+          GOOGLE_TOKEN_PATH: token.json
+        run: |
+          OUTPUT_DIR=$(ls -td scripts/video/output_shorts/*/ 2>/dev/null | head -1)
+          if [ -z "$OUTPUT_DIR" ]; then
+            echo "ERROR: No shorts output directory" | tee /tmp/upload_shorts.log
+            exit 1
+          fi
+          python -u scripts/video/upload_youtube.py "$OUTPUT_DIR" 2>&1 | tee /tmp/upload_shorts.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Save run status
+        if: always()
+        run: |
+          mkdir -p .github/run_logs
+          STATUS="success"
+          [ "${{ steps.assemble.outcome }}" != "success" ] && STATUS="assemble_failed"
+          [ "${{ steps.upload.outcome }}"   != "success" ] && STATUS="upload_failed"
+          {
+            echo "type: shorts"
+            echo "status: $STATUS"
+            echo "run: ${{ github.run_number }}"
+            echo "timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "--- shorts log ---"
+            cat /tmp/shorts.log 2>/dev/null || echo "(no log)"
+            echo "--- upload log ---"
+            cat /tmp/upload_shorts.log 2>/dev/null || echo "(no log)"
+          } > .github/run_logs/last_shorts_run.txt
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add .github/run_logs/last_shorts_run.txt
+          git commit -m "ci: shorts #${{ github.run_number }} $STATUS [skip ci]" || true
+          git push origin HEAD:${{ github.ref_name }}

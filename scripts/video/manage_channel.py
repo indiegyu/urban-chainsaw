@@ -331,24 +331,30 @@ def optimize_channel():
     print(f"현재 타이틀: {current_title}")
 
     # ── 1. 타이틀 + 설명 (snippet) ──
+    snippet_payload = {
+        "id": channel_id,
+        "snippet": {
+            "title":       CHANNEL_TITLE,
+            "description": CHANNEL_DESCRIPTION,
+            "country":     "US",
+            "defaultLanguage": "en",
+        }
+    }
     snippet_upd = requests.put(
         f"{API_BASE}/channels?part=snippet",
         headers=headers,
-        json={
-            "id": channel_id,
-            "snippet": {
-                "title":       CHANNEL_TITLE,
-                "description": CHANNEL_DESCRIPTION,
-                "country":     "US",
-                "defaultLanguage": "en",
-            }
-        }
+        json=snippet_payload
     )
+    print(f"  snippet update → HTTP {snippet_upd.status_code}")
     if snippet_upd.status_code in (200, 204):
-        print(f"  ✓ 타이틀 변경: '{current_title}' → '{CHANNEL_TITLE}'")
+        updated_title = snippet_upd.json().get("snippet", {}).get("title", "?")
+        print(f"  ✓ 타이틀: '{current_title}' → '{updated_title}'")
+        if updated_title != CHANNEL_TITLE:
+            print(f"  ⚠ API 응답 타이틀이 목표와 다름 (Brand Account 제한일 수 있음)")
     else:
-        # snippet.title은 Brand Account에서 종종 제한됨 → brandingSettings으로 대체
-        print(f"  ⚠ snippet 업데이트 제한 ({snippet_upd.status_code}) — brandingSettings로 시도")
+        print(f"  ✗ snippet 업데이트 실패: {snippet_upd.text[:400]}")
+        print("  ℹ️  Brand Account는 YouTube Studio에서 직접 변경해야 합니다:")
+        print("      studio.youtube.com → 맞춤설정 → 기본 정보 → 채널 이름")
 
     # ── 2. brandingSettings (설명·키워드·언어·국가) ──
     brand_upd = requests.put(
@@ -369,25 +375,57 @@ def optimize_channel():
             }
         }
     )
+    print(f"  brandingSettings update → HTTP {brand_upd.status_code}")
     if brand_upd.status_code in (200, 204):
         print("  ✓ 채널 설명/키워드 업데이트 완료")
     else:
-        print(f"  ✗ brandingSettings 실패: {brand_upd.status_code} {brand_upd.text[:300]}")
+        print(f"  ✗ brandingSettings 실패: {brand_upd.text[:400]}")
 
-    # ── 3. 배너 이미지 생성 + 업로드 ──
+    # ── 3. 변경 후 채널 상태 재확인 ──
+    print("\n  📋 변경 후 채널 상태 확인...")
+    verify = requests.get(
+        f"{API_BASE}/channels?part=snippet,brandingSettings&id={channel_id}",
+        headers=headers
+    )
+    if verify.status_code == 200:
+        v = verify.json()["items"][0]
+        actual_title = v["snippet"].get("title", "N/A")
+        actual_desc  = v["snippet"].get("description", "")[:80]
+        brand_title  = v.get("brandingSettings", {}).get("channel", {}).get("title", "N/A")
+        print(f"  채널명 (snippet.title):              {actual_title}")
+        print(f"  채널명 (brandingSettings.channel.title): {brand_title}")
+        print(f"  설명 (앞 80자):                      {actual_desc}...")
+        if actual_title == CHANNEL_TITLE:
+            print("  ✅ 채널명 변경 성공!")
+        else:
+            print(f"  ⚠ 채널명이 '{CHANNEL_TITLE}'로 변경되지 않음 — 수동 변경 필요")
+            print("     👉 studio.youtube.com → 맞춤설정 → 기본 정보 → 채널 이름 편집")
+
+    # ── 4. 배너 이미지 생성 + 업로드 ──
     print("\n  📐 배너 이미지 생성 중...")
     banner_path = generate_banner()
     upload_banner(banner_path, headers, channel_id)
 
-    # ── 4. 프로필 이미지 생성 (파일만 저장, 수동 업로드 필요) ──
+    # ── 5. 프로필 이미지 생성 (파일만 저장, 수동 업로드 필요) ──
     print("\n  👤 프로필 이미지 생성 중...")
     profile_path = generate_profile_image()
     print(f"""
-  ℹ️  프로필 사진은 YouTube API 정책상 자동 변경 불가.
-     수동 업로드 방법:
-     1. 생성된 파일: {profile_path}
-     2. YouTube Studio → 채널 맞춤설정 → 기본 정보
-        → 프로필 사진 변경 → 위 파일 업로드""")
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ℹ️  프로필 사진 수동 업로드 안내 (API 정책 제한)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. GitHub에서 이미지 다운로드:
+     https://github.com/indiegyu/urban-chainsaw/raw/main/scripts/video/channel_assets/channel_profile.jpg
+
+  2. YouTube Studio 접속:
+     https://studio.youtube.com
+
+  3. 왼쪽 메뉴 → 맞춤설정 → 기본 정보 탭
+     → 프로필 사진 항목 → 사진 변경
+     → 다운로드한 channel_profile.jpg 선택
+     → 게시 클릭
+
+  📁 로컬 파일 경로: {profile_path}
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━""")
 
 
 if __name__ == "__main__":

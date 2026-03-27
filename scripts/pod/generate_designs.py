@@ -168,9 +168,12 @@ def run(count: int = 5):
             meta    = generate_design_content(niche, groq_key)
             palette = random.choice(COLOR_PALETTES)
 
+            # 마크다운 기호 제거 (**, *, _, ` 등)
+            import re
+            clean = lambda s: re.sub(r"[\*\_\`\#]+", "", s).strip()
             img = create_design_image(
-                main_text=meta.get("main_text", niche.upper()),
-                sub_text=meta.get("sub_text", ""),
+                main_text=clean(meta.get("main_text", niche.upper())),
+                sub_text=clean(meta.get("sub_text", "")),
                 palette=palette,
             )
 

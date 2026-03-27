@@ -39,4 +39,5 @@ jobs:
           git reset --soft origin/${{ github.ref_name }}
           git add docs/podcast/ scripts/podcast/.podcast_episodes.json 2>/dev/null || true
           git commit -m "ci: podcast RSS updated [skip ci]" || echo "Nothing to commit"
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }} || \
+            (git pull origin ${{ github.ref_name }} --rebase && git push origin HEAD:${{ github.ref_name }})

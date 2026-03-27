@@ -130,7 +130,7 @@ def build_html(tools: list[dict], strategy: dict) -> str:
             money = t.get("money_use_case", "")
             best  = t.get("best_for", "")
             rel_attr = 'noopener sponsored' if t.get('affiliate') else 'noopener'
-        cards.append(f"""
+            cards.append(f"""
     <div class="tool-card">
       <div class="tool-header">
         <h3><a href="{t['url']}" target="_blank" rel="{rel_attr}">{t['name']}</a></h3>

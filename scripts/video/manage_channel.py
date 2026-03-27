@@ -82,19 +82,40 @@ def get_channel(headers: dict) -> dict:
 
 # ── 기존 영상 비공개 처리 ─────────────────────────────────────────────────────
 def make_all_videos_private():
-    headers = get_headers()
+    headers  = get_headers()
+    channel  = get_channel(headers)
+    # 채널 업로드 플레이리스트 ID 가져오기
+    ch_detail = requests.get(
+        f"{API_BASE}/channels?part=contentDetails&id={channel['id']}",
+        headers=headers
+    )
+    ch_detail.raise_for_status()
+    uploads_playlist = (ch_detail.json()["items"][0]
+                        ["contentDetails"]["relatedPlaylists"]["uploads"])
+    print(f"  업로드 플레이리스트: {uploads_playlist}")
+
     page_token = None
     total = 0
 
     while True:
-        params = {"part": "id,snippet,status", "mine": "true", "maxResults": 50}
+        params = {"part": "contentDetails", "playlistId": uploads_playlist, "maxResults": 50}
         if page_token:
             params["pageToken"] = page_token
-        r = requests.get(f"{API_BASE}/videos", headers=headers, params=params)
+        r = requests.get(f"{API_BASE}/playlistItems", headers=headers, params=params)
         r.raise_for_status()
         data = r.json()
 
-        for video in data.get("items", []):
+        video_ids = [item["contentDetails"]["videoId"] for item in data.get("items", [])]
+        if not video_ids:
+            break
+
+        # 상태 일괄 조회
+        vid_resp = requests.get(f"{API_BASE}/videos", headers=headers, params={
+            "part": "id,snippet,status", "id": ",".join(video_ids)
+        })
+        vid_resp.raise_for_status()
+
+        for video in vid_resp.json().get("items", []):
             vid_id  = video["id"]
             title   = video["snippet"]["title"]
             current = video["status"]["privacyStatus"]

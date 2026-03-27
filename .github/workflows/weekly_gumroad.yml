@@ -27,9 +27,9 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python -u scripts/products/auto_product.py
 
-      - name: Publish to Gumroad
+      - name: Publish to Lemon Squeezy
         env:
-          GUMROAD_ACCESS_TOKEN: ${{ secrets.GUMROAD_ACCESS_TOKEN }}
+          LEMONSQUEEZY_API_KEY: ${{ secrets.LEMONSQUEEZY_API_KEY }}
         run: python -u scripts/products/gumroad_publisher.py
 
       - name: Commit product files + updated strategy

@@ -3,11 +3,17 @@
 .env.local
 .env.*.local
 credentials.json
+token_yt.json
+token.json
 
 # 생성된 콘텐츠 출력물 (generated files)
 scripts/pod/output/
 scripts/video/output/
 scripts/blog/output/
+scripts/ebook/output/*.pdf
+
+# docs/ 는 GitHub Pages용으로 추적 (gitignore 제외)
+
 
 # 스케줄러 로그 및 리포트
 logs/
@@ -47,4 +53,3 @@ Thumbs.db
 .idea/
 .vscode/
 *.code-workspace
-token.json

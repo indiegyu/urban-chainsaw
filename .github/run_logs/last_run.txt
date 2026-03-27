@@ -1,6 +1,8 @@
-status: upload_failed
-run: 23
-timestamp: 2026-03-27T04:49:38Z
+status: assemble_failed
+assemble_outcome: skipped
+upload_outcome: skipped
+run: 24
+timestamp: 2026-03-27T05:15:40Z
 --- assemble log ---
 (no log)
 --- upload log ---

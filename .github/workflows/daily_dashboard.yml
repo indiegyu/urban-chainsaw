@@ -1,17 +1,17 @@
-name: Weekly Strategy Optimizer
+name: Daily Revenue Dashboard
 
 on:
   schedule:
-    - cron: "0 6 * * 1"   # 매주 월요일 06:00 UTC (직전 주 성과 분석)
-  workflow_dispatch:
+    - cron: "0 22 * * *"   # 매일 22:00 UTC — 하루 콘텐츠 다 올라간 후 집계
+  workflow_dispatch:         # 언제든 수동 새로고침 가능
 
 permissions:
   contents: write
 
 jobs:
-  optimize:
+  dashboard:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
@@ -30,22 +30,18 @@ jobs:
           GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: python3 scripts/video/make_token.py
 
-      - name: Analyze performance & update strategy
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python -u scripts/analytics/weekly_optimizer.py
-
-      - name: Generate revenue dashboard
+      - name: Generate dashboard
         env:
           LEMONSQUEEZY_API_KEY: ${{ secrets.LEMONSQUEEZY_API_KEY }}
+          GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
         run: python -u scripts/analytics/revenue_dashboard.py
 
-      - name: Commit strategy + dashboard
+      - name: Deploy to GitHub Pages
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git fetch origin ${{ github.ref_name }}
           git reset --soft origin/${{ github.ref_name }}
-          git add scripts/strategy/content_strategy.json docs/dashboard.html
-          git commit -m "ci: strategy+dashboard week $(date +%V) [skip ci]" || echo "No changes"
+          git add docs/dashboard.html
+          git commit -m "ci: dashboard update $(date -u +%Y-%m-%d) [skip ci]" || echo "No changes"
           git push origin HEAD:${{ github.ref_name }}

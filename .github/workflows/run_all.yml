@@ -13,7 +13,8 @@ jobs:
           REPO: ${{ github.repository }}
           BRANCH: main
         run: |
-          workflows=(
+          # 콘텐츠 생성 워크플로 먼저 실행
+          content_workflows=(
             "daily_blog.yml"
             "daily_youtube.yml"
             "daily_shorts.yml"
@@ -25,10 +26,9 @@ jobs:
             "weekly_ebook.yml"
             "weekly_optimize.yml"
             "weekly_expand.yml"
-            "daily_dashboard.yml"
           )
 
-          for wf in "${workflows[@]}"; do
+          for wf in "${content_workflows[@]}"; do
             echo "▶ 실행: $wf"
             curl -s -X POST \
               -H "Authorization: Bearer $GH_TOKEN" \
@@ -38,4 +38,15 @@ jobs:
             sleep 2
           done
 
-          echo "✅ 전체 ${#workflows[@]}개 워크플로 실행 요청 완료"
+          echo "⏳ 콘텐츠 워크플로 완료 대기 (5분)..."
+          sleep 300
+
+          # 대시보드는 마지막에 실행 (모든 데이터 반영)
+          echo "▶ 실행: daily_dashboard.yml"
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/actions/workflows/daily_dashboard.yml/dispatches" \
+            -d "{\"ref\":\"$BRANCH\"}"
+
+          echo "✅ 전체 파이프라인 실행 완료 (대시보드 5분 후 갱신)"

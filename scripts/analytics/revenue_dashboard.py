@@ -2,16 +2,19 @@
 수익 대시보드 자동 생성
 ========================
 실제 작동 중인 파이프라인만 표시.
+다중 수익원 추적, 7일 트렌드, 파이프라인 건강도 포함.
 """
 
-import os, json, requests
+import os, json, requests, sys
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 YOUTUBE_API   = "https://www.googleapis.com/youtube/v3"
 STRATEGY_PATH = Path("scripts/strategy/content_strategy.json")
 DOCS_DIR      = Path("docs")
 TOKEN_PATH    = "token.json"
+REVENUE_HISTORY_PATH = Path(".github/run_logs/revenue_history.json")
+HEALTH_LOG_PATH = Path(".github/run_logs/health.json")
 
 # ── 실제 활성 파이프라인 (확인된 것만) ────────────────────────────────────────
 ACTIVE_PIPELINES = [
@@ -219,11 +222,109 @@ def fetch_pipeline_status() -> dict:
     return status
 
 
+# ── 수익 히스토리 추적 ────────────────────────────────────────────────────────
+
+def save_revenue_snapshot(yt: dict, outputs: dict):
+    """매일 수익/생산량 스냅샷을 저장합니다 (최근 90일 유지)."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    REVENUE_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        history = json.loads(REVENUE_HISTORY_PATH.read_text()) if REVENUE_HISTORY_PATH.exists() else {"daily": []}
+    except (json.JSONDecodeError, FileNotFoundError):
+        history = {"daily": []}
+
+    # 같은 날짜 중복 방지
+    history["daily"] = [d for d in history["daily"] if d.get("date") != today]
+
+    snapshot = {
+        "date": today,
+        "yt_est_monthly": yt.get("est_monthly", 0) if "error" not in yt else 0,
+        "yt_subscribers": yt.get("subscribers", 0) if "error" not in yt else 0,
+        "yt_recent_views": yt.get("recent_views", 0) if "error" not in yt else 0,
+        "videos": outputs.get("videos", 0),
+        "blogs": outputs.get("blogs", 0),
+        "pods": outputs.get("pods", 0),
+    }
+    history["daily"].append(snapshot)
+    history["daily"] = history["daily"][-90:]  # 최근 90일만 유지
+    history["last_updated"] = today
+
+    REVENUE_HISTORY_PATH.write_text(json.dumps(history, indent=2, ensure_ascii=False))
+    return history
+
+
+def get_revenue_trend(history: dict, days: int = 7) -> list[dict]:
+    """최근 N일간 수익 트렌드를 반환합니다."""
+    daily = history.get("daily", [])
+    return daily[-days:] if len(daily) >= days else daily
+
+
+def fetch_pipeline_health() -> dict:
+    """health.json에서 파이프라인 에러율/성공률을 계산합니다."""
+    try:
+        data = json.loads(HEALTH_LOG_PATH.read_text()) if HEALTH_LOG_PATH.exists() else {"events": []}
+    except (json.JSONDecodeError, FileNotFoundError):
+        return {"total": 0, "success": 0, "error": 0, "rate": 100, "recent_errors": []}
+
+    events = data.get("events", [])
+    # 최근 7일 이벤트만
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    recent = [e for e in events if e.get("timestamp", "") >= cutoff]
+
+    success = sum(1 for e in recent if e.get("status") == "success")
+    errors = [e for e in recent if "error" in e]
+    total = len(recent)
+
+    return {
+        "total": total,
+        "success": success,
+        "error": len(errors),
+        "rate": round(success / total * 100) if total > 0 else 100,
+        "recent_errors": errors[-5:],  # 최근 에러 5건
+    }
+
+
+def _build_sparkline_svg(values: list[float], width: int = 200, height: int = 40) -> str:
+    """간단한 SVG 스파크라인 차트를 생성합니다."""
+    if not values or len(values) < 2:
+        return ""
+    max_val = max(values) or 1
+    min_val = min(values)
+    val_range = max_val - min_val or 1
+
+    points = []
+    step = width / (len(values) - 1)
+    for i, v in enumerate(values):
+        x = round(i * step, 1)
+        y = round(height - (v - min_val) / val_range * (height - 4) - 2, 1)
+        points.append(f"{x},{y}")
+
+    # 그라디언트 영역
+    fill_points = points + [f"{width},{height}", f"0,{height}"]
+
+    return (
+        f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" '
+        f'xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle">'
+        f'<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0%" stop-color="#818cf8" stop-opacity="0.3"/>'
+        f'<stop offset="100%" stop-color="#818cf8" stop-opacity="0.02"/>'
+        f'</linearGradient></defs>'
+        f'<polygon points="{" ".join(fill_points)}" fill="url(#sg)"/>'
+        f'<polyline points="{" ".join(points)}" fill="none" stroke="#818cf8" stroke-width="2"/>'
+        f'<circle cx="{points[-1].split(",")[0]}" cy="{points[-1].split(",")[1]}" r="3" fill="#a5b4fc"/>'
+        f'</svg>'
+    )
+
+
 # ── HTML 빌드 ─────────────────────────────────────────────────────────────────
 
-def build_dashboard(yt: dict, strategy: dict, outputs: dict, pipe_status: dict = None) -> str:
+def build_dashboard(yt: dict, strategy: dict, outputs: dict, pipe_status: dict = None,
+                    revenue_history: dict = None, health: dict = None) -> str:
     now      = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     est_usd  = yt.get("est_monthly", 0) if "error" not in yt else 0
+    trend_data = get_revenue_trend(revenue_history or {}, days=7)
+    health = health or {}
 
     # ── YouTube 카드 ──────────────────────────────────────────────────────────
     if "error" not in yt and yt:
@@ -346,6 +447,74 @@ def build_dashboard(yt: dict, strategy: dict, outputs: dict, pipe_status: dict =
 <table class="data-table">
 {pending_rows}
 </table>"""
+
+    # ── 수익 추이 카드 (7일) ──────────────────────────────────────────────────
+    if trend_data and len(trend_data) >= 2:
+        views_vals = [d.get("yt_recent_views", 0) for d in trend_data]
+        subs_vals = [d.get("yt_subscribers", 0) for d in trend_data]
+        views_spark = _build_sparkline_svg(views_vals, 180, 36)
+        subs_spark = _build_sparkline_svg(subs_vals, 180, 36)
+
+        # 성장률 계산
+        if views_vals[0] > 0:
+            views_growth = round((views_vals[-1] - views_vals[0]) / views_vals[0] * 100, 1)
+        else:
+            views_growth = 0
+        subs_growth = subs_vals[-1] - subs_vals[0] if len(subs_vals) >= 2 else 0
+
+        views_arrow = "📈" if views_growth >= 0 else "📉"
+        subs_arrow = "📈" if subs_growth >= 0 else "📉"
+
+        trend_body = f"""
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div style="background:#1e293b;border-radius:10px;padding:14px">
+    <p style="color:#64748b;font-size:.75em;margin-bottom:6px">최근 조회수 (7일)</p>
+    <p style="font-size:1.1em;font-weight:700;color:#fff">{views_vals[-1]:,} {views_arrow} {views_growth:+.1f}%</p>
+    <div style="margin-top:8px">{views_spark}</div>
+  </div>
+  <div style="background:#1e293b;border-radius:10px;padding:14px">
+    <p style="color:#64748b;font-size:.75em;margin-bottom:6px">구독자 변화 (7일)</p>
+    <p style="font-size:1.1em;font-weight:700;color:#fff">{subs_vals[-1]:,} {subs_arrow} {subs_growth:+,}</p>
+    <div style="margin-top:8px">{subs_spark}</div>
+  </div>
+</div>
+<p class="muted" style="margin-top:10px">최근 7일간 추이 · 매일 22:00 UTC 자동 기록</p>"""
+    else:
+        trend_body = '<p class="muted">데이터 수집 중... (2일 후 트렌드 표시 시작)</p>'
+
+    # ── 파이프라인 건강도 카드 ─────────────────────────────────────────────────
+    h_rate = health.get("rate", 100)
+    h_total = health.get("total", 0)
+    h_errors = health.get("error", 0)
+    h_color = "#6ee7b7" if h_rate >= 90 else ("#fbbf24" if h_rate >= 70 else "#f87171")
+
+    recent_err_html = ""
+    for err in health.get("recent_errors", [])[-3:]:
+        ts = _relative_time(err.get("timestamp", ""))
+        recent_err_html += (
+            f'<p style="font-size:.78em;color:#f87171;margin-top:4px">'
+            f'⚠ [{err.get("pipeline","?")}] {err.get("error","")[:60]} · {ts}</p>'
+        )
+
+    health_body = f"""
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+  <div style="position:relative;width:80px;height:80px">
+    <svg viewBox="0 0 36 36" width="80" height="80">
+      <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none" stroke="#1e293b" stroke-width="3"/>
+      <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none" stroke="{h_color}" stroke-width="3"
+            stroke-dasharray="{h_rate}, 100" stroke-linecap="round"/>
+    </svg>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                font-size:1.1em;font-weight:700;color:{h_color}">{h_rate}%</div>
+  </div>
+  <div>
+    <p style="font-weight:600;color:#e2e8f0">7일 성공률</p>
+    <p style="color:#64748b;font-size:.83em">실행 {h_total}회 중 에러 {h_errors}회</p>
+  </div>
+</div>
+{recent_err_html if recent_err_html else '<p style="color:#6ee7b7;font-size:.83em">✓ 최근 에러 없음</p>'}"""
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
@@ -496,6 +665,15 @@ def build_dashboard(yt: dict, strategy: dict, outputs: dict, pipe_status: dict =
       <div class="card-body">{output_body}</div>
     </div>
 
+    <!-- 수익 추이 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:#818cf8"></div>
+        <span class="card-title">7일 수익 추이</span>
+      </div>
+      <div class="card-body">{trend_body}</div>
+    </div>
+
     <!-- 전략 -->
     <div class="card">
       <div class="card-header">
@@ -503,6 +681,15 @@ def build_dashboard(yt: dict, strategy: dict, outputs: dict, pipe_status: dict =
         <span class="card-title">AI 전략 상태</span>
       </div>
       <div class="card-body">{strategy_body}</div>
+    </div>
+
+    <!-- 파이프라인 건강도 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:{h_color}"></div>
+        <span class="card-title">파이프라인 건강도</span>
+      </div>
+      <div class="card-body">{health_body}</div>
     </div>
 
     <!-- 파이프라인 -->
@@ -529,18 +716,25 @@ def run():
 
     print("📊 수익 대시보드 생성 중...")
 
-    yt         = fetch_youtube_stats()
-    strategy   = fetch_strategy_stats()
-    outputs    = count_local_outputs()
+    yt          = fetch_youtube_stats()
+    strategy    = fetch_strategy_stats()
+    outputs     = count_local_outputs()
     pipe_status = fetch_pipeline_status()
+    health      = fetch_pipeline_health()
+
+    # 수익 스냅샷 저장 (히스토리 누적)
+    rev_history = save_revenue_snapshot(yt, outputs)
 
     print(f"  YouTube: 구독자 {yt.get('subscribers', 0):,} / 예상 ${yt.get('est_monthly', 0):.2f}")
     print(f"  콘텐츠: 영상 {outputs['videos']}개 / 블로그 {outputs['blogs']}개 / POD {outputs['pods']}개")
     print(f"  파이프라인 상태 수집: {len(pipe_status)}개 확인됨")
+    print(f"  건강도: {health.get('rate', 100)}% (최근 7일 에러 {health.get('error', 0)}건)")
+    print(f"  히스토리: {len(rev_history.get('daily', []))}일 누적됨")
 
     DOCS_DIR.mkdir(exist_ok=True)
     (DOCS_DIR / "dashboard.html").write_text(
-        build_dashboard(yt, strategy, outputs, pipe_status), encoding="utf-8"
+        build_dashboard(yt, strategy, outputs, pipe_status, rev_history, health),
+        encoding="utf-8"
     )
 
     print(f"\n✅ 대시보드 저장 완료")

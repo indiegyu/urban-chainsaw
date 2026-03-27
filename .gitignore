@@ -6,10 +6,10 @@ credentials.json
 token_yt.json
 token.json
 
-# 생성된 콘텐츠 출력물 (generated files)
-scripts/pod/output/
-scripts/video/output/
-scripts/blog/output/
+# 생성된 콘텐츠 출력물 — 워크플로우가 커밋해야 하므로 추적 허용
+# scripts/pod/output/    # ← 제거: daily_pod.yml이 커밋함
+# scripts/video/output/  # ← 제거: daily_youtube.yml이 커밋함
+# scripts/blog/output/   # ← 제거: daily_blog.yml이 커밋함
 scripts/ebook/output/*.pdf
 
 # docs/ 는 GitHub Pages용으로 추적 (gitignore 제외)

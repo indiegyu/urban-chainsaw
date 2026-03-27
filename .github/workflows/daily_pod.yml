@@ -1,10 +1,10 @@
-name: Daily POD Auto-Listing
+name: Daily POD Design Generator
 
-# 매일 오전 8시(UTC) = 한국시간 오후 5시에 실행
+# 매일 디자인 생성 (Printify 연동 없이 디자인 파일만 생성 → 아티팩트 저장)
 on:
   schedule:
     - cron: "0 8 * * *"
-  workflow_dispatch:        # 수동 실행 버튼
+  workflow_dispatch:
     inputs:
       count:
         description: "Number of designs to generate"
@@ -12,38 +12,26 @@ on:
         type: string
 
 jobs:
-  generate-and-list:
+  generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
-      - name: Generate designs
+      - name: Generate POD designs
         env:
-          IDEOGRAM_API_KEY: ${{ secrets.IDEOGRAM_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           COUNT="${{ github.event.inputs.count || '5' }}"
           python scripts/pod/generate_designs.py "$COUNT"
-
-      - name: Create Printify + Etsy listings
-        env:
-          PRINTIFY_API_KEY: ${{ secrets.PRINTIFY_API_KEY }}
-          PRINTIFY_SHOP_ID: ${{ secrets.PRINTIFY_SHOP_ID }}
-          ETSY_API_KEY:     ${{ secrets.ETSY_API_KEY }}
-          ETSY_SHOP_ID:     ${{ secrets.ETSY_SHOP_ID }}
-        run: python scripts/pod/create_listing.py scripts/pod/output
 
       - name: Upload design artifacts (7-day retention)
         uses: actions/upload-artifact@v4

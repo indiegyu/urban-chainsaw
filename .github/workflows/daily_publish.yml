@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: "30 8 * * *"   # 08:30 UTC (블로그 생성 30분 후)
   workflow_dispatch:
-  push:
-    branches:
-      - claude/research-income-automation-fNwfz
-    paths:
-      - '.github/workflows/daily_publish.yml'
-      - 'scripts/publish/**'
 
 permissions:
   contents: write
@@ -45,28 +39,13 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python scripts/publish/devto_publisher.py
 
-      # ── 3. Medium 발행 ────────────────────────────────────────────
-      - name: Publish to Medium
-        env:
-          MEDIUM_TOKEN: ${{ secrets.MEDIUM_TOKEN }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python scripts/publish/medium_publisher.py
-
-      # ── 4. AI Tools 디렉토리 빌드 (SEO 자산) ────────────────────────
+      # ── 3. AI Tools 디렉토리 빌드 (SEO 자산) ─────────────────────
       - name: Build AI Tools Directory
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python scripts/publish/tools_directory.py
 
-      # ── 5. Hashnode 크로스포스팅 (개발자 1억 UV) ─────────────────
-      - name: Publish to Hashnode
-        env:
-          HASHNODE_ACCESS_TOKEN: ${{ secrets.HASHNODE_ACCESS_TOKEN }}
-          HASHNODE_PUBLICATION_ID: ${{ secrets.HASHNODE_PUBLICATION_ID }}
-          GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
-        run: python scripts/publish/hashnode_publisher.py
-
-      # ── 6. Ko-fi 후원 버튼 주입 ─────────────────────────────────
+      # ── 4. Ko-fi 후원 버튼 주입 ─────────────────────────────────
       - name: Inject Ko-fi donation buttons
         env:
           KOFI_USERNAME: ${{ secrets.KOFI_USERNAME }}
@@ -75,13 +54,13 @@ jobs:
             python scripts/monetize/kofi_injector.py
           fi
 
-      # ── 7. 커밋 (docs/ 변경사항) ──────────────────────────────────
+      # ── 5. 커밋 (docs/ 변경사항) ──────────────────────────────────
       - name: Commit GitHub Pages
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git fetch origin ${{ github.ref_name }}
-          git reset --soft origin/${{ github.ref_name }}
-          git add docs/ scripts/publish/.devto_published.json scripts/publish/.medium_published.json scripts/publish/.tools_state.json scripts/publish/.hashnode_published.json 2>/dev/null || true
+          git fetch origin main
+          git reset --soft origin/main
+          git add docs/ scripts/publish/.devto_published.json scripts/publish/.tools_state.json 2>/dev/null || true
           git commit -m "ci: deploy pages + publish [skip ci]" || echo "Nothing to commit"
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:main

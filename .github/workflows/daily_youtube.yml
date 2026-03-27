@@ -107,4 +107,5 @@ jobs:
           git reset --soft origin/${{ github.ref_name }}
           git add .github/run_logs/last_run.txt
           git commit -m "ci: run #${{ github.run_number }} $STATUS [skip ci]" || true
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }} || \
+            (git pull origin ${{ github.ref_name }} --rebase && git push origin HEAD:${{ github.ref_name }})

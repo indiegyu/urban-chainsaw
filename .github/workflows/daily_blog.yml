@@ -39,4 +39,5 @@ jobs:
           git reset --soft origin/${{ github.ref_name }}
           git add scripts/blog/output/
           git commit -m "ci: blog post [skip ci]" || echo "Nothing to commit"
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }} || \
+            (git pull origin ${{ github.ref_name }} --rebase && git push origin HEAD:${{ github.ref_name }})

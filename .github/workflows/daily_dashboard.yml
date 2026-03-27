@@ -43,4 +43,5 @@ jobs:
           git reset --soft origin/${{ github.ref_name }}
           git add docs/dashboard.html
           git commit -m "ci: dashboard update $(date -u +%Y-%m-%d) [skip ci]" || echo "No changes"
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }} || \
+            (git pull origin ${{ github.ref_name }} --rebase && git push origin HEAD:${{ github.ref_name }})

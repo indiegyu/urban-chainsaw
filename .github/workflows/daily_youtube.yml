@@ -2,7 +2,8 @@ name: Daily YouTube Video
 
 on:
   schedule:
-    - cron: "0 9 * * *"
+    - cron: "0 9  * * *"   # 09:00 UTC — 아침 편
+    - cron: "0 21 * * *"   # 21:00 UTC — 저녁 편 (하루 2편)
   push:
     branches:
       - claude/research-income-automation-fNwfz

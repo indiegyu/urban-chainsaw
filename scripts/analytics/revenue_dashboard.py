@@ -133,12 +133,17 @@ def fetch_strategy_stats() -> dict:
     try:
         s = json.loads(STRATEGY_PATH.read_text())
         return {
-            "version":        s.get("version", 1),
-            "last_updated":   s.get("last_updated", ""),
-            "products_made":  len(s.get("gumroad_products_created", [])),
-            "products":       s.get("gumroad_products_created", [])[-5:],
-            "top_topics":     s.get("top_performing_topics", [])[:3],
-            "strategy_note":  s.get("last_strategy_note", ""),
+            "version":          s.get("version", 1),
+            "last_updated":     s.get("last_updated", ""),
+            "products_made":    len(s.get("gumroad_products_created", [])),
+            "products":         s.get("gumroad_products_created", [])[-5:],
+            "top_topics":       s.get("top_performing_topics", [])[:3],
+            "strategy_note":    s.get("last_strategy_note", ""),
+            "income_streams":   s.get("income_streams", {}),
+            "activated_streams": s.get("activated_streams", []),
+            "total_pipelines":  s.get("total_pipelines", 0),
+            "last_expansion":   s.get("last_expansion", ""),
+            "groq_suggested":   s.get("groq_suggested_streams", [])[-3:],
         }
     except Exception:
         return {}
@@ -238,9 +243,69 @@ def build_dashboard(yt: dict, ls: dict, strategy: dict) -> str:
 {f"<p class='insight'>💡 {strategy.get('strategy_note','')}</p>" if strategy.get('strategy_note') else ''}
 <p class="muted">매주 월요일 자동 분석·업데이트</p>"""
 
+    # ── 파이프라인 현황 카드 ──
+    core_streams = [
+        ("🟢", "YouTube 영상", "x2/일", "AdSense"),
+        ("🟢", "YouTube Shorts", "x1/일", "AdSense + 알고리즘"),
+        ("🟢", "블로그 (GitHub Pages)", "x2/일", "AdSense + 어필리에이트"),
+        ("🟢", "KDP 이북 자동 생성", "x1/주", "Amazon 인세 70%"),
+        ("🟢", "Lemon Squeezy 상품", "x2/주", "디지털 상품 95%"),
+        ("🟢", "AI Tools 디렉토리", "매일 업데이트", "어필리에이트 SEO"),
+    ]
+    maybe_streams = [
+        ("🟡", "Dev.to 발행", "DEVTO_API_KEY"),
+        ("🟡", "Medium 파트너", "MEDIUM_TOKEN"),
+        ("🟡", "Hashnode 크로스포스팅", "HASHNODE_ACCESS_TOKEN + HASHNODE_PUBLICATION_ID"),
+        ("🟡", "Pinterest 핀", "PINTEREST_ACCESS_TOKEN"),
+        ("🟡", "Patreon 유료 구독", "PATREON_ACCESS_TOKEN + PATREON_CAMPAIGN_ID"),
+        ("🟡", "Twitter/X 포스팅", "TWITTER_API_KEY x4"),
+        ("🟡", "Reddit 공유", "REDDIT_CLIENT_ID x4"),
+        ("🟡", "Beehiiv 뉴스레터", "BEEHIIV_API_KEY + BEEHIIV_PUB_ID"),
+        ("🟡", "Printify POD (티셔츠)", "PRINTIFY_API_KEY + PRINTIFY_SHOP_ID"),
+        ("🟡", "Etsy 디지털 상품", "ETSY_API_KEY + ETSY_SHOP_ID"),
+        ("🟡", "Ko-fi 후원 버튼", "KOFI_USERNAME"),
+        ("🟡", "TikTok 자동 포스팅", "TIKTOK_ACCESS_TOKEN + TIKTOK_OPEN_ID"),
+    ]
+    active_streams = strategy.get("income_streams", {})
+    expanded_rows = "".join(
+        f'<tr><td>{info.get("name","")}</td>'
+        f'<td><span class="badge {"green" if info.get("status")=="active" else "yellow"}">'
+        f'{"🟢 활성" if info.get("status")=="active" else "🟡 대기"}</span></td>'
+        f'<td style="color:#64748b;font-size:.8em">{info.get("est_monthly","?")}</td></tr>'
+        for sid, info in active_streams.items()
+    )
+
+    core_rows = "".join(
+        f'<tr><td>{icon} {name}</td><td style="color:#64748b;font-size:.8em">{freq}</td>'
+        f'<td style="color:#6ee7b7;font-size:.8em">{revenue}</td></tr>'
+        for icon, name, freq, revenue in core_streams
+    )
+    maybe_rows = "".join(
+        f'<tr><td>{icon} {name}</td>'
+        f'<td colspan="2" style="color:#fcd34d;font-size:.75em">시크릿 필요: {secret}</td></tr>'
+        for icon, name, secret in maybe_streams
+    )
+
+    last_exp = strategy.get("last_expansion", "")
+    total_p  = strategy.get("total_pipelines", len(core_streams))
+    pipeline_body = f"""
+<p style="margin-bottom:12px"><strong>총 파이프라인: {total_p + len(core_streams)}개</strong>
+  <span class="muted" style="margin-left:8px">마지막 확장: {last_exp[:10] if last_exp else '미실행'}</span></p>
+<table class="data-table">
+<tr><th>스트림</th><th>주기</th><th>수익 방식</th></tr>
+{core_rows}
+</table>
+<p style="margin-top:12px;color:#fcd34d;font-size:.85em">⏳ 시크릿 등록 시 즉시 활성화</p>
+<table class="data-table">
+<tr><th>스트림</th><th colspan="2">필요 시크릿</th></tr>
+{maybe_rows}
+</table>
+<p class="muted" style="margin-top:10px">매주 화요일 자동 확장 (weekly_expand.yml)</p>"""
+
     # ── 전체 수익 합산 ──
     total_est = (yt.get("est_monthly", 0) if "error" not in yt else 0) + \
                 (ls.get("month_revenue", 0) if "error" not in ls else 0)
+    total_active = len(core_streams) + len(strategy.get("income_streams", {}))
 
     # ── 플랫폼 수확 링크 ──
     harvest_links = [
@@ -319,8 +384,11 @@ def build_dashboard(yt: dict, ls: dict, strategy: dict) -> str:
   <h1>💰 AI Income Daily</h1>
   <div class="total">${total_est:.2f}</div>
   <div class="sub">이번 달 예상 수익 합산 · {now} 기준</div>
-  <div style="margin-top:12px;font-size:.85em;color:rgba(255,255,255,.6)">
-    매주 월요일 자동 업데이트 · 브라우저 새로고침으로 즉시 갱신
+  <div style="margin-top:8px;font-size:1.1em;color:rgba(255,255,255,.9)">
+    🚀 활성 수익 파이프라인 <strong>{total_active}개</strong> 자동 운영 중
+  </div>
+  <div style="margin-top:6px;font-size:.85em;color:rgba(255,255,255,.6)">
+    매주 화요일 자동 확장 · 매주 월요일 전략 업데이트
   </div>
 </div>
 
@@ -340,6 +408,7 @@ def build_dashboard(yt: dict, ls: dict, strategy: dict) -> str:
     {_card("🍋 Lemon Squeezy 상품 판매", ls_body, "#fbbf24")}
     {_card("🛍️ 내 디지털 상품 목록", prod_body, "#10b981")}
     {_card("🧠 AI 전략 상태", strategy_body, "#6366f1")}
+    {_card("🔥 전체 수익 파이프라인 현황", pipeline_body, "#f59e0b")}
   </div>
 
 </div>

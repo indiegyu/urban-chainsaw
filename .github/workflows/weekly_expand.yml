@@ -1,0 +1,59 @@
+name: Weekly Income Expansion Engine
+
+# 매주 화요일 06:00 UTC — 새 수익 파이프라인 자동 추가
+on:
+  schedule:
+    - cron: "0 6 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  expand:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests python-dotenv -q
+
+      # ── 1. 수익 파이프라인 확장 엔진 실행 ────────────────────────
+      - name: Run income expander
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python -u scripts/meta/income_expander.py
+
+      # ── 2. Ko-fi 버튼 주입 (KOFI_USERNAME 있을 경우) ─────────────
+      - name: Inject Ko-fi buttons
+        env:
+          KOFI_USERNAME: ${{ secrets.KOFI_USERNAME }}
+        run: |
+          if [ -f scripts/monetize/kofi_injector.py ]; then
+            python scripts/monetize/kofi_injector.py
+          fi
+
+      # ── 3. Notion 템플릿 생성 ─────────────────────────────────────
+      - name: Generate Notion templates
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          if [ -f scripts/products/notion_template_generator.py ]; then
+            python scripts/products/notion_template_generator.py
+          fi
+
+      # ── 4. 변경사항 커밋 ─────────────────────────────────────────
+      - name: Commit expansion results
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin main
+          git reset --soft origin/main
+          git add scripts/ docs/ 2>/dev/null || true
+          git commit -m "ci: income expansion $(date -u +%Y-%m-%d) [skip ci]" || echo "Nothing to commit"
+          git push origin HEAD:main

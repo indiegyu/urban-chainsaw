@@ -1,0 +1,40 @@
+name: Weekly Patreon Post
+
+on:
+  schedule:
+    - cron: "0 8 * * 5"   # 매주 금요일 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests python-dotenv -q
+
+      - name: Post to Patreon
+        env:
+          GROQ_API_KEY:          ${{ secrets.GROQ_API_KEY }}
+          PATREON_ACCESS_TOKEN:  ${{ secrets.PATREON_ACCESS_TOKEN }}
+          PATREON_CAMPAIGN_ID:   ${{ secrets.PATREON_CAMPAIGN_ID }}
+        run: python -u scripts/social/patreon_poster.py
+
+      - name: Commit state
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add scripts/social/.patreon_posted.json 2>/dev/null || true
+          git commit -m "ci: patreon weekly post [skip ci]" || echo "Nothing to commit"
+          git push origin HEAD:${{ github.ref_name }}

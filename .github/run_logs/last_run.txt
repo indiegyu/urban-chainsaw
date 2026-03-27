@@ -1,8 +1,8 @@
-status: upload_failed
+status: success
 assemble_outcome: success
-upload_outcome: failure
-run: 28
-timestamp: 2026-03-27T06:48:06Z
+upload_outcome: success
+run: 29
+timestamp: 2026-03-27T07:38:29Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -11,14 +11,14 @@ timestamp: 2026-03-27T06:48:06Z
   ✓ Reddit: 0 hot posts
   ⚠ pytrends: Retry.__init__() got an unexpected keyword argument 'method_whitelist'
   ✓ Google Trends: 0 keywords scored
-  ✅ Topic selected: Make $1000 monthly with AI stocks.
-  📊 Trend-selected topic: 'Make $1000 monthly with AI stocks.'
+  ✅ Topic selected: Make $1000 Monthly with AI Stocks.
+  📊 Trend-selected topic: 'Make $1000 Monthly with AI Stocks.'
 
-🎬 Producing video: 'Make $1000 monthly with AI stocks.'
+🎬 Producing video: 'Make $1000 Monthly with AI Stocks.'
 
 [1/3] Generating script...
-  ✓ Title:     1000 AI Stocks $1000/month (2026)
-  ✓ Tags:      24 tags
+  ✓ Title:     Make $1000 AI Stocks (2026)
+  ✓ Tags:      21 tags
   ✓ Thumbnail: $1000 MONTHLY AI
 
 [2/3] Synthesizing voice...
@@ -28,31 +28,14 @@ timestamp: 2026-03-27T06:48:06Z
   ✓ Thumbnail: thumbnail.jpg
   ✓ Video assembled: final.mp4
 
-✅ Video ready: 20260327_064705
-   Title:  1000 AI Stocks $1000/month (2026)
-   Size:   5.7 MB
+✅ Video ready: 20260327_073729
+   Title:  Make $1000 AI Stocks (2026)
+   Size:   5.4 MB
 --- upload log ---
-Traceback (most recent call last):
-  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/upload_youtube.py", line 256, in <module>
-    run(sys.argv[1])
-  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/upload_youtube.py", line 236, in run
-    video_id = upload_video(
-               ^^^^^^^^^^^^^
-  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/upload_youtube.py", line 144, in upload_video
-    raise RuntimeError(f"Failed to initiate upload: {init_resp.status_code} {init_resp.text}")
-RuntimeError: Failed to initiate upload: 400 {
-  "error": {
-    "code": 400,
-    "message": "The request metadata specifies invalid video keywords.",
-    "errors": [
-      {
-        "message": "The request metadata specifies invalid video keywords.",
-        "domain": "youtube.video",
-        "reason": "invalidTags",
-        "location": "body.snippet.tags",
-        "locationType": "other"
-      }
-    ]
-  }
-}
+  Upload session: https://www.googleapis.com/upload/youtube/v3/videos?uploadTy...
+  Uploading: final.mp4 (5.7 MB)
+  Upload progress: 73%
+  ✓ Uploaded: https://youtu.be/42IWOpLBTMo
+  ✓ Thumbnail uploaded
 
+🎉 Done! Watch at: https://youtu.be/42IWOpLBTMo

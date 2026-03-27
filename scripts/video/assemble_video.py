@@ -48,20 +48,29 @@ def _groq_post(headers: dict, messages: list, temperature: float = 0.8,
     return resp.json()["choices"][0]["message"]["content"].strip()
 
 
-def generate_script(topic: str, groq_api_key: str) -> dict:
-    """2-step 방식: JSON 메타 + plain text 스크립트 분리."""
+def generate_script(topic: str, groq_api_key: str, seo_context: str = "") -> dict:
+    """2-step 방식: JSON 메타 + plain text 스크립트 분리.
+    seo_context: trend_researcher에서 수집한 SEO 힌트 (선택)."""
     import re
     headers = {"Authorization": f"Bearer {groq_api_key}", "Content-Type": "application/json"}
+
+    seo_hint = (f"\n\nSEO MARKET DATA (use to optimize title/tags/thumbnail):\n{seo_context}"
+                if seo_context else "")
 
     # Step 1: JSON 메타데이터만 (script 없음 → 파싱 오류 방지)
     meta_raw = _groq_post(headers, [
         {"role": "system", "content": (
-            "Output ONLY valid JSON (no markdown, no code blocks) with keys: "
-            "title (max 70 chars), description (200 words), "
-            "tags (list of 15 strings), thumbnail_text (3-5 word phrase)."
+            "Output ONLY valid JSON (no markdown, no code blocks) with these exact keys:\n"
+            "- title: YouTube title max 70 chars. MUST include a specific number (e.g. '7 tools', '$500/month') "
+            "AND a clear benefit. Year 2026. Pattern: [Number/Amount] [AI keyword] [Benefit] [(2026)]\n"
+            "- description: 280-word SEO description. Start with a 2-sentence attention hook. "
+            "Include 5+ keyword variations naturally. End with: 'Subscribe for daily AI income tips!'\n"
+            "- tags: list of 20 strings (mix exact + broad: make money online, AI tools 2026, passive income...)\n"
+            "- thumbnail_text: 3-4 word PUNCHY phrase for thumbnail. All caps OK. "
+            "Include $ amount or number if possible. Example: '$500 DAILY AI' or '7 FREE TOOLS'"
         )},
-        {"role": "user", "content": f"Topic: {topic}"},
-    ], max_tokens=500)
+        {"role": "user", "content": f"Topic: {topic}{seo_hint}"},
+    ], max_tokens=700)
     meta_raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
     if "```" in meta_raw:
         meta_raw = meta_raw.split("```")[1].lstrip("json").strip()
@@ -70,8 +79,13 @@ def generate_script(topic: str, groq_api_key: str) -> dict:
     # Step 2: 스크립트 plain text
     script = _groq_post(headers, [
         {"role": "system", "content": (
-            "Write a 900-1100 word spoken narration for a faceless YouTube channel. "
-            "Engaging, conversational, no stage directions, no JSON, just the spoken text."
+            "Write a 900-1100 word engaging spoken narration for a faceless YouTube channel "
+            "about AI tools and passive income. Rules: "
+            "(1) Hook the viewer in the first 30 seconds with a bold claim or surprising stat. "
+            "(2) Deliver 5-7 specific, actionable tips or tools. "
+            "(3) Each tip: name → what it does → how to make money with it → specific numbers. "
+            "(4) End with a clear CTA: subscribe, comment, like. "
+            "No stage directions, no section headers, just natural spoken text."
         )},
         {"role": "user", "content": f"Topic: {topic}"},
     ], max_tokens=2000)
@@ -177,53 +191,67 @@ def run(topic: str = None):
     from dotenv import load_dotenv
     from datetime import datetime
     import random
+    import sys
 
     load_dotenv()
     groq_key   = os.environ["GROQ_API_KEY"]
     eleven_key = os.environ.get("ELEVENLABS_API_KEY", "")
 
+    seo_context = ""
+
     if not topic:
-        topics = [
-            "5 AI tools that will make you $1000 per month",
-            "How to build passive income with AI automation in 2026",
-            "10 side hustles you can start with ChatGPT today",
-            "YouTube automation: how to make money without showing your face",
-            "AI print on demand business: $0 to $3000/month guide",
-            "Passive income ideas that actually work in 2026",
-            "How I automated my income with GitHub Actions and AI",
-            "Best free AI tools for making money online",
-        ]
-        topic = random.choice(topics)
+        # ── 실시간 트렌드 연구로 최적 주제 자동 선정 ────────────────────────
+        try:
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from research.trend_researcher import research as do_research
+            print("\n[0/3] Researching trending topics...")
+            result = do_research(groq_api_key=groq_key)
+            topic = result["topic"]
+            seo_context = result.get("seo_context", "")
+            print(f"  📊 Trend-selected topic: '{topic[:60]}'")
+        except Exception as e:
+            print(f"  ⚠ Trend research failed ({e}), using fallback topic")
+            fallback = [
+                "7 AI tools that pay $500 per month in 2026",
+                "How to make $3000/month with ChatGPT automation",
+                "5 passive income streams using free AI tools",
+                "Build a faceless YouTube channel with AI in 1 hour",
+                "The $0 AI business that generates income while you sleep",
+                "10 side hustles you can start with ChatGPT this week",
+            ]
+            topic = random.choice(fallback)
 
     ts  = datetime.now().strftime("%Y%m%d_%H%M%S")
-    dir = OUTPUT_DIR / ts
-    dir.mkdir(parents=True, exist_ok=True)
+    out_dir = OUTPUT_DIR / ts
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"\n🎬 Producing video: '{topic}'")
 
-    # 1. 스크립트
+    # 1. 스크립트 (SEO 컨텍스트 주입)
     print("\n[1/3] Generating script...")
-    meta = generate_script(topic, groq_key)
-    (dir / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2))
-    print(f"  ✓ Title: {meta['title'][:60]}")
+    meta = generate_script(topic, groq_key, seo_context=seo_context)
+    (out_dir / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2))
+    print(f"  ✓ Title:     {meta['title'][:65]}")
+    print(f"  ✓ Tags:      {len(meta.get('tags', []))} tags")
+    print(f"  ✓ Thumbnail: {meta.get('thumbnail_text', '')}")
 
     # 2. 음성 합성
     print("\n[2/3] Synthesizing voice...")
-    audio_path = synthesize_voice(meta["script"], eleven_key, dir / "audio.mp3")
+    audio_path = synthesize_voice(meta["script"], eleven_key, out_dir / "audio.mp3")
 
     # 3. 썸네일 생성 + 영상 조립
     print("\n[3/3] Generating thumbnail & assembling video...")
     thumbnail = generate_thumbnail(
-        meta.get("thumbnail_text", meta["title"][:40]),
-        dir / "thumbnail.jpg"
+        meta.get("thumbnail_text", meta["title"][:30]),
+        out_dir / "thumbnail.jpg"
     )
-    final_video = assemble_video(thumbnail, audio_path, dir / "final.mp4")
+    final_video = assemble_video(thumbnail, audio_path, out_dir / "final.mp4")
 
     size_mb = final_video.stat().st_size / 1024 / 1024
-    print(f"\n✅ Video ready: {dir.name}")
-    print(f"   Title: {meta['title']}")
-    print(f"   Size:  {size_mb:.1f} MB")
-    return {"dir": str(dir), "meta": meta,
+    print(f"\n✅ Video ready: {out_dir.name}")
+    print(f"   Title:  {meta['title']}")
+    print(f"   Size:   {size_mb:.1f} MB")
+    return {"dir": str(out_dir), "meta": meta,
             "video": str(final_video), "thumbnail": str(thumbnail)}
 
 

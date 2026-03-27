@@ -13,4 +13,6 @@ gTTS>=2.4.0
 python-dotenv>=1.0.0
 
 # Google Trends 실시간 연구 (트렌드 주제 선택)
+# pytrends 4.9.2 + urllib3 2.x 충돌 패치: urllib3를 1.x로 고정
 pytrends>=4.9.2
+urllib3<2.0

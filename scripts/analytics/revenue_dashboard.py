@@ -6,7 +6,7 @@
 
 import os, json, requests
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 YOUTUBE_API   = "https://www.googleapis.com/youtube/v3"
 STRATEGY_PATH = Path("scripts/strategy/content_strategy.json")
@@ -105,9 +105,123 @@ def count_local_outputs() -> dict:
     return {"blogs": blog_count, "pods": pod_count, "videos": vid_count}
 
 
+def _parse_log_field(text: str, field: str) -> str:
+    """run_logs txt 파일에서 'field: value' 형식 파싱."""
+    for line in text.splitlines():
+        if line.startswith(f"{field}:"):
+            return line.split(":", 1)[1].strip()
+    return ""
+
+
+def _relative_time(ts_str: str) -> str:
+    """ISO timestamp → 'N분 전' / 'N시간 전' 형식."""
+    if not ts_str:
+        return "미실행"
+    try:
+        ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+        now = datetime.now(timezone.utc)
+        diff = int((now - ts).total_seconds())
+        if diff < 60:
+            return f"{diff}초 전"
+        elif diff < 3600:
+            return f"{diff // 60}분 전"
+        elif diff < 86400:
+            return f"{diff // 3600}시간 전"
+        else:
+            return f"{diff // 86400}일 전"
+    except Exception:
+        return ts_str[:16]
+
+
+def fetch_pipeline_status() -> dict:
+    """각 파이프라인의 최근 실행 상태를 수집합니다."""
+    status = {}
+
+    # ── YouTube 영상 run log ──────────────────────────────────────
+    yt_log = Path(".github/run_logs/last_run.txt")
+    if yt_log.exists():
+        txt = yt_log.read_text()
+        status["youtube"] = {
+            "ok":        _parse_log_field(txt, "status") == "success",
+            "detail":    _parse_log_field(txt, "status"),
+            "ts":        _parse_log_field(txt, "timestamp"),
+            "run":       _parse_log_field(txt, "run"),
+        }
+
+    # ── YouTube Shorts run log ────────────────────────────────────
+    sh_log = Path(".github/run_logs/last_shorts_run.txt")
+    if sh_log.exists():
+        txt = sh_log.read_text()
+        status["shorts"] = {
+            "ok":     _parse_log_field(txt, "status") == "success",
+            "detail": _parse_log_field(txt, "status"),
+            "ts":     _parse_log_field(txt, "timestamp"),
+            "run":    _parse_log_field(txt, "run"),
+        }
+
+    # ── 블로그 (파일 mtime 기준) ──────────────────────────────────
+    blog_dir = Path("scripts/blog/output")
+    if blog_dir.exists():
+        html_files = sorted(blog_dir.glob("*.html"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if html_files:
+            mtime = datetime.fromtimestamp(html_files[0].stat().st_mtime, tz=timezone.utc)
+            status["blog"] = {"ok": True, "ts": mtime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                              "detail": f"{len(html_files)}개 포스트"}
+
+    # ── Dev.to 발행 로그 ──────────────────────────────────────────
+    devto_log = Path("scripts/publish/.devto_published.json")
+    if devto_log.exists():
+        try:
+            data = json.loads(devto_log.read_text())
+            published = data.get("published", [])
+            mtime = datetime.fromtimestamp(devto_log.stat().st_mtime, tz=timezone.utc)
+            status["devto"] = {"ok": True, "ts": mtime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                               "detail": f"{len(published)}개 발행"}
+        except Exception:
+            pass
+
+    # ── POD 디자인 (파일 mtime 기준) ─────────────────────────────
+    pod_dir = Path("scripts/pod/output")
+    if pod_dir.exists():
+        png_files = sorted(pod_dir.glob("*.png"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if png_files:
+            mtime = datetime.fromtimestamp(png_files[0].stat().st_mtime, tz=timezone.utc)
+            status["pod"] = {"ok": True, "ts": mtime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                             "detail": f"{len(png_files)}개 디자인"}
+
+    # ── KDP 이북 ─────────────────────────────────────────────────
+    ebook_dir = Path("scripts/ebook/output")
+    if ebook_dir.exists():
+        ebook_files = sorted(ebook_dir.glob("*.html"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if ebook_files:
+            mtime = datetime.fromtimestamp(ebook_files[0].stat().st_mtime, tz=timezone.utc)
+            status["ebook"] = {"ok": True, "ts": mtime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                               "detail": f"{len(ebook_files)}개 이북"}
+
+    # ── 전략 최적화 (content_strategy.json mtime) ─────────────────
+    if STRATEGY_PATH.exists():
+        mtime = datetime.fromtimestamp(STRATEGY_PATH.stat().st_mtime, tz=timezone.utc)
+        status["strategy"] = {"ok": True, "ts": mtime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                              "detail": "전략 파일 최신"}
+
+    # ── Twitter 포스팅 로그 ───────────────────────────────────────
+    tw_log = Path("scripts/social/.twitter_posted.json")
+    if tw_log.exists():
+        try:
+            data = json.loads(tw_log.read_text())
+            posted = data.get("posted", [])
+            mtime = datetime.fromtimestamp(tw_log.stat().st_mtime, tz=timezone.utc)
+            status["twitter"] = {"ok": True, "ts": mtime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                 "detail": f"누적 {len(posted)}개 트윗"}
+        except Exception:
+            pass
+
+    return status
+
+
 # ── HTML 빌드 ─────────────────────────────────────────────────────────────────
 
-def build_dashboard(yt: dict, strategy: dict, outputs: dict) -> str:
+def build_dashboard(yt: dict, strategy: dict, outputs: dict, pipe_status: dict = None) -> str:
     now      = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     est_usd  = yt.get("est_monthly", 0) if "error" not in yt else 0
 
@@ -168,12 +282,46 @@ def build_dashboard(yt: dict, strategy: dict, outputs: dict) -> str:
 <p style="margin-top:6px">{topics_html}</p>
 <p class="muted" style="margin-top:12px">매주 월요일 YouTube 성과 분석 → 자동 업데이트</p>"""
 
-    # ── 파이프라인 현황 카드 ─────────────────────────────────────────────────
+    # ── 파이프라인 현황 카드 (실시간 상태 포함) ─────────────────────────────
+    ps = pipe_status or {}
+
+    PIPE_STATUS_KEYS = {
+        "YouTube 영상":      "youtube",
+        "YouTube Shorts":    "shorts",
+        "블로그 포스트":      "blog",
+        "Dev.to 발행":        "devto",
+        "POD 티셔츠 디자인":  "pod",
+        "Twitter/X 포스팅":  "twitter",
+        "KDP 이북 생성":      "ebook",
+        "AI 전략 최적화":     "strategy",
+    }
+
+    def _status_cell(name: str) -> str:
+        key = PIPE_STATUS_KEYS.get(name)
+        if not key or key not in ps:
+            return '<td style="color:#334155;font-size:.75em">–</td>'
+        info = ps[key]
+        rel  = _relative_time(info.get("ts", ""))
+        detail = info.get("detail", "")
+        detail_span = f' <span style="color:#475569">· {detail}</span>' if detail else ""
+        if info.get("ok"):
+            return (f'<td style="font-size:.75em">'
+                    f'<span style="color:#6ee7b7">✓</span> '
+                    f'<span style="color:#64748b">{rel}</span>'
+                    f'{detail_span}</td>')
+        else:
+            err = info.get("detail", "실패")
+            return (f'<td style="font-size:.75em">'
+                    f'<span style="color:#f87171">✗ {err}</span>'
+                    + (f' <span style="color:#475569">{rel}</span>' if rel else "")
+                    + '</td>')
+
     active_rows = "".join(
         f'<tr>'
-        f'<td>{icon} {name}</td>'
-        f'<td style="color:#94a3b8;font-size:.8em">{freq}</td>'
-        f'<td style="color:#6ee7b7;font-size:.8em">{revenue}</td>'
+        f'<td style="font-size:.85em">{icon} {name}</td>'
+        f'<td style="color:#94a3b8;font-size:.78em">{freq}</td>'
+        f'<td style="color:#6ee7b7;font-size:.78em">{revenue}</td>'
+        f'{_status_cell(name)}'
         f'<td><a href="{link}" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td>'
         f'</tr>'
         for icon, name, freq, revenue, link in ACTIVE_PIPELINES
@@ -181,7 +329,7 @@ def build_dashboard(yt: dict, strategy: dict, outputs: dict) -> str:
     pending_rows = "".join(
         f'<tr>'
         f'<td>{icon} {name}</td>'
-        f'<td colspan="3" style="color:#fbbf24;font-size:.78em">{reason}</td>'
+        f'<td colspan="4" style="color:#fbbf24;font-size:.78em">{reason}</td>'
         f'</tr>'
         for icon, name, reason in PENDING_PIPELINES
     )
@@ -191,7 +339,7 @@ def build_dashboard(yt: dict, strategy: dict, outputs: dict) -> str:
   <span style="margin-left:12px;color:#fbbf24">🟡 대기 {len(PENDING_PIPELINES)}개</span>
 </p>
 <table class="data-table">
-<tr><th>파이프라인</th><th>주기</th><th>수익</th><th></th></tr>
+<tr><th>파이프라인</th><th>주기</th><th>수익</th><th>최근 실행</th><th></th></tr>
 {active_rows}
 </table>
 <p style="margin-top:16px;margin-bottom:8px;color:#fbbf24;font-size:.85em;font-weight:600">⏳ 설정 대기</p>
@@ -381,15 +529,19 @@ def run():
 
     print("📊 수익 대시보드 생성 중...")
 
-    yt       = fetch_youtube_stats()
-    strategy = fetch_strategy_stats()
-    outputs  = count_local_outputs()
+    yt         = fetch_youtube_stats()
+    strategy   = fetch_strategy_stats()
+    outputs    = count_local_outputs()
+    pipe_status = fetch_pipeline_status()
 
     print(f"  YouTube: 구독자 {yt.get('subscribers', 0):,} / 예상 ${yt.get('est_monthly', 0):.2f}")
     print(f"  콘텐츠: 영상 {outputs['videos']}개 / 블로그 {outputs['blogs']}개 / POD {outputs['pods']}개")
+    print(f"  파이프라인 상태 수집: {len(pipe_status)}개 확인됨")
 
     DOCS_DIR.mkdir(exist_ok=True)
-    (DOCS_DIR / "dashboard.html").write_text(build_dashboard(yt, strategy, outputs), encoding="utf-8")
+    (DOCS_DIR / "dashboard.html").write_text(
+        build_dashboard(yt, strategy, outputs, pipe_status), encoding="utf-8"
+    )
 
     print(f"\n✅ 대시보드 저장 완료")
     print(f"   → https://indiegyu.github.io/urban-chainsaw/dashboard.html")

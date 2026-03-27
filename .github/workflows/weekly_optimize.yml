@@ -36,8 +36,6 @@ jobs:
         run: python -u scripts/analytics/weekly_optimizer.py
 
       - name: Generate revenue dashboard
-        env:
-          LEMONSQUEEZY_API_KEY: ${{ secrets.LEMONSQUEEZY_API_KEY }}
         run: python -u scripts/analytics/revenue_dashboard.py
 
       - name: Commit strategy + dashboard

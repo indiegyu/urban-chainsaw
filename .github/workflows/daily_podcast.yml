@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: "30 9 * * *"   # 09:30 UTC (YouTube 업로드 후)
   workflow_dispatch:
-  push:
-    branches:
-      - claude/research-income-automation-fNwfz
-    paths:
-      - '.github/workflows/daily_podcast.yml'
-      - 'scripts/podcast/**'
 
 permissions:
   contents: write

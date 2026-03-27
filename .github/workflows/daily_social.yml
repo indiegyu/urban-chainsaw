@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: "0 10 * * *"   # 10:00 UTC (영상/블로그 완료 후)
   workflow_dispatch:
-  push:
-    branches:
-      - claude/research-income-automation-fNwfz
-    paths:
-      - '.github/workflows/daily_social.yml'
-      - 'scripts/social/**'
 
 permissions:
   contents: write

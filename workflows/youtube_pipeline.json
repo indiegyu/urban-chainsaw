@@ -1,0 +1,163 @@
+{
+  "name": "YouTube Automation Pipeline – Script to Upload",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "days", "daysInterval": 1, "triggerAtHour": 9 }]
+        }
+      },
+      "id": "trigger-daily",
+      "name": "Daily Trigger (9AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.youtube.com/feed/trending",
+        "responseFormat": "string",
+        "options": {}
+      },
+      "id": "fetch-yt-trending",
+      "name": "Fetch YouTube Trending",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "model": "llama-3.3-70b-versatile",
+          "temperature": 0.8,
+          "messages": [
+            {
+              "role": "system",
+              "content": "Pick ONE viral topic idea for a faceless YouTube channel from current trends. Output JSON: {\"topic\": \"...\", \"hook\": \"first 5 seconds hook sentence\"}"
+            },
+            {
+              "role": "user",
+              "content": "=Based on today's date {{ $now.format('MMMM D, YYYY') }}, suggest a topic."
+            }
+          ]
+        }
+      },
+      "id": "pick-topic",
+      "name": "Pick Viral Topic (Groq)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = JSON.parse($input.first().json.choices[0].message.content);\nreturn [{ json: data }];"
+      },
+      "id": "parse-topic",
+      "name": "Parse Topic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "command": "=cd /workspace && python scripts/video/assemble_video.py \"{{ $json.topic }}\""
+      },
+      "id": "run-assemble",
+      "name": "Assemble Video (Python)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// assemble_video.py stdout에서 output 디렉토리 추출\nconst stdout = $input.first().json.stdout;\nconst match = stdout.match(/Video ready: (.+)/);\nif (!match) throw new Error('Could not find output dir in: ' + stdout);\nreturn [{ json: { video_dir: match[1].trim() } }];"
+      },
+      "id": "parse-output-dir",
+      "name": "Parse Output Dir",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "command": "=cd /workspace && python scripts/video/upload_youtube.py \"{{ $json.video_dir }}\""
+      },
+      "id": "upload-youtube",
+      "name": "Upload to YouTube",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 업로드 결과에서 video_id 추출\nconst stdout = $input.first().json.stdout;\nconst match = stdout.match(/https:\\/\\/youtu\\.be\\/(\\S+)/);\nconst url = match ? match[0] : 'unknown';\nreturn [{ json: { youtube_url: url, stdout } }];"
+      },
+      "id": "parse-upload-result",
+      "name": "Parse Upload Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.twitter.com/2/tweets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.TWITTER_BEARER_TOKEN }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "text": "=🎬 New video just dropped!\n\n{{ $json.youtube_url }}\n\n#YouTube #AI #Automation"
+        }
+      },
+      "id": "share-twitter",
+      "name": "Share on Twitter/X",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1760, 200]
+    },
+    {
+      "parameters": {
+        "content": "=## ✅ YouTube Video Published\n**URL:** {{ $json.youtube_url }}"
+      },
+      "id": "log-success",
+      "name": "Log Success",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1760, 400]
+    }
+  ],
+  "connections": {
+    "Daily Trigger (9AM)":        { "main": [[{ "node": "Fetch YouTube Trending",    "type": "main", "index": 0 }]] },
+    "Fetch YouTube Trending":     { "main": [[{ "node": "Pick Viral Topic (Groq)",   "type": "main", "index": 0 }]] },
+    "Pick Viral Topic (Groq)":    { "main": [[{ "node": "Parse Topic",               "type": "main", "index": 0 }]] },
+    "Parse Topic":                { "main": [[{ "node": "Assemble Video (Python)",   "type": "main", "index": 0 }]] },
+    "Assemble Video (Python)":    { "main": [[{ "node": "Parse Output Dir",          "type": "main", "index": 0 }]] },
+    "Parse Output Dir":           { "main": [[{ "node": "Upload to YouTube",          "type": "main", "index": 0 }]] },
+    "Upload to YouTube":          { "main": [[{ "node": "Parse Upload Result",        "type": "main", "index": 0 }]] },
+    "Parse Upload Result": {
+      "main": [
+        [{ "node": "Share on Twitter/X", "type": "main", "index": 0 }],
+        [{ "node": "Log Success",        "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "description": "매일 오전 9시에 트렌딩 주제를 선정, 스크립트 생성→음성→영상→썸네일→YouTube 업로드까지 완전 자동화합니다."
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "name": "AI Content Pipeline – Blog + Affiliate Auto-Publish",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 6 }]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Schedule Trigger (every 6h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://trends.google.com/trends/hottrends/atom/hourly",
+        "responseFormat": "string",
+        "options": {}
+      },
+      "id": "fetch-trends",
+      "name": "Fetch Google Trends RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Google Trends RSS에서 트렌딩 주제 5개 추출\nconst xml = $input.first().json.data;\nconst matches = [...xml.matchAll(/<title><![CDATA[([^\\]]+)\\]\\]><\\/title>/g)];\nconst topics = matches.slice(1, 6).map(m => m[1]); // 첫 번째는 피드 제목\nreturn topics.map(topic => ({ json: { topic } }));"
+      },
+      "id": "parse-trends",
+      "name": "Parse Trending Topics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "model": "llama-3.3-70b-versatile",
+          "temperature": 0.7,
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are an expert SEO content writer. Write a complete blog post (800-1200 words) in HTML format. Include: H1 title, intro, 3-4 H2 sections with content, conclusion with CTA. Add affiliate link placeholders as {{AFFILIATE_LINK_amazon}} or {{AFFILIATE_LINK_saas}} where naturally relevant. Output JSON: {\"title\": \"...\", \"slug\": \"...\", \"html\": \"...\", \"meta_description\": \"...\", \"tags\": [\"tag1\", \"tag2\"]}"
+            },
+            {
+              "role": "user",
+              "content": "=Write a blog post about: {{ $json.topic }}"
+            }
+          ]
+        }
+      },
+      "id": "groq-write-post",
+      "name": "Groq – Write SEO Blog Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Groq 응답 파싱 + Affiliate 링크 삽입\nconst raw = $input.first().json.choices[0].message.content;\nconst post = JSON.parse(raw);\n\n// Affiliate 링크 매핑 (실제 링크로 교체 필요)\nconst affiliateLinks = {\n  'amazon':  'https://amzn.to/YOUR_AFFILIATE_TAG',\n  'saas':    'https://YOUR_SAAS_AFFILIATE_LINK',\n};\n\npost.html = post.html\n  .replace(/\\{\\{AFFILIATE_LINK_amazon\\}\\}/g, affiliateLinks.amazon)\n  .replace(/\\{\\{AFFILIATE_LINK_saas\\}\\}/g, affiliateLinks.saas);\n\nreturn [{ json: post }];"
+      },
+      "id": "insert-affiliate",
+      "name": "Insert Affiliate Links",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.GHOST_URL }}/ghost/api/admin/posts/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Ghost {{ $env.GHOST_ADMIN_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "posts": [
+            {
+              "title": "={{ $json.title }}",
+              "slug": "={{ $json.slug }}",
+              "html": "={{ $json.html }}",
+              "custom_excerpt": "={{ $json.meta_description }}",
+              "tags": "={{ $json.tags.map(t => ({ name: t })) }}",
+              "status": "published"
+            }
+          ]
+        }
+      },
+      "id": "publish-ghost",
+      "name": "Publish to Ghost Blog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.twitter.com/2/tweets",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.TWITTER_BEARER_TOKEN }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "text": "={{ '📖 New post: ' + $json.posts[0].title + '\\n\\n' + $env.GHOST_URL + '/' + $json.posts[0].slug + '/' }}"
+        }
+      },
+      "id": "share-twitter",
+      "name": "Share on Twitter/X",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 200]
+    },
+    {
+      "parameters": {
+        "channel": "={{ $env.SLACK_CHANNEL_ID }}",
+        "text": "=✅ New blog post published!\n*{{ $json.posts[0].title }}*\n{{ $env.GHOST_URL }}/{{ $json.posts[0].slug }}/",
+        "otherOptions": {}
+      },
+      "id": "notify-slack",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1320, 400],
+      "credentials": { "slackApi": { "id": "slack-cred", "name": "Slack" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (every 6h)": {
+      "main": [[{ "node": "Fetch Google Trends RSS", "type": "main", "index": 0 }]]
+    },
+    "Fetch Google Trends RSS": {
+      "main": [[{ "node": "Parse Trending Topics", "type": "main", "index": 0 }]]
+    },
+    "Parse Trending Topics": {
+      "main": [[{ "node": "Groq – Write SEO Blog Post", "type": "main", "index": 0 }]]
+    },
+    "Groq – Write SEO Blog Post": {
+      "main": [[{ "node": "Insert Affiliate Links", "type": "main", "index": 0 }]]
+    },
+    "Insert Affiliate Links": {
+      "main": [[{ "node": "Publish to Ghost Blog", "type": "main", "index": 0 }]]
+    },
+    "Publish to Ghost Blog": {
+      "main": [
+        [{ "node": "Share on Twitter/X", "type": "main", "index": 0 }],
+        [{ "node": "Notify Slack", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "description": "트렌딩 주제를 자동 수집하여 SEO 블로그 포스팅을 생성하고 Affiliate 링크를 삽입한 뒤 Ghost CMS에 발행합니다."
+  }
+}

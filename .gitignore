@@ -1,0 +1,50 @@
+# 환경변수 (절대 커밋 금지)
+.env
+.env.local
+.env.*.local
+credentials.json
+
+# 생성된 콘텐츠 출력물 (generated files)
+scripts/pod/output/
+scripts/video/output/
+scripts/blog/output/
+
+# 스케줄러 로그 및 리포트
+logs/
+reports/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Node.js / Next.js
+node_modules/
+saas/.next/
+saas/out/
+saas/.vercel/
+*.tsbuildinfo
+.npm
+
+# Docker 볼륨 로컬 경로
+data/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# 에디터
+.idea/
+.vscode/
+*.code-workspace
+token.json

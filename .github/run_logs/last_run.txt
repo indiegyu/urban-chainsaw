@@ -1,0 +1,38 @@
+status: upload_failed
+run: 17
+timestamp: 2026-03-27T03:32:22Z
+--- assemble log ---
+
+🎬 Producing video: '10 AI tools that will change your life in 2026'
+
+[1/5] Generating script...
+
+[2/5] Synthesizing voice...
+  ✓ gTTS voice: voice.mp3
+
+[3/5] Downloading stock footage...
+  ✓ Stock video: stock_AI_18069785.mp4
+  ✓ Stock video: stock_AI_18069701.mp4
+  ✓ Stock video: stock_robotics_8084614.mp4
+  ✓ Stock video: stock_robotics_8463624.mp4
+  ✓ Stock video: stock_intelligent_8328035.mp4
+  ✓ Stock video: stock_intelligent_8084495.mp4
+  ✓ Stock video: stock_assistant_7683097.mp4
+  ✓ Stock video: stock_assistant_7706818.mp4
+  ✓ Stock video: stock_automation_32386581.mp4
+  ✓ Stock video: stock_automation_32386569.mp4
+
+[4/5] Assembling video...
+Traceback (most recent call last):
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 307, in <module>
+    run(topic)
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 293, in run
+    final_video = assemble_video(video_paths, audio_path, dir / "final.mp4")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 207, in assemble_video
+    subprocess.run([
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['ffmpeg', '-y', '-stream_loop', '-1', '-i', '/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/output/20260327_031134/merged_raw.mp4', '-i', '/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/output/20260327_031134/voice.mp3', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-shortest', '-map', '0:v:0', '-map', '1:a:0', '/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/output/20260327_031134/final.mp4']' returned non-zero exit status 244.
+--- upload log ---
+(no log)

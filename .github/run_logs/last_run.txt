@@ -1,14 +1,14 @@
 status: success
 assemble_outcome: success
 upload_outcome: success
-run: 25
-timestamp: 2026-03-27T05:49:12Z
+run: 26
+timestamp: 2026-03-27T06:03:47Z
 --- assemble log ---
 
-🎬 Producing video: '5 AI tools that will make you $1000 per month'
+🎬 Producing video: 'How to build passive income with AI automation in 2026'
 
 [1/3] Generating script...
-  ✓ Title: AI Tools for Income
+  ✓ Title: AI Passive Income
 
 [2/3] Synthesizing voice...
   ✓ gTTS voice: audio.mp3
@@ -17,14 +17,14 @@ timestamp: 2026-03-27T05:49:12Z
   ✓ Thumbnail: thumbnail.jpg
   ✓ Video assembled: final.mp4
 
-✅ Video ready: 20260327_054804
-   Title: AI Tools for Income
-   Size:  5.2 MB
+✅ Video ready: 20260327_060250
+   Title: AI Passive Income
+   Size:  5.3 MB
 --- upload log ---
   Upload session: https://www.googleapis.com/upload/youtube/v3/videos?uploadTy...
-  Uploading: final.mp4 (5.5 MB)
-  Upload progress: 76%
-  ✓ Uploaded: https://youtu.be/5wBPZLuOZg8
+  Uploading: final.mp4 (5.6 MB)
+  Upload progress: 75%
+  ✓ Uploaded: https://youtu.be/0WxHHAUFdk0
   ✓ Thumbnail uploaded
 
-🎉 Done! Watch at: https://youtu.be/5wBPZLuOZg8
+🎉 Done! Watch at: https://youtu.be/0WxHHAUFdk0

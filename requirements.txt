@@ -11,3 +11,6 @@ gTTS>=2.4.0
 
 # 환경변수 관리
 python-dotenv>=1.0.0
+
+# Google Trends 실시간 연구 (트렌드 주제 선택)
+pytrends>=4.9.2

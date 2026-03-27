@@ -181,7 +181,18 @@ def run(topic: str = None, count: int = 1):
     ghost_key = os.environ.get("GHOST_ADMIN_API_KEY", "")
 
     if not topic:
-        topic = random.choice(TRENDING_TOPICS)
+        # 실시간 트렌드로 주제 선택 시도
+        try:
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from research.trend_researcher import research as do_research
+            print("🔍 Running trend research for blog topic...")
+            result = do_research(groq_api_key=groq_key)
+            topic = result["topic"]
+            print(f"  📊 Trend-selected: '{topic[:60]}'")
+        except Exception as e:
+            print(f"  ⚠ Trend research failed ({e}), using static topic")
+            topic = random.choice(TRENDING_TOPICS)
 
     print(f"\n📝 Generating: '{topic}'")
     post = generate_blog_post(topic, groq_key)

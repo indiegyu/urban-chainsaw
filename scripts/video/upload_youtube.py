@@ -15,6 +15,29 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ── 어필리에이트 / CTA 섹션 (모든 영상 설명에 자동 추가) ─────────────────────
+_DESCRIPTION_CTA = """
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 FREE TOOLS I USE & RECOMMEND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 Groq AI  (fastest free LLM)       → https://groq.com
+🎨 Canva    (free design tool)        → https://canva.com
+📦 Printify (free print-on-demand)    → https://printify.com
+💻 GitHub   (free automation / CI/CD) → https://github.com
+🎙️ ElevenLabs (free AI voice)         → https://elevenlabs.io
+📊 HuggingFace (free AI models)       → https://huggingface.co
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 SUBSCRIBE for daily AI income tips → bit.ly/AIIncomeDaily
+👍 LIKE if this saved you time!
+💬 COMMENT your #1 challenge below
+🔔 TURN ON notifications (bell icon)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#AIIncome #PassiveIncome #ChatGPT #AITools #MakeMoneyOnline
+#SideHustle #AIAutomation #FacelessYouTube #OnlineIncome2026"""
+
 TOKEN_PATH       = os.environ.get("GOOGLE_TOKEN_PATH", "token.json")
 CREDENTIALS_PATH = os.environ.get("GOOGLE_CREDENTIALS_PATH", "credentials.json")
 
@@ -184,10 +207,13 @@ def run(video_dir: str):
     with open(meta_file) as f:
         meta = json.load(f)
 
+    # 설명 + CTA 합치기 (어필리에이트 링크 + 구독 유도)
+    full_description = meta["description"] + _DESCRIPTION_CTA
+
     video_id = upload_video(
         video_path=str(video_file),
         title=meta["title"],
-        description=meta["description"],
+        description=full_description,
         tags=meta.get("tags", []),
         thumbnail_path=str(thumb_file) if thumb_file.exists() else None,
         privacy="public",

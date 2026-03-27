@@ -40,8 +40,8 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git fetch origin
-          git reset --soft origin/claude/research-income-automation-fNwfz
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
           git add scripts/blog/output/
           git commit -m "ci: blog post [skip ci]" || echo "Nothing to commit"
-          git push
+          git push origin HEAD:${{ github.ref_name }}

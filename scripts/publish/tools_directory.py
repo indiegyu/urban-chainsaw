@@ -106,8 +106,13 @@ def generate_tool_descriptions(tools: list[dict], groq_key: str) -> list[dict]:
     raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', raw)
     if "```" in raw:
         raw = raw.split("```")[1].lstrip("json").strip()
-
-    desc_map = {d["name"]: d for d in json.loads(raw)}
+    arr_match = re.search(r'\[.*\]', raw, re.S)
+    if arr_match:
+        raw = arr_match.group(0)
+    try:
+        desc_map = {d["name"]: d for d in json.loads(raw)}
+    except Exception:
+        return tools  # 설명 생성 실패 시 원본 툴 목록 그대로 반환
     for tool in tools:
         if tool["name"] in desc_map:
             tool.update(desc_map[tool["name"]])

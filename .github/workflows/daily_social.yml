@@ -29,6 +29,10 @@ jobs:
           BEEHIIV_PUB_ID: ${{ secrets.BEEHIIV_PUB_ID }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
+          KOFI_USERNAME: ${{ secrets.KOFI_USERNAME }}
+          PRINTIFY_AFF_ID: ${{ secrets.PRINTIFY_AFF_ID }}
+          FIVERR_AFF_ID: ${{ secrets.FIVERR_AFF_ID }}
+          ELEVENLABS_AFF_ID: ${{ secrets.ELEVENLABS_AFF_ID }}
         run: python scripts/social/newsletter.py
 
       # ── 2. Twitter/X 포스팅 ──────────────────────────────────────

@@ -1,0 +1,25 @@
+type: shorts
+status: success
+run: 1
+timestamp: 2026-03-27T10:04:19Z
+--- shorts log ---
+
+🎬 [Shorts] Generating script...
+  ✓ Title: Earn $1,000/mo with AI #Shorts
+
+🎙️  [Shorts] Synthesizing voice...
+  ✓ gTTS voice
+
+🖼️  [Shorts] Assembling vertical video...
+  ✓ Shorts thumbnail: thumbnail.jpg
+  ✓ Shorts video: final.mp4
+
+✅ Shorts ready: 20260327_100403 (0.8 MB)
+--- upload log ---
+  Upload session: https://www.googleapis.com/upload/youtube/v3/videos?uploadTy...
+  Uploading: final.mp4 (0.9 MB)
+
+  ✓ Uploaded: https://youtu.be/CFX4Fo9Keg8
+  ✓ Thumbnail uploaded
+
+🎉 Done! Watch at: https://youtu.be/CFX4Fo9Keg8

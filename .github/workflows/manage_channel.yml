@@ -25,6 +25,21 @@ jobs:
 
       - run: pip install requests python-dotenv Pillow -q
 
+      - name: Check secrets
+        env:
+          YT_FULL_REFRESH_TOKEN: ${{ secrets.YT_FULL_REFRESH_TOKEN }}
+          GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          echo "YT_FULL_REFRESH_TOKEN set: $( [ -n "$YT_FULL_REFRESH_TOKEN" ] && echo YES || echo NO )"
+          echo "GOOGLE_CLIENT_ID set:      $( [ -n "$GOOGLE_CLIENT_ID" ] && echo YES || echo NO )"
+          echo "GOOGLE_CLIENT_SECRET set:  $( [ -n "$GOOGLE_CLIENT_SECRET" ] && echo YES || echo NO )"
+          if [ -z "$YT_FULL_REFRESH_TOKEN" ]; then
+            echo "ERROR: YT_FULL_REFRESH_TOKEN 시크릿이 비어있습니다."
+            echo "GitHub → Settings → Secrets → YT_FULL_REFRESH_TOKEN 을 추가해주세요."
+            exit 1
+          fi
+
       - name: Create token_yt.json
         env:
           YT_REFRESH_TOKEN: ${{ secrets.YT_FULL_REFRESH_TOKEN }}
@@ -34,6 +49,7 @@ jobs:
           YOUTUBE_REFRESH_TOKEN=$YT_REFRESH_TOKEN \
           YT_SCOPE=https://www.googleapis.com/auth/youtube \
           python3 scripts/video/make_token.py token_yt.json
+          echo "token_yt.json created OK"
 
       - name: Run channel manager
         run: python3 scripts/video/manage_channel.py ${{ github.event.inputs.action }}

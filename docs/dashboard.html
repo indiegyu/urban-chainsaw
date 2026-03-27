@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>💰 AI Income Daily — 수익 대시보드</title>
+<meta http-equiv="refresh" content="3600">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+  .top-bar{background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:24px 20px;text-align:center}
+  .top-bar h1{font-size:1.8em;color:#fff;margin-bottom:.3em}
+  .top-bar .total{font-size:3em;color:#fff;font-weight:700;margin:.2em 0}
+  .top-bar .sub{color:rgba(255,255,255,.8);font-size:.9em}
+  .main{max-width:1000px;margin:0 auto;padding:30px 20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:20px;margin-bottom:30px}
+  .card{background:#1e293b;border:1px solid #334155;border-radius:14px;overflow:hidden}
+  .card-header{padding:16px 20px;background:#0f172a}
+  .card-header h3{font-size:1em;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+  .card-body{padding:20px}
+  .stats-row{display:flex;gap:16px;margin-bottom:16px}
+  .stat{flex:1;background:#0f172a;border-radius:10px;padding:14px;text-align:center}
+  .stat-num{display:block;font-size:1.6em;font-weight:700;color:#fff}
+  .stat-label{font-size:.75em;color:#64748b;margin-top:4px;display:block}
+  .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8em;margin-bottom:12px}
+  .badge.green{background:#064e3b;color:#6ee7b7}
+  .badge.yellow{background:#451a03;color:#fcd34d}
+  .harvest-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .harvest-btn{background:#6366f1;color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:.85em;white-space:nowrap}
+  .harvest-btn:hover{background:#4f46e5}
+  .harvest-note{color:#64748b;font-size:.75em;margin-left:6px;align-self:center}
+  .data-table{width:100%;border-collapse:collapse;font-size:.85em}
+  .data-table th{text-align:left;padding:8px;color:#64748b;border-bottom:1px solid #334155}
+  .data-table td{padding:8px;border-bottom:1px solid #1e293b}
+  .data-table a{color:#818cf8}
+  .tag{background:#1e3a5f;color:#93c5fd;padding:3px 10px;border-radius:12px;font-size:.8em;margin-right:6px}
+  .insight{background:#1e293b;border-left:3px solid #6366f1;padding:10px 14px;margin-top:10px;font-size:.9em;color:#cbd5e1}
+  .muted{color:#475569;font-size:.85em;margin-top:8px}
+  .error{color:#f87171;font-size:.85em}
+
+  /* 수확 섹션 */
+  .harvest-section{background:#1e293b;border-radius:16px;padding:28px;margin-bottom:30px}
+  .harvest-section h2{color:#fff;margin-bottom:20px;font-size:1.3em}
+  .platforms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .platform-btn{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:16px;
+                 text-decoration:none;display:flex;flex-direction:column;gap:4px;transition:.2s}
+  .platform-btn:hover{border-color:#6366f1;transform:translateY(-2px)}
+  .platform-name{color:#e2e8f0;font-weight:600;font-size:.95em}
+  .platform-note{color:#64748b;font-size:.75em}
+
+  .updated{text-align:center;color:#334155;font-size:.8em;padding:20px}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>💰 AI Income Daily</h1>
+  <div class="total">$0.00</div>
+  <div class="sub">이번 달 예상 수익 합산 · 2026-03-27 08:14 UTC 기준</div>
+  <div style="margin-top:12px;font-size:.85em;color:rgba(255,255,255,.6)">
+    매주 월요일 자동 업데이트 · 브라우저 새로고침으로 즉시 갱신
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 수확 버튼 모음 -->
+  <div class="harvest-section">
+    <h2>🌾 수확하기 — 플랫폼별 정산 링크</h2>
+    <div class="platforms-grid">
+      <a href="https://studio.youtube.com" class="platform-btn" target="_blank"><span class="platform-name">YouTube Studio</span><span class="platform-note">AdSense → 지급</span></a><a href="https://app.lemonsqueezy.com/payouts" class="platform-btn" target="_blank"><span class="platform-name">Lemon Squeezy</span><span class="platform-note">매월 자동 지급</span></a><a href="https://www.etsy.com/your/account" class="platform-btn" target="_blank"><span class="platform-name">Etsy</span><span class="platform-note">Finance → 수령</span></a><a href="https://www.patreon.com/dashboard" class="platform-btn" target="_blank"><span class="platform-name">Patreon</span><span class="platform-note">Payouts 탭</span></a><a href="https://dev.to/dashboard" class="platform-btn" target="_blank"><span class="platform-name">Dev.to</span><span class="platform-note">통계 확인</span></a><a href="https://medium.com/me/partner/dashboard" class="platform-btn" target="_blank"><span class="platform-name">Medium</span><span class="platform-note">파트너 수익</span></a><a href="https://analytics.pinterest.com" class="platform-btn" target="_blank"><span class="platform-name">Pinterest</span><span class="platform-note">트래픽 확인</span></a><a href="https://adsense.google.com/adsense/web/main" class="platform-btn" target="_blank"><span class="platform-name">Google AdSense</span><span class="platform-note">잔액 출금</span></a>
+    </div>
+  </div>
+
+  <!-- 수익 카드 -->
+  <div class="grid">
+    
+<div class="card">
+  <div class="card-header" style="border-left:4px solid #ff0000">
+    <h3>📺 YouTube 채널</h3>
+  </div>
+  <div class="card-body">
+<div class="stats-row">
+  <div class="stat"><span class="stat-num">0</span><span class="stat-label">구독자</span></div>
+  <div class="stat"><span class="stat-num">0</span><span class="stat-label">최근 조회수</span></div>
+  <div class="stat"><span class="stat-num">$0.00</span><span class="stat-label">예상 월 수익</span></div>
+</div>
+<p class="badge yellow">⏳ 구독자 0명 더 필요</p>
+
+<div class="harvest-row">
+  <a href="https://studio.youtube.com" class="harvest-btn" target="_blank">💰 YouTube Studio</a><span class="harvest-note">수익 → 지급</span>
+  <a href="https://adsense.google.com" class="harvest-btn" target="_blank">💰 AdSense</a><span class="harvest-note">$100 이상 시 출금</span>
+</div></div>
+</div>
+    
+<div class="card">
+  <div class="card-header" style="border-left:4px solid #fbbf24">
+    <h3>🍋 Lemon Squeezy 상품 판매</h3>
+  </div>
+  <div class="card-body"><p class="muted">LEMONSQUEEZY_API_KEY 설정 시 데이터 표시</p></div>
+</div>
+    
+<div class="card">
+  <div class="card-header" style="border-left:4px solid #10b981">
+    <h3>🛍️ 내 디지털 상품 목록</h3>
+  </div>
+  <div class="card-body"><p class='muted'>아직 상품 없음 — 첫 수요일에 자동 생성됩니다</p></div>
+</div>
+    
+<div class="card">
+  <div class="card-header" style="border-left:4px solid #6366f1">
+    <h3>🧠 AI 전략 상태</h3>
+  </div>
+  <div class="card-body">
+<p><strong>전략 버전:</strong> v1 &nbsp;
+   <strong>마지막 업데이트:</strong> 2026-03-27</p>
+<p><strong>현재 최적 토픽:</strong> <span class='tag'>AI tools for passive income</span><span class='tag'>ChatGPT side hustles</span><span class='tag'>faceless YouTube automation</span></p>
+
+<p class="muted">매주 월요일 자동 분석·업데이트</p></div>
+</div>
+  </div>
+
+</div>
+
+<div class="updated">마지막 업데이트: 2026-03-27 08:14 UTC · 매주 월요일 자동 갱신</div>
+
+</body>
+</html>

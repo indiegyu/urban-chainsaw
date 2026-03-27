@@ -71,7 +71,21 @@ def generate_blog_post(topic: str, groq_api_key: str) -> dict:
     meta_raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
     if "```" in meta_raw:
         meta_raw = meta_raw.split("```")[1].lstrip("json").strip()
-    meta = json.loads(meta_raw)
+    # Groq이 JSON 앞뒤에 텍스트를 붙이는 경우를 대비해 중괄호 블록만 추출
+    json_match = re.search(r'\{.*\}', meta_raw, re.S)
+    if json_match:
+        meta_raw = json_match.group(0)
+    try:
+        meta = json.loads(meta_raw)
+    except json.JSONDecodeError:
+        # 메타 파싱 실패 시 기본값으로 진행
+        slug = re.sub(r'[^a-z0-9]+', '-', topic.lower())[:50]
+        meta = {
+            "title": topic[:70],
+            "slug": slug,
+            "meta_description": f"Learn how to {topic} with AI tools in 2026.",
+            "tags": ["ai", "passive-income", "side-hustle", "make-money-online", "automation"],
+        }
 
     # Step 2: HTML 본문만 (JSON 불필요, 그냥 텍스트)
     html_content = _groq_request([

@@ -30,6 +30,10 @@ jobs:
           ADSENSE_CLIENT_ID: ${{ secrets.ADSENSE_CLIENT_ID }}
           BLOG_CUSTOM_DOMAIN: ${{ secrets.BLOG_CUSTOM_DOMAIN }}
           GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
+          BEEHIIV_PUB_ID: ${{ secrets.BEEHIIV_PUB_ID }}
+          KOFI_USERNAME: ${{ secrets.KOFI_USERNAME }}
+          PRINTIFY_AFF_ID: ${{ secrets.PRINTIFY_AFF_ID }}
+          FIVERR_AFF_ID: ${{ secrets.FIVERR_AFF_ID }}
         run: python scripts/publish/pages_deploy.py
 
       # ── 2. Dev.to 발행 ────────────────────────────────────────────
@@ -37,12 +41,20 @@ jobs:
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
         run: python scripts/publish/devto_publisher.py
 
       # ── 3. AI Tools 디렉토리 빌드 (SEO 자산) ─────────────────────
       - name: Build AI Tools Directory
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PRINTIFY_AFF_ID: ${{ secrets.PRINTIFY_AFF_ID }}
+          FIVERR_AFF_ID: ${{ secrets.FIVERR_AFF_ID }}
+          HOSTINGER_AFF_ID: ${{ secrets.HOSTINGER_AFF_ID }}
+          ELEVENLABS_AFF_ID: ${{ secrets.ELEVENLABS_AFF_ID }}
+          JASPER_AFF_ID: ${{ secrets.JASPER_AFF_ID }}
+          CONVERTKIT_AFF_ID: ${{ secrets.CONVERTKIT_AFF_ID }}
+          SEMRUSH_AFF_ID: ${{ secrets.SEMRUSH_AFF_ID }}
         run: python scripts/publish/tools_directory.py
 
       # ── 4. Ko-fi 후원 버튼 주입 ─────────────────────────────────

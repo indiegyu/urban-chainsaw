@@ -1,0 +1,64 @@
+name: Daily Multi-Platform Publish
+
+on:
+  schedule:
+    - cron: "30 8 * * *"   # 08:30 UTC (블로그 생성 30분 후)
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/research-income-automation-fNwfz
+    paths:
+      - '.github/workflows/daily_publish.yml'
+      - 'scripts/publish/**'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests python-dotenv -q
+
+      # ── 1. GitHub Pages 빌드 (AdSense 삽입) ──────────────────────
+      - name: Build GitHub Pages site
+        env:
+          ADSENSE_CLIENT_ID: ${{ secrets.ADSENSE_CLIENT_ID }}
+          BLOG_CUSTOM_DOMAIN: ${{ secrets.BLOG_CUSTOM_DOMAIN }}
+          GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
+        run: python scripts/publish/pages_deploy.py
+
+      # ── 2. Dev.to 발행 ────────────────────────────────────────────
+      - name: Publish to Dev.to
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python scripts/publish/devto_publisher.py
+
+      # ── 3. Medium 발행 ────────────────────────────────────────────
+      - name: Publish to Medium
+        env:
+          MEDIUM_TOKEN: ${{ secrets.MEDIUM_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python scripts/publish/medium_publisher.py
+
+      # ── 4. 커밋 (docs/ 변경사항) ──────────────────────────────────
+      - name: Commit GitHub Pages
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add docs/ scripts/publish/.devto_published.json scripts/publish/.medium_published.json 2>/dev/null || true
+          git commit -m "ci: deploy pages + publish [skip ci]" || echo "Nothing to commit"
+          git push origin HEAD:${{ github.ref_name }}

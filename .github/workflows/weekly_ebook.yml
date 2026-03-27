@@ -1,0 +1,52 @@
+name: Weekly KDP Ebook Generator
+
+on:
+  schedule:
+    - cron: "0 7 * * 0"   # 매주 일요일 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      topic_idx:
+        description: "Topic index (0-3)"
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  generate-ebook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv -q
+          sudo apt-get install -y wkhtmltopdf -q || echo "wkhtmltopdf unavailable — HTML only"
+
+      - name: Generate ebook
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          IDX="${{ github.event.inputs.topic_idx }}"
+          if [ -z "$IDX" ]; then
+            python scripts/ebook/generate_ebook.py
+          else
+            python scripts/ebook/generate_ebook.py "$IDX"
+          fi
+
+      - name: Commit ebook output
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add scripts/ebook/output/
+          git commit -m "ci: ebook generated [skip ci]" || echo "Nothing to commit"
+          git push origin HEAD:${{ github.ref_name }}

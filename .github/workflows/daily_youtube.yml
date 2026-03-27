@@ -1,0 +1,113 @@
+name: Daily YouTube Video
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  push:
+    branches:
+      - claude/research-income-automation-fNwfz
+    paths:
+      - '.github/workflows/daily_youtube.yml'
+      - 'scripts/video/**'
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Video topic (leave empty for auto-select)"
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  produce-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install system dependencies (FFmpeg)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore Google OAuth token
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YT_REFRESH_TOKEN:      ${{ secrets.YT_FULL_REFRESH_TOKEN }}
+          GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          python3 scripts/video/make_token.py
+          echo "Token created OK"
+
+      - name: Assemble video
+        id: assemble
+        env:
+          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          TOPIC="${{ github.event.inputs.topic }}"
+          if [ -z "$TOPIC" ]; then
+            python -u scripts/video/assemble_video.py 2>&1 | tee /tmp/assemble.log
+          else
+            python -u scripts/video/assemble_video.py "$TOPIC" 2>&1 | tee /tmp/assemble.log
+          fi
+          # tee 성공 여부와 무관하게 python 종료 코드를 전달
+          exit ${PIPESTATUS[0]}
+
+      - name: Upload to YouTube
+        id: upload
+        env:
+          GOOGLE_TOKEN_PATH: token.json
+        run: |
+          OUTPUT_DIR=$(ls -td scripts/video/output/*/ 2>/dev/null | head -1)
+          if [ -z "$OUTPUT_DIR" ]; then
+            echo "ERROR: No video output directory found" | tee /tmp/upload.log
+            exit 1
+          fi
+          echo "Uploading from: $OUTPUT_DIR"
+          python -u scripts/video/upload_youtube.py "$OUTPUT_DIR" 2>&1 | tee /tmp/upload.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Save run status
+        if: always()
+        run: |
+          mkdir -p .github/run_logs
+          if [ "${{ steps.assemble.outcome }}" != "success" ]; then
+            STATUS="assemble_failed"
+          elif [ "${{ steps.upload.outcome }}" != "success" ]; then
+            STATUS="upload_failed"
+          else
+            STATUS="success"
+          fi
+          {
+            echo "status: $STATUS"
+            echo "assemble_outcome: ${{ steps.assemble.outcome }}"
+            echo "upload_outcome: ${{ steps.upload.outcome }}"
+            echo "run: ${{ github.run_number }}"
+            echo "timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "--- assemble log ---"
+            cat /tmp/assemble.log 2>/dev/null || echo "(no log)"
+            echo "--- upload log ---"
+            cat /tmp/upload.log 2>/dev/null || echo "(no log)"
+          } > .github/run_logs/last_run.txt
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add .github/run_logs/last_run.txt
+          git commit -m "ci: run #${{ github.run_number }} $STATUS [skip ci]" || true
+          git push origin HEAD:${{ github.ref_name }}

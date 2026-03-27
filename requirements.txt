@@ -1,0 +1,13 @@
+# Python 의존성 (pip install -r requirements.txt)
+
+# HTTP 요청
+requests>=2.31.0
+
+# 이미지 생성 (PIL/Pillow)
+Pillow>=10.0.0
+
+# TTS
+gTTS>=2.4.0
+
+# 환경변수 관리
+python-dotenv>=1.0.0

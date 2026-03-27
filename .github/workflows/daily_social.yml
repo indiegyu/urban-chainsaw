@@ -1,0 +1,71 @@
+name: Daily Social Media & Newsletter
+
+on:
+  schedule:
+    - cron: "0 10 * * *"   # 10:00 UTC (영상/블로그 완료 후)
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/research-income-automation-fNwfz
+    paths:
+      - '.github/workflows/daily_social.yml'
+      - 'scripts/social/**'
+
+permissions:
+  contents: write
+
+jobs:
+  social:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests python-dotenv -q
+
+      # ── 1. Beehiiv 뉴스레터 발송 ─────────────────────────────────
+      - name: Send newsletter (Beehiiv)
+        env:
+          BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
+          BEEHIIV_PUB_ID: ${{ secrets.BEEHIIV_PUB_ID }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
+        run: python scripts/social/newsletter.py
+
+      # ── 2. Twitter/X 포스팅 ──────────────────────────────────────
+      - name: Post to Twitter/X
+        env:
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
+          YOUTUBE_CHANNEL_URL: ${{ secrets.YOUTUBE_CHANNEL_URL }}
+        run: python scripts/social/twitter_poster.py
+
+      # ── 3. Reddit 공유 ───────────────────────────────────────────
+      - name: Share on Reddit
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
+        run: python scripts/social/reddit_poster.py
+
+      # ── 4. 커밋 (발행 로그) ──────────────────────────────────────
+      - name: Commit published logs
+        if: always()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add scripts/social/.twitter_posted.json scripts/social/.reddit_posted.json 2>/dev/null || true
+          git commit -m "ci: social publish logs [skip ci]" || echo "Nothing to commit"
+          git push origin HEAD:${{ github.ref_name }}

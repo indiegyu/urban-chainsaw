@@ -16,12 +16,13 @@ import os, sys, json, re, glob, requests
 from pathlib import Path
 from datetime import datetime
 
-DEVTO_API = "https://dev.to/api/articles"
-GROQ_URL  = "https://api.groq.com/openai/v1/chat/completions"
+DEVTO_API  = "https://dev.to/api/articles"
+GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
-BLOG_OUTPUT = Path(__file__).parent.parent / "blog" / "output"
+BLOG_OUTPUT   = Path(__file__).parent.parent / "blog" / "output"
 PUBLISHED_LOG = Path(__file__).parent / ".devto_published.json"
+PAGES_URL     = os.environ.get("GITHUB_PAGES_URL", "https://indiegyu.github.io/urban-chainsaw").rstrip("/")
 
 
 def load_published() -> set:
@@ -88,6 +89,9 @@ def publish_to_devto(json_path: Path, html_path: Path, devto_key: str, groq_key:
 
     tags = groq_tags(meta.get("title", ""), groq_key)
 
+    # canonical_url: 검색 엔진 크레딧이 내 블로그로 돌아오게 함 (SEO 핵심)
+    canonical = f"{PAGES_URL}/{html_path.name}" if PAGES_URL else ""
+
     payload = {
         "article": {
             "title": meta.get("title", "Untitled"),
@@ -95,7 +99,7 @@ def publish_to_devto(json_path: Path, html_path: Path, devto_key: str, groq_key:
             "published": True,
             "tags": tags,
             "description": meta.get("meta_description", "")[:160],
-            "canonical_url": "",  # 본인 블로그 URL 있으면 여기 입력
+            "canonical_url": canonical,
         }
     }
 

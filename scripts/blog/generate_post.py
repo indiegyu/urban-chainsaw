@@ -39,14 +39,9 @@ TRENDING_TOPICS = [
     "dropshipping vs print on demand which is better",
 ]
 
-# Affiliate 링크 매핑 (실제 링크로 교체 필요)
-AFFILIATE_LINKS = {
-    "n8n":        "https://n8n.io/?ref=YOURID",
-    "hostinger":  "https://hostinger.com/affiliate",
-    "convertkit": "https://convertkit.com/?lmref=YOURID",
-    "beehiiv":    "https://beehiiv.com/partner/YOURID",
-    "printify":   "https://printify.com/app/register?referrer=YOURID",
-}
+# Affiliate 링크는 link_inserter.py의 AFFILIATE_MAP에서 관리
+# 환경변수로 ID 설정: AMAZON_TAG, FIVERR_AFF_ID, HOSTINGER_AFF_ID 등
+AFFILIATE_LINKS = {}  # 레거시 호환성 유지 (실제 삽입은 link_inserter.py가 처리)
 
 
 def _groq_request(messages: list, groq_api_key: str, max_tokens: int = 2048) -> str:
@@ -96,13 +91,55 @@ def generate_blog_post(topic: str, groq_api_key: str) -> dict:
 
 
 def insert_affiliate_links(html: str) -> str:
-    """{{AFFILIATE:tool}} 플레이스홀더를 실제 링크로 교체합니다."""
-    import re
-    def replace_affiliate(match):
-        tool = match.group(1).lower().strip()
-        url = AFFILIATE_LINKS.get(tool, "#")
-        return f'<a href="{url}" target="_blank" rel="noopener sponsored">{tool}</a>'
-    return re.sub(r'\{\{AFFILIATE:([^}]+)\}\}', replace_affiliate, html)
+    """본문에서 키워드를 감지해 affiliate 링크 자동 삽입 + {{AFFILIATE:tool}} 플레이스홀더 처리."""
+    import re, sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    try:
+        from affiliate.link_inserter import insert_affiliate_links as _insert, _build_affiliate_map
+        aff_map = _build_affiliate_map()
+        # 레거시 플레이스홀더 처리
+        def replace_placeholder(match):
+            tool = match.group(1).lower().strip()
+            info = aff_map.get(tool, {})
+            url = info.get("url", "#")
+            return f'<a href="{url}" target="_blank" rel="noopener sponsored">{tool}</a>'
+        html = re.sub(r'\{\{AFFILIATE:([^}]+)\}\}', replace_placeholder, html)
+        # 키워드 자동 감지 삽입 (최대 5개)
+        html, _ = _insert(html, max_per_post=5)
+    except Exception as e:
+        print(f"  ⚠ Affiliate insert skipped: {e}")
+    return html
+
+
+def _build_post_cta() -> str:
+    """포스트 하단 수익화 CTA 박스"""
+    beehiiv_pub = os.environ.get("BEEHIIV_PUB_ID", "")
+    kofi        = os.environ.get("KOFI_USERNAME", "")
+    sub_btn = (f'<a href="https://www.beehiiv.com/subscribe/{beehiiv_pub}" target="_blank" '
+               f'style="display:inline-block;background:#6366f1;color:#fff;padding:10px 22px;'
+               f'border-radius:8px;text-decoration:none;font-weight:700;margin:4px 4px">📧 뉴스레터 무료 구독</a>'
+               if beehiiv_pub else "")
+    kofi_btn = (f'<a href="https://ko-fi.com/{kofi}" target="_blank" '
+                f'style="display:inline-block;background:#ff5e5b;color:#fff;padding:10px 22px;'
+                f'border-radius:8px;text-decoration:none;font-weight:700;margin:4px 4px">☕ 커피 한 잔</a>'
+                if kofi else "")
+    return f"""
+<div style="background:linear-gradient(135deg,#1e1b4b,#0f172a);border:1px solid #312e81;
+            border-radius:14px;padding:28px 20px;margin:40px 0;text-align:center;color:#e2e8f0;
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <p style="font-size:1.5em;margin-bottom:6px">🤖</p>
+  <h3 style="color:#a5b4fc;font-size:1.1em;margin:0 0 8px">매일 AI 수익화 전략 — 무료로 받기</h3>
+  <p style="color:#94a3b8;font-size:.85em;margin:0 0 18px;line-height:1.6">
+    실제 작동하는 AI 수익화 방법을 매일 아침 메일로 받아보세요
+  </p>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center">
+    {sub_btn}
+    {kofi_btn}
+    <a href="https://www.youtube.com/@psg9806" target="_blank"
+       style="display:inline-block;background:#ff0000;color:#fff;padding:10px 22px;
+              border-radius:8px;text-decoration:none;font-weight:700;margin:4px 4px">▶ YouTube 구독</a>
+  </div>
+</div>"""
 
 
 def save_post(post: dict, output_dir: Path) -> Path:
@@ -111,6 +148,7 @@ def save_post(post: dict, output_dir: Path) -> Path:
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     slug = post.get("slug", "post")[:50]
 
+    cta_box = _build_post_cta()
     # HTML 파일
     html_path = output_dir / f"{ts}_{slug}.html"
     full_html = f"""<!DOCTYPE html>
@@ -119,20 +157,34 @@ def save_post(post: dict, output_dir: Path) -> Path:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="{post.get('meta_description', '')}">
-<title>{post.get('title', 'Post')}</title>
+<title>{post.get('title', 'Post')} | AI Income Daily</title>
 <style>
-body {{ font-family: Georgia, serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.8; }}
-h1 {{ color: #1a1a2e; font-size: 2em; margin-bottom: 0.5em; }}
-h2 {{ color: #2d6a4f; font-size: 1.5em; margin-top: 2em; }}
-a {{ color: #e94560; }}
-strong {{ color: #1a1a2e; }}
-.meta {{ color: #6c757d; font-size: 0.9em; margin-bottom: 2em; }}
+body {{ font-family: Georgia, serif; max-width: 820px; margin: 0 auto; padding: 20px 20px 60px; line-height: 1.85; color: #1a1a2e; background: #f8fafc; }}
+h1 {{ color: #0f172a; font-size: 2em; margin-bottom: 0.4em; line-height: 1.3; }}
+h2 {{ color: #1e3a5f; font-size: 1.4em; margin-top: 2.2em; border-left: 4px solid #6366f1; padding-left: 12px; }}
+h3 {{ color: #2d6a4f; font-size: 1.15em; margin-top: 1.6em; }}
+a {{ color: #4f46e5; }}
+a:hover {{ text-decoration: underline; }}
+strong {{ color: #0f172a; }}
+.meta {{ color: #6c757d; font-size: 0.85em; margin-bottom: 2em; }}
+.tag {{ background: #e0e7ff; color: #4f46e5; border-radius: 4px; padding: 2px 8px; font-size: .75em; margin-right: 4px; font-family: sans-serif; }}
+blockquote {{ border-left: 4px solid #6366f1; margin: 1.5em 0; padding: 12px 20px; background: #f0f4ff; border-radius: 0 8px 8px 0; }}
+/* 어필리에이트 링크 강조 */
+a[rel~="sponsored"] {{ color: #059669; font-weight: 600; }}
+a[rel~="sponsored"]:hover {{ color: #047857; }}
+/* 광고 박스 */
+.ad-box {{ background: #fffbeb; border: 1px solid #fbbf24; border-radius: 10px; padding: 16px; margin: 24px 0; font-family: sans-serif; font-size: .88em; }}
+.ad-box strong {{ color: #92400e; }}
 </style>
 </head>
 <body>
 <h1>{post.get('title', 'Post')}</h1>
-<p class="meta">Tags: {', '.join(post.get('tags', []))}</p>
+<p class="meta">
+  📅 {ts[:4]}-{ts[4:6]}-{ts[6:8]} &nbsp;|&nbsp;
+  🏷 {''.join(f'<span class="tag">{t}</span>' for t in post.get('tags', []))}
+</p>
 {post.get('html', '')}
+{cta_box}
 </body>
 </html>"""
     html_path.write_text(full_html)

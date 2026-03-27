@@ -126,6 +126,42 @@ def generate_chapter(title: str, chapter: str, audience: str, groq_key: str) -> 
     return content
 
 
+def _build_ebook_cta() -> str:
+    """이북 마지막 페이지에 들어갈 수익화 CTA."""
+    beehiiv_pub = os.environ.get("BEEHIIV_PUB_ID", "")
+    kofi        = os.environ.get("KOFI_USERNAME", "")
+    pfy         = os.environ.get("PRINTIFY_AFF_ID", "")
+    fiv         = os.environ.get("FIVERR_AFF_ID", "")
+
+    newsletter_link = (f'<a href="https://www.beehiiv.com/subscribe/{beehiiv_pub}">'
+                       f'AI Income Insider Newsletter</a>' if beehiiv_pub
+                       else '<a href="https://beehiiv.com">AI Income Insider Newsletter</a>')
+    kofi_link = (f'<a href="https://ko-fi.com/{kofi}">Buy me a coffee on Ko-fi</a>'
+                 if kofi else "")
+    printify_link = (f'<a href="https://printify.com/app/register?referrer={pfy}">Printify (Print on Demand)</a>'
+                     if pfy else '<a href="https://printify.com">Printify</a>')
+    fiverr_link = (f'<a href="https://go.fiverr.com/visit/?bta={fiv}&brand=fiverrcpa">Fiverr</a>'
+                   if fiv else '<a href="https://fiverr.com">Fiverr</a>')
+
+    return f"""
+<div class="page-break"></div>
+<div class="backmatter">
+  <h2>🚀 Keep Going — Free Resources</h2>
+  <p>You've finished the book — but your journey is just starting. Here are the best free resources to
+  accelerate your results:</p>
+  <ul>
+    <li><strong>Daily AI Income Newsletter (Free):</strong> {newsletter_link} — actionable tips every morning.</li>
+    <li><strong>YouTube Channel:</strong> <a href="https://www.youtube.com/@psg9806">AI Income Daily on YouTube</a>
+    — step-by-step video tutorials, free.</li>
+    <li><strong>Start Selling Today:</strong> {printify_link} — zero upfront cost, free to join.</li>
+    <li><strong>Offer AI Services:</strong> {fiverr_link} — list your first gig in 30 minutes.</li>
+    {f'<li><strong>Support the author:</strong> {kofi_link} — helps create more free content.</li>' if kofi_link else ''}
+  </ul>
+  <p style="margin-top:1cm"><em>Thank you for reading. If this book helped you, please leave a review on Amazon —
+  it takes 60 seconds and makes a huge difference.</em></p>
+</div>"""
+
+
 def build_ebook_html(topic: dict, chapters_content: list) -> str:
     title = topic["title"]
     chapters_html = ""
@@ -159,6 +195,9 @@ def build_ebook_html(topic: dict, chapters_content: list) -> str:
   strong {{ color: #0f172a; }}
   .action-step {{ background: #f0fdf4; border-left: 4px solid #22c55e; padding: 0.5cm; margin: 0.5cm 0; }}
   .page-break {{ page-break-after: always; }}
+  .backmatter {{ background: #f0f4ff; border: 2px solid #6366f1; border-radius: 8pt; padding: 1cm; margin: 1cm 0; }}
+  .backmatter h2 {{ color: #4f46e5; border-bottom: none; }}
+  .backmatter a {{ color: #4f46e5; font-weight: bold; }}
   .disclaimer {{ font-size: 9pt; color: #94a3b8; margin-top: 2cm; border-top: 1px solid #e2e8f0; padding-top: 0.5cm; }}
 </style>
 </head>
@@ -179,6 +218,7 @@ def build_ebook_html(topic: dict, chapters_content: list) -> str:
 <div class="page-break"></div>
 
 {chapters_html}
+{_build_ebook_cta()}
 
 <div class="disclaimer">
   <p><strong>Disclaimer:</strong> Results vary based on individual effort and market conditions.

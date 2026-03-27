@@ -3,68 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Daily AI Tips, Side Hustles & Make Money Online">
-<title>AI Income Automation Blog</title>
+<meta name="description" content="Daily AI Side Hustles, Automation Tips & Make Money Online">
+<meta property="og:title" content="AI Income Daily">
+<meta property="og:description" content="Daily AI Side Hustles, Automation Tips & Make Money Online">
+<title>AI Income Daily — AI Side Hustles & Passive Income</title>
+
 <style>
-:root { --primary:#0f172a; --accent:#6366f1; --text:#334155; --bg:#f8fafc; --card:#fff; }
+:root { --primary:#0f172a; --accent:#6366f1; --text:#334155; --bg:#f1f5f9; --card:#fff; }
 * { box-sizing:border-box; margin:0; padding:0 }
 body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); line-height:1.7 }
-header { background:var(--primary); color:#fff; padding:2rem; text-align:center }
-header h1 { font-size:2rem; font-weight:800 }
-header p { opacity:.7; margin-top:.5rem }
-.container { max-width:900px; margin:2rem auto; padding:0 1rem }
-.card { background:var(--card); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 1px 3px rgba(0,0,0,.08) }
-.card h2 { font-size:1.25rem; margin-bottom:.5rem }
+/* 상단 고정 바 */
+.top-bar { background:var(--primary); color:#94a3b8; font-size:.8em; padding:6px 16px;
+            display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px }
+.top-bar a { color:#a5b4fc; text-decoration:none; font-weight:600 }
+/* 헤더 */
+header { background:linear-gradient(135deg,#1e1b4b,#312e81); color:#fff; padding:40px 20px; text-align:center }
+header h1 { font-size:2.2rem; font-weight:800; margin-bottom:8px }
+header p { opacity:.8; font-size:1.05em; max-width:600px; margin:0 auto 20px }
+.cta-strip { display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+.cta-strip a { padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:700; font-size:.88em }
+.btn-red { background:#ff0000; color:#fff }
+.btn-indigo { background:#6366f1; color:#fff }
+.btn-ko { background:#ff5e5b; color:#fff }
+/* 레이아웃 */
+.wrap { max-width:960px; margin:0 auto; padding:24px 16px; display:grid;
+          grid-template-columns:1fr 300px; gap:24px }
+@media(max-width:700px) { .wrap { grid-template-columns:1fr } .sidebar { display:none } }
+.card { background:var(--card); border-radius:12px; padding:20px; margin-bottom:16px;
+          box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #e2e8f0 }
+.card h2 { font-size:1.15rem; margin-bottom:6px }
 .card h2 a { color:var(--primary); text-decoration:none }
 .card h2 a:hover { color:var(--accent) }
-.meta { font-size:.8rem; color:#94a3b8; margin-bottom:.75rem }
-.tag { background:#e0e7ff; color:var(--accent); border-radius:4px; padding:.2rem .5rem; font-size:.75rem; margin-right:.3rem }
-footer { text-align:center; padding:2rem; color:#94a3b8; font-size:.85rem }
-.ads { margin:1.5rem 0 }
+.meta { font-size:.78rem; color:#94a3b8; margin-bottom:.6rem }
+.tag { background:#e0e7ff; color:var(--accent); border-radius:4px; padding:.15rem .45rem; font-size:.72rem; margin-right:.3rem }
+/* 사이드바 */
+.sidebar-card { background:#fff; border-radius:12px; padding:18px; margin-bottom:16px;
+                  border:1px solid #e2e8f0; font-size:.87em }
+.sidebar-card h3 { font-size:.95em; font-weight:700; margin-bottom:12px; color:#0f172a }
+.sidebar-tool { display:flex; align-items:center; gap:10px; padding:8px 0;
+                  border-bottom:1px solid #f1f5f9; text-decoration:none; color:#334155 }
+.sidebar-tool:hover { color:var(--accent) }
+footer { text-align:center; padding:28px 16px; color:#94a3b8; font-size:.82rem; border-top:1px solid #e2e8f0; background:#fff }
+.ads { margin:16px 0; text-align:center }
 </style>
 </head>
 <body>
+
+<!-- 상단 고정 바 -->
+<div class="top-bar">
+  <span>🤖 AI Income Daily — 매일 자동 생성되는 수익화 블로그</span>
+  <span>
+    <a href="https://www.youtube.com/@psg9806" target="_blank">▶ YouTube</a> &nbsp;|&nbsp;
+    <a href="dashboard.html">📊 대시보드</a>
+    
+  </span>
+</div>
+
+<!-- 헤더 -->
 <header>
-  <h1>🤖 AI Income Automation Blog</h1>
-  <p>Daily AI Tips, Side Hustles & Make Money Online</p>
+  <h1>🤖 AI Income Daily</h1>
+  <p>Daily AI Side Hustles, Automation Tips & Make Money Online</p>
+  <div class="cta-strip">
+    <a href="https://www.youtube.com/@psg9806" target="_blank" class="cta-strip a btn-red">▶ YouTube 구독</a>
+    
+    
+    <a href="ai-tools.html" style="background:#1e293b;color:#94a3b8;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.88em">🔧 AI Tools</a>
+  </div>
 </header>
-<div class="container">
-  <div class="ads"></div>
-  
+
+<div class="ads"></div>
+
+<div class="wrap">
+  <!-- 메인 포스트 목록 -->
+  <main>
+    
+    
     <article class="card">
       <h2><a href="20260326_044111_chatgpt-side-hustle-ideas.html">ChatGPT Side Hustles</a></h2>
-      <p class="meta">20260326 · 599 words</p>
-      <p>Discover profitable ChatGPT side hustle ideas that actually work and can increase your income</p>
-      <div class="tags"><span class="tag">ChatGPT</span><span class="tag">Side Hustles</span><span class="tag">Artificial Intelligence</span><span class="tag">Remote Work</span><span class="tag">Online Business</span></div>
+      <p class="meta">📅 20260326 · 📖 599 words</p>
+      <p style="color:#475569;font-size:.9em;line-height:1.6">Discover profitable ChatGPT side hustle ideas that actually work and can increase your income</p>
+      <div style="margin-top:10px"><span class="tag">ChatGPT</span><span class="tag">Side Hustles</span><span class="tag">Artificial Intelligence</span><span class="tag">Remote Work</span></div>
+      <a href="20260326_044111_chatgpt-side-hustle-ideas.html" style="display:inline-block;margin-top:12px;color:#4f46e5;font-size:.85em;font-weight:600">읽기 →</a>
     </article>
+    
     <article class="card">
       <h2><a href="20260326_044107_high-paying-remote-jobs-over-100k.html">High Paying Remote Jobs</a></h2>
-      <p class="meta">20260326 · 637 words</p>
-      <p>Discover the best remote jobs that pay over $100k, offering flexibility and high salaries. Explore in-demand careers and start your remote job search today.</p>
-      <div class="tags"><span class="tag">Remote Jobs</span><span class="tag">High Paying Careers</span><span class="tag">Work From Home</span><span class="tag">Digital Nomad</span><span class="tag">Online Employment</span></div>
+      <p class="meta">📅 20260326 · 📖 637 words</p>
+      <p style="color:#475569;font-size:.9em;line-height:1.6">Discover the best remote jobs that pay over $100k, offering flexibility and high salaries. Explore in-demand careers and start your remote job search today.</p>
+      <div style="margin-top:10px"><span class="tag">Remote Jobs</span><span class="tag">High Paying Careers</span><span class="tag">Work From Home</span><span class="tag">Digital Nomad</span></div>
+      <a href="20260326_044107_high-paying-remote-jobs-over-100k.html" style="display:inline-block;margin-top:12px;color:#4f46e5;font-size:.85em;font-weight:600">읽기 →</a>
     </article>
+    
     <article class="card">
       <h2><a href="20260326_044102_chatgpt-side-hustle-ideas.html">ChatGPT Side Hustle Ideas</a></h2>
-      <p class="meta">20260326 · 515 words</p>
-      <p>Discover profitable ChatGPT side hustle ideas that can boost your income and help you achieve financial freedom with these actionable strategies</p>
-      <div class="tags"><span class="tag">ChatGPT</span><span class="tag">Side Hustle Ideas</span><span class="tag">AI Business</span><span class="tag">Online Income</span><span class="tag">Financial Freedom</span></div>
+      <p class="meta">📅 20260326 · 📖 515 words</p>
+      <p style="color:#475569;font-size:.9em;line-height:1.6">Discover profitable ChatGPT side hustle ideas that can boost your income and help you achieve financial freedom with these actionable strategies</p>
+      <div style="margin-top:10px"><span class="tag">ChatGPT</span><span class="tag">Side Hustle Ideas</span><span class="tag">AI Business</span><span class="tag">Online Income</span></div>
+      <a href="20260326_044102_chatgpt-side-hustle-ideas.html" style="display:inline-block;margin-top:12px;color:#4f46e5;font-size:.85em;font-weight:600">읽기 →</a>
     </article>
+    
     <article class="card">
       <h2><a href="20260326_044058_dropshipping-vs-print-on-demand.html">Dropshipping vs Print on Demand</a></h2>
-      <p class="meta">20260326 · 677 words</p>
-      <p>Compare dropshipping and print on demand to determine which business model is best for your e-commerce venture, considering factors like cost, risk, and scalabi</p>
-      <div class="tags"><span class="tag">dropshipping</span><span class="tag">print on demand</span><span class="tag">e-commerce</span><span class="tag">online business</span><span class="tag">entrepreneurship</span></div>
+      <p class="meta">📅 20260326 · 📖 677 words</p>
+      <p style="color:#475569;font-size:.9em;line-height:1.6">Compare dropshipping and print on demand to determine which business model is best for your e-commerce venture, considering factors like cost, risk, and scalabi</p>
+      <div style="margin-top:10px"><span class="tag">dropshipping</span><span class="tag">print on demand</span><span class="tag">e-commerce</span><span class="tag">online business</span></div>
+      <a href="20260326_044058_dropshipping-vs-print-on-demand.html" style="display:inline-block;margin-top:12px;color:#4f46e5;font-size:.85em;font-weight:600">읽기 →</a>
     </article>
+    
     <article class="card">
       <h2><a href="20260326_043635_best-ai-tools-to-make-money-online-2026.html">Make Money Online with AI Tools 2026</a></h2>
-      <p class="meta">20260326 · 594 words</p>
-      <p>Discover the best AI tools to make money online in 2026. Boost your income with our expert guide to top AI-powered platforms and software.</p>
-      <div class="tags"><span class="tag">AI Tools</span><span class="tag">Make Money Online</span><span class="tag">Online Income</span><span class="tag">AI Marketing</span><span class="tag">Digital Earning</span></div>
+      <p class="meta">📅 20260326 · 📖 594 words</p>
+      <p style="color:#475569;font-size:.9em;line-height:1.6">Discover the best AI tools to make money online in 2026. Boost your income with our expert guide to top AI-powered platforms and software.</p>
+      <div style="margin-top:10px"><span class="tag">AI Tools</span><span class="tag">Make Money Online</span><span class="tag">Online Income</span><span class="tag">AI Marketing</span></div>
+      <a href="20260326_043635_best-ai-tools-to-make-money-online-2026.html" style="display:inline-block;margin-top:12px;color:#4f46e5;font-size:.85em;font-weight:600">읽기 →</a>
     </article>
-  <div class="ads"></div>
+    
+  </main>
+
+  <!-- 사이드바 -->
+  <aside class="sidebar">
+    <div class="ads"></div>
+
+    <div class="sidebar-card">
+      <h3>🚀 무료 AI 수익화 도구</h3>
+      <a class="sidebar-tool" href="https://printify.com" target="_blank" rel="noopener">
+        <span>🎨</span><span><strong>Printify</strong><br><small style="color:#64748b">POD 무료 시작</small></span>
+      </a>
+      <a class="sidebar-tool" href="https://elevenlabs.io" target="_blank" rel="noopener">
+        <span>🎙</span><span><strong>ElevenLabs</strong><br><small style="color:#64748b">AI 보이스 무료</small></span>
+      </a>
+      <a class="sidebar-tool" href="https://beehiiv.com" target="_blank" rel="noopener">
+        <span>📧</span><span><strong>Beehiiv</strong><br><small style="color:#64748b">뉴스레터 2500명 무료</small></span>
+      </a>
+      <a class="sidebar-tool" href="https://canva.com" target="_blank" rel="noopener">
+        <span>🎨</span><span><strong>Canva</strong><br><small style="color:#64748b">무료 디자인 툴</small></span>
+      </a>
+      <a class="sidebar-tool" href="https://groq.com" target="_blank" rel="noopener">
+        <span>⚡</span><span><strong>Groq AI</strong><br><small style="color:#64748b">가장 빠른 무료 LLM</small></span>
+      </a>
+      <a class="sidebar-tool" href="ai-tools.html" style="color:#6366f1;font-weight:700;font-size:.85em;display:block;margin-top:10px;text-align:center;text-decoration:none">모든 AI 도구 보기 →</a>
+    </div>
+
+    
+
+    
+
+    <div class="ads"></div>
+  </aside>
 </div>
+
+<div class="ads"></div>
+
 <footer>
-  <p>© 2026 AI Income Automation Blog · Powered by AI · <a href="privacy.html">Privacy Policy</a></p>
+  <p>© 2026 AI Income Daily · Powered by AI · <a href="privacy.html">Privacy Policy</a> · <a href="dashboard.html">Revenue Dashboard</a></p>
+  <p style="margin-top:8px">
+    <a href="https://www.youtube.com/@psg9806" target="_blank" style="color:#6366f1">YouTube</a> &nbsp;|&nbsp;
+    <a href="ai-tools.html" style="color:#6366f1">AI Tools Directory</a>
+    
+  </p>
 </footer>
 </body>
 </html>

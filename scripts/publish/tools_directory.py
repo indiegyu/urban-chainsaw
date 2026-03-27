@@ -24,21 +24,57 @@ GROQ_MODEL = "llama-3.3-70b-versatile"
 DOCS_DIR   = Path("docs")
 STATE_FILE = Path("scripts/publish/.tools_state.json")
 
-# 시드 툴 목록 (어필리에이트 링크 있는 것 우선)
-SEED_TOOLS = [
-    {"name": "Groq", "url": "https://groq.com", "category": "AI LLM", "free": True},
-    {"name": "Canva", "url": "https://canva.com", "category": "Design", "free": True},
-    {"name": "ElevenLabs", "url": "https://elevenlabs.io", "category": "AI Voice", "free": True},
-    {"name": "Printify", "url": "https://printify.com", "category": "Print on Demand", "free": True},
-    {"name": "HuggingFace", "url": "https://huggingface.co", "category": "AI Models", "free": True},
-    {"name": "LemonSqueezy", "url": "https://lemonsqueezy.com", "category": "Sell Digital", "free": True},
-    {"name": "GitHub Actions", "url": "https://github.com/features/actions", "category": "Automation", "free": True},
-    {"name": "Perplexity AI", "url": "https://perplexity.ai", "category": "AI Search", "free": True},
-    {"name": "Pika Labs", "url": "https://pika.art", "category": "AI Video", "free": True},
-    {"name": "Suno AI", "url": "https://suno.com", "category": "AI Music", "free": True},
-    {"name": "Kling AI", "url": "https://klingai.com", "category": "AI Video", "free": True},
-    {"name": "Ideogram", "url": "https://ideogram.ai", "category": "AI Image", "free": True},
-]
+
+def _build_seed_tools() -> list:
+    """환경변수 기반으로 어필리에이트 URL이 포함된 시드 툴 목록을 생성합니다."""
+    pfy  = os.environ.get("PRINTIFY_AFF_ID", "").strip()
+    fiv  = os.environ.get("FIVERR_AFF_ID", "").strip()
+    hos  = os.environ.get("HOSTINGER_AFF_ID", "").strip()
+    eleven = os.environ.get("ELEVENLABS_AFF_ID", "").strip()
+    jsp  = os.environ.get("JASPER_AFF_ID", "").strip()
+    ck   = os.environ.get("CONVERTKIT_AFF_ID", "").strip()
+    sem  = os.environ.get("SEMRUSH_AFF_ID", "").strip()
+    amz  = os.environ.get("AMAZON_TAG", "").strip()
+
+    return [
+        {"name": "Groq", "url": "https://groq.com",
+         "category": "AI LLM", "free": True, "affiliate": False},
+        {"name": "Canva", "url": "https://partner.canva.com/c/canva",
+         "category": "Design", "free": True, "affiliate": True},
+        {"name": "ElevenLabs",
+         "url": f"https://elevenlabs.io/?from={eleven}" if eleven else "https://elevenlabs.io",
+         "category": "AI Voice", "free": True, "affiliate": bool(eleven)},
+        {"name": "Printify",
+         "url": f"https://printify.com/app/register?referrer={pfy}" if pfy else "https://printify.com",
+         "category": "Print on Demand", "free": True, "affiliate": bool(pfy)},
+        {"name": "Fiverr",
+         "url": f"https://go.fiverr.com/visit/?bta={fiv}&brand=fiverrcpa" if fiv else "https://fiverr.com",
+         "category": "Freelance", "free": True, "affiliate": bool(fiv)},
+        {"name": "Hostinger",
+         "url": f"https://hostinger.com?REFERRALCODE={hos}" if hos else "https://hostinger.com",
+         "category": "Web Hosting", "free": False, "affiliate": bool(hos)},
+        {"name": "Jasper AI",
+         "url": f"https://jasper.ai?fpr={jsp}" if jsp else "https://jasper.ai",
+         "category": "AI Writing", "free": False, "affiliate": bool(jsp)},
+        {"name": "ConvertKit",
+         "url": f"https://partners.convertkit.com/?lmref={ck}" if ck else "https://convertkit.com",
+         "category": "Email Marketing", "free": True, "affiliate": bool(ck)},
+        {"name": "Semrush",
+         "url": f"https://semrush.sjv.io/{sem}" if sem else "https://semrush.com",
+         "category": "SEO Tools", "free": False, "affiliate": bool(sem)},
+        {"name": "HuggingFace", "url": "https://huggingface.co",
+         "category": "AI Models", "free": True, "affiliate": False},
+        {"name": "GitHub Actions", "url": "https://github.com/features/actions",
+         "category": "Automation", "free": True, "affiliate": False},
+        {"name": "Perplexity AI", "url": "https://perplexity.ai",
+         "category": "AI Search", "free": True, "affiliate": False},
+        {"name": "Ideogram", "url": "https://ideogram.ai",
+         "category": "AI Image", "free": True, "affiliate": False},
+        {"name": "Suno AI", "url": "https://suno.com",
+         "category": "AI Music", "free": True, "affiliate": False},
+        {"name": "Beehiiv", "url": "https://beehiiv.com",
+         "category": "Newsletter", "free": True, "affiliate": False},
+    ]
 
 
 def _groq(messages, groq_key, max_tokens=1000) -> str:
@@ -93,16 +129,17 @@ def build_html(tools: list[dict], strategy: dict) -> str:
             free_badge = '<span class="badge free">FREE</span>' if t.get("free") else ""
             money = t.get("money_use_case", "")
             best  = t.get("best_for", "")
-            cards.append(f"""
+            rel_attr = 'noopener sponsored' if t.get('affiliate') else 'noopener'
+        cards.append(f"""
     <div class="tool-card">
       <div class="tool-header">
-        <h3><a href="{t['url']}" target="_blank" rel="noopener">{t['name']}</a></h3>
+        <h3><a href="{t['url']}" target="_blank" rel="{rel_attr}">{t['name']}</a></h3>
         {free_badge}
       </div>
       <p class="tool-desc">{t.get('description', '')}</p>
       {f'<p class="money">💰 {money}</p>' if money else ''}
       {f'<p class="best-for">👤 Best for: {best}</p>' if best else ''}
-      <a href="{t['url']}" class="btn" target="_blank" rel="noopener">Try Free →</a>
+      <a href="{t['url']}" class="btn" target="_blank" rel="{rel_attr}">Try Free →</a>
     </div>""")
         sections.append(f"""
   <section>
@@ -173,7 +210,7 @@ def build_html(tools: list[dict], strategy: dict) -> str:
 <header>
   <h1>🤖 Best AI Tools to Make Money Online</h1>
   <p>Updated {datetime.now().strftime('%B %Y')} · {len(tools)} tools · All free to start</p>
-  <p style="margin-top:1em"><a href="https://youtube.com/@AIIncomeDaily" style="color:#6366f1">▶ Watch daily AI income tips on YouTube →</a></p>
+  <p style="margin-top:1em"><a href="https://www.youtube.com/@psg9806" style="color:#6366f1">▶ Watch daily AI income tips on YouTube →</a></p>
 </header>
 <nav>{nav_links}</nav>
 <main>
@@ -181,7 +218,7 @@ def build_html(tools: list[dict], strategy: dict) -> str:
 {product_html}
 </main>
 <footer>
-  <p>Updated weekly by <a href="https://youtube.com/@AIIncomeDaily">AI Income Daily</a> · Subscribe for daily tips</p>
+  <p>Updated weekly by <a href="https://www.youtube.com/@psg9806">AI Income Daily</a> · Subscribe for daily tips</p>
   <p style="margin-top:.5em;font-size:.8em">Some links may be affiliate links. We only recommend tools we use.</p>
 </footer>
 </body>
@@ -199,7 +236,7 @@ def run():
     state = {}
     if STATE_FILE.exists():
         state = json.loads(STATE_FILE.read_text())
-    tools = state.get("tools", SEED_TOOLS.copy())
+    tools = state.get("tools", _build_seed_tools())
 
     # Groq으로 설명 생성 (없는 것만)
     if groq_key:

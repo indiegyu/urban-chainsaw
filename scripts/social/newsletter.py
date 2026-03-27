@@ -59,39 +59,80 @@ def generate_newsletter_content(groq_key: str, blog_post_title: str = "") -> dic
         meta_raw = meta_raw.split("```")[1].lstrip("json").strip()
     meta = json.loads(meta_raw)
 
-    # Step 2: HTML 본문
-    blog_link = ""
-    if PAGES_URL and blog_post_title:
-        blog_link = f"<p><a href='{PAGES_URL}' style='background:#6366f1;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:10px'>Read Full Article →</a></p>"
+    # 환경변수에서 어필리에이트 정보
+    kofi_user   = os.environ.get("KOFI_USERNAME", "")
+    pfy_id      = os.environ.get("PRINTIFY_AFF_ID", "")
+    fiv_id      = os.environ.get("FIVERR_AFF_ID", "")
+    printify_url = f"https://printify.com/app/register?referrer={pfy_id}" if pfy_id else "https://printify.com"
+    fiverr_url   = f"https://go.fiverr.com/visit/?bta={fiv_id}&brand=fiverrcpa" if fiv_id else "https://fiverr.com"
+
+    # Step 2: HTML 본문 + 수익화 섹션 추가
+    blog_url = f"{PAGES_URL}" if PAGES_URL else "#"
+    blog_link = f"<p style='margin-top:16px'><a href='{blog_url}' style='background:#6366f1;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:700'>Read Full Article →</a></p>" if blog_post_title else ""
 
     body = groq_request([
         {"role": "system", "content": (
             "Write a daily email newsletter in HTML. Structure:\n"
             "1. Warm greeting (1 sentence)\n"
             "2. Today's main insight (2-3 paragraphs, practical, actionable)\n"
-            "3. Quick tips (3 bullet points)\n"
-            "4. Tool of the day (name + why it's useful for income)\n"
-            "5. Action step (one specific thing to do today)\n"
-            "Use inline styles only (no <style> tags). Friendly, non-corporate tone. "
-            "Max 400 words. Clean, mobile-friendly HTML."
+            "3. Quick tips (3 bullet points, each with a specific tool or method)\n"
+            "4. Tool of the day (name the tool, why it earns money, how to start today)\n"
+            "5. Action step (one specific thing to do TODAY — be very concrete)\n"
+            "Use inline styles only (no <style> tags). Friendly, direct tone. "
+            "Max 400 words. Mobile-friendly HTML."
         )},
         {"role": "user", "content": f"Date: {today}. Focus topic: {blog_post_title or 'AI side hustles and passive income'}"}
     ], groq_key, max_tokens=1500)
 
+    # 수익화 섹션: 추천 도구 + 어필리에이트
+    tools_section = f"""
+<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:18px;margin-top:24px">
+  <p style="font-weight:700;color:#166534;margin:0 0 12px">🔧 이번 주 추천 도구 (무료 시작)</p>
+  <table style="width:100%;border-collapse:collapse">
+    <tr>
+      <td style="padding:6px 0">
+        <a href="{printify_url}" style="color:#166534;font-weight:600" target="_blank">🎨 Printify</a>
+        <span style="color:#4b5563;font-size:.85em"> — AI 디자인으로 POD 티셔츠 판매</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0">
+        <a href="{fiverr_url}" style="color:#166534;font-weight:600" target="_blank">💼 Fiverr</a>
+        <span style="color:#4b5563;font-size:.85em"> — AI 서비스로 건당 $50-500 수익</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0">
+        <a href="https://elevenlabs.io" style="color:#166534;font-weight:600" target="_blank">🎙 ElevenLabs</a>
+        <span style="color:#4b5563;font-size:.85em"> — AI 음성으로 YouTube/팟캐스트 자동화</span>
+      </td>
+    </tr>
+  </table>
+</div>"""
+
+    kofi_cta = (f'<p style="text-align:center;margin-top:16px">'
+                f'<a href="https://ko-fi.com/{kofi_user}" style="background:#ff5e5b;color:#fff;'
+                f'padding:8px 18px;border-radius:20px;text-decoration:none;font-size:.85em;font-weight:700">'
+                f'☕ Buy me a coffee</a></p>'
+                if kofi_user else "")
+
     full_html = f"""
 <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a">
   <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:30px;text-align:center;border-radius:12px 12px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:24px">🤖 {NEWSLETTER_NAME}</h1>
-    <p style="color:#94a3b8;margin:8px 0 0">{NEWSLETTER_TAGLINE}</p>
+    <h1 style="color:#fff;margin:0;font-size:22px">🤖 {NEWSLETTER_NAME}</h1>
+    <p style="color:#94a3b8;margin:8px 0 0;font-size:.9em">{NEWSLETTER_TAGLINE}</p>
   </div>
-  <div style="background:#fff;padding:30px;border:1px solid #e2e8f0;border-top:none">
+  <div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none">
     {body}
     {blog_link}
+    {tools_section}
+    {kofi_cta}
   </div>
-  <div style="background:#f8fafc;padding:20px;text-align:center;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px">
-    <p style="color:#94a3b8;font-size:12px;margin:0">
+  <div style="background:#f8fafc;padding:16px;text-align:center;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px">
+    <p style="color:#94a3b8;font-size:11px;margin:0">
       You're receiving this because you subscribed to {NEWSLETTER_NAME}.<br>
-      <a href="{{{{unsubscribe}}}}" style="color:#6366f1">Unsubscribe</a>
+      <a href="{{{{unsubscribe}}}}" style="color:#6366f1">Unsubscribe</a> &nbsp;|&nbsp;
+      <a href="{PAGES_URL}" style="color:#6366f1">Visit Blog</a>
     </p>
   </div>
 </div>"""
@@ -122,11 +163,12 @@ def create_beehiiv_post(content: dict, pub_id: str, api_key: str) -> dict:
     post_id = post["id"]
     print(f"  ✓ Draft created: {post_id}")
 
-    # 발송 (schedule → now)
+    # 발송 (send_at: 현재 시각 Unix timestamp)
+    import time as _time
     send_resp = requests.post(
         f"https://api.beehiiv.com/v2/publications/{pub_id}/posts/{post_id}/email",
         headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json={"send_at": "now"}, timeout=30
+        json={"send_at": int(_time.time())}, timeout=30
     )
 
     if send_resp.status_code in (200, 201, 202):

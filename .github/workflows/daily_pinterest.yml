@@ -1,0 +1,49 @@
+name: Daily Pinterest + Etsy Sync
+
+on:
+  schedule:
+    - cron: "30 9  * * *"   # 매일 09:30 UTC (YouTube 업로드 직후)
+    - cron: "30 21 * * *"   # 매일 21:30 UTC (저녁 업로드 직후)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests python-dotenv -q
+
+      - name: Pinterest auto-pin
+        env:
+          PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
+          PINTEREST_BOARD_ID:     ${{ secrets.PINTEREST_BOARD_ID }}
+        run: python -u scripts/social/pinterest_poster.py
+
+      - name: Etsy auto-list
+        env:
+          ETSY_API_KEY:      ${{ secrets.ETSY_API_KEY }}
+          ETSY_ACCESS_TOKEN: ${{ secrets.ETSY_ACCESS_TOKEN }}
+          ETSY_SHOP_ID:      ${{ secrets.ETSY_SHOP_ID }}
+        run: python -u scripts/products/etsy_publisher.py
+
+      - name: Commit state files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add scripts/social/.pinterest_posted.json \
+                  scripts/products/.etsy_listed.json \
+                  scripts/strategy/content_strategy.json 2>/dev/null || true
+          git commit -m "ci: pinterest+etsy sync [skip ci]" || echo "Nothing to commit"
+          git push origin HEAD:${{ github.ref_name }}

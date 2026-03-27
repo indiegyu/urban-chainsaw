@@ -52,24 +52,31 @@ jobs:
       - name: Assemble video
         id: assemble
         env:
-          GROQ_API_KEY:        ${{ secrets.GROQ_API_KEY }}
-          ELEVENLABS_API_KEY:  ${{ secrets.ELEVENLABS_API_KEY }}
+          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: |
-          set -o pipefail
           TOPIC="${{ github.event.inputs.topic }}"
           if [ -z "$TOPIC" ]; then
-            python scripts/video/assemble_video.py 2>&1 | tee /tmp/assemble.log
+            python -u scripts/video/assemble_video.py 2>&1 | tee /tmp/assemble.log
           else
-            python scripts/video/assemble_video.py "$TOPIC" 2>&1 | tee /tmp/assemble.log
+            python -u scripts/video/assemble_video.py "$TOPIC" 2>&1 | tee /tmp/assemble.log
           fi
+          # tee 성공 여부와 무관하게 python 종료 코드를 전달
+          exit ${PIPESTATUS[0]}
 
       - name: Upload to YouTube
         id: upload
         env:
           GOOGLE_TOKEN_PATH: token.json
         run: |
-          OUTPUT_DIR=$(ls -td scripts/video/output/*/ | head -1)
-          python scripts/video/upload_youtube.py "$OUTPUT_DIR" 2>&1 | tee /tmp/upload.log
+          OUTPUT_DIR=$(ls -td scripts/video/output/*/ 2>/dev/null | head -1)
+          if [ -z "$OUTPUT_DIR" ]; then
+            echo "ERROR: No video output directory found" | tee /tmp/upload.log
+            exit 1
+          fi
+          echo "Uploading from: $OUTPUT_DIR"
+          python -u scripts/video/upload_youtube.py "$OUTPUT_DIR" 2>&1 | tee /tmp/upload.log
+          exit ${PIPESTATUS[0]}
 
       - name: Save run status
         if: always()

@@ -169,7 +169,10 @@ def upload_video(
 # ── 메인 실행 ─────────────────────────────────────────────────────────────────
 def run(video_dir: str):
     video_dir  = Path(video_dir)
-    meta_file  = video_dir / "meta.json"
+    # metadata.json (new pipeline) 또는 meta.json (legacy) 모두 지원
+    meta_file = video_dir / "metadata.json"
+    if not meta_file.exists():
+        meta_file = video_dir / "meta.json"
     video_file = video_dir / "final.mp4"
     thumb_file = video_dir / "thumbnail.jpg"
 

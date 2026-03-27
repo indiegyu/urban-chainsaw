@@ -20,6 +20,19 @@ YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
 GROQ_API         = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL       = "llama-3.3-70b-versatile"
 
+STRATEGY_PATH = Path(__file__).parent.parent / "strategy" / "content_strategy.json"
+
+def _load_strategy_keywords() -> list[str]:
+    """content_strategy.json의 target_cpm_keywords를 로드합니다."""
+    try:
+        s = json.loads(STRATEGY_PATH.read_text())
+        kw = s.get("target_cpm_keywords", [])
+        topics = s.get("top_performing_topics", [])
+        combined = [f"{t} 2026" for t in topics[:2]] + kw[:3]
+        return combined[:5] if combined else SEARCH_KEYWORDS
+    except Exception:
+        return SEARCH_KEYWORDS
+
 SEARCH_KEYWORDS = [
     "AI tools make money 2026",
     "passive income automation 2026",
@@ -186,16 +199,19 @@ def research(groq_api_key: str = None, youtube_api_key: str = None) -> dict:
     groq_key = groq_api_key or os.environ.get("GROQ_API_KEY", "")
     yt_key   = youtube_api_key or os.environ.get("YOUTUBE_API_KEY", "")
 
+    # 전략 파일 기반 키워드 사용 (성과 기반으로 진화)
+    keywords = _load_strategy_keywords()
+
     print("🔍 Researching trending topics...")
 
     # 1. YouTube 검색 (API key → OAuth token 순으로 시도)
     youtube_titles = []
     if yt_key:
-        for kw in SEARCH_KEYWORDS[:2]:
+        for kw in keywords[:2]:
             youtube_titles.extend(_yt_search_apikey(kw, yt_key))
             time.sleep(0.4)
     else:
-        for kw in SEARCH_KEYWORDS[:2]:
+        for kw in keywords[:2]:
             youtube_titles.extend(_yt_search_oauth(kw))
             time.sleep(0.4)
 

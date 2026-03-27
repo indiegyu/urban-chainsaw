@@ -1,0 +1,46 @@
+name: Weekly Strategy Optimizer
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # 매주 월요일 06:00 UTC (직전 주 성과 분석)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests python-dotenv -q
+
+      - name: Restore OAuth token
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YT_REFRESH_TOKEN:      ${{ secrets.YT_FULL_REFRESH_TOKEN }}
+          GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: python3 scripts/video/make_token.py
+
+      - name: Analyze performance & update strategy
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python -u scripts/analytics/weekly_optimizer.py
+
+      - name: Commit updated strategy
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git fetch origin ${{ github.ref_name }}
+          git reset --soft origin/${{ github.ref_name }}
+          git add scripts/strategy/content_strategy.json
+          git commit -m "ci: strategy update week $(date +%V) [skip ci]" || echo "No changes"
+          git push origin HEAD:${{ github.ref_name }}

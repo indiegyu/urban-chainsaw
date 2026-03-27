@@ -15,9 +15,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── 어필리에이트 / CTA 섹션 (모든 영상 설명에 자동 추가) ─────────────────────
-_DESCRIPTION_CTA = """
+_STRATEGY_PATH = Path(__file__).parent.parent / "strategy" / "content_strategy.json"
 
+
+def _build_description_cta() -> str:
+    """strategy.json의 Gumroad 상품 링크를 동적으로 포함한 CTA를 생성합니다."""
+    products_section = ""
+    try:
+        strategy = json.loads(_STRATEGY_PATH.read_text())
+        products = strategy.get("gumroad_products_created", [])
+        if products:
+            recent = products[-3:]  # 최근 3개 상품
+            lines = ["━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                     "🛍️  MY DIGITAL PRODUCTS (instant download)",
+                     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"]
+            for p in recent:
+                price = f"${p.get('price_usd', 9)}"
+                url   = p.get("url", "")
+                title = p.get("title", "")
+                if url:
+                    lines.append(f"📘 {title} ({price}) → {url}")
+            products_section = "\n" + "\n".join(lines) + "\n"
+    except Exception:
+        pass
+
+    return f"""
+{products_section}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔗 FREE TOOLS I USE & RECOMMEND
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -29,7 +52,7 @@ _DESCRIPTION_CTA = """
 📊 HuggingFace (free AI models)       → https://huggingface.co
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📌 SUBSCRIBE for daily AI income tips → bit.ly/AIIncomeDaily
+📌 SUBSCRIBE for daily AI income tips
 👍 LIKE if this saved you time!
 💬 COMMENT your #1 challenge below
 🔔 TURN ON notifications (bell icon)
@@ -207,8 +230,8 @@ def run(video_dir: str):
     with open(meta_file) as f:
         meta = json.load(f)
 
-    # 설명 + CTA 합치기 (어필리에이트 링크 + 구독 유도)
-    full_description = meta["description"] + _DESCRIPTION_CTA
+    # 설명 + CTA 합치기 (Gumroad 상품 링크 동적 포함)
+    full_description = meta["description"] + _build_description_cta()
 
     video_id = upload_video(
         video_path=str(video_file),

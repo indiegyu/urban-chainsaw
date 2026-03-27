@@ -45,9 +45,12 @@ jobs:
       - name: Restore Google OAuth token
         env:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YT_REFRESH_TOKEN:      ${{ secrets.YT_FULL_REFRESH_TOKEN }}
           GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        run: python3 scripts/video/make_token.py
+        run: |
+          python3 scripts/video/make_token.py
+          echo "Token created OK"
 
       - name: Assemble video
         id: assemble
@@ -82,11 +85,17 @@ jobs:
         if: always()
         run: |
           mkdir -p .github/run_logs
-          STATUS="success"
-          [ "${{ steps.assemble.outcome }}" != "success" ] && STATUS="assemble_failed"
-          [ "${{ steps.upload.outcome }}" != "success" ] && STATUS="upload_failed"
+          if [ "${{ steps.assemble.outcome }}" != "success" ]; then
+            STATUS="assemble_failed"
+          elif [ "${{ steps.upload.outcome }}" != "success" ]; then
+            STATUS="upload_failed"
+          else
+            STATUS="success"
+          fi
           {
             echo "status: $STATUS"
+            echo "assemble_outcome: ${{ steps.assemble.outcome }}"
+            echo "upload_outcome: ${{ steps.upload.outcome }}"
             echo "run: ${{ github.run_number }}"
             echo "timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "--- assemble log ---"

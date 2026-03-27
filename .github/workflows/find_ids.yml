@@ -1,0 +1,77 @@
+name: 🔍 Find Platform IDs (1회용)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  find-ids:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install requests -q
+
+      - name: Find Hashnode Publication ID
+        env:
+          HASHNODE_ACCESS_TOKEN: ${{ secrets.HASHNODE_ACCESS_TOKEN }}
+        run: |
+          python3 - <<'EOF'
+          import requests, os, json
+          token = os.environ.get("HASHNODE_ACCESS_TOKEN", "")
+          if not token:
+              print("❌ HASHNODE_ACCESS_TOKEN 없음")
+          else:
+              r = requests.post("https://gql.hashnode.com/",
+                  headers={"Authorization": token, "Content-Type": "application/json"},
+                  json={"query": "{ me { publications(first:5) { edges { node { id title } } } } }"},
+                  timeout=10)
+              data = r.json()
+              pubs = data.get("data", {}).get("me", {}).get("publications", {}).get("edges", [])
+              if pubs:
+                  for p in pubs:
+                      node = p["node"]
+                      print(f"✅ HASHNODE_PUBLICATION_ID = {node['id']}  (블로그: {node['title']})")
+              else:
+                  print(f"⚠ 응답: {json.dumps(data, indent=2)}")
+          EOF
+
+      - name: Find Printify Shop ID
+        env:
+          PRINTIFY_API_KEY: ${{ secrets.PRINTIFY_API_KEY }}
+        run: |
+          python3 - <<'EOF'
+          import requests, os, json
+          token = os.environ.get("PRINTIFY_API_KEY", "")
+          if not token:
+              print("❌ PRINTIFY_API_KEY 없음")
+          else:
+              r = requests.get("https://api.printify.com/v1/shops.json",
+                  headers={"Authorization": f"Bearer {token}"},
+                  timeout=10)
+              shops = r.json()
+              if isinstance(shops, list):
+                  for s in shops:
+                      print(f"✅ PRINTIFY_SHOP_ID = {s['id']}  (샵: {s['title']})")
+              else:
+                  print(f"⚠ 응답: {json.dumps(shops, indent=2)}")
+          EOF
+
+      - name: Find Patreon Campaign ID
+        env:
+          PATREON_ACCESS_TOKEN: ${{ secrets.PATREON_ACCESS_TOKEN }}
+        run: |
+          python3 - <<'EOF'
+          import requests, os, json
+          token = os.environ.get("PATREON_ACCESS_TOKEN", "")
+          if not token:
+              print("❌ PATREON_ACCESS_TOKEN 없음")
+          else:
+              r = requests.get("https://www.patreon.com/api/oauth2/v2/campaigns",
+                  headers={"Authorization": f"Bearer {token}"},
+                  timeout=10)
+              data = r.json()
+              campaigns = data.get("data", [])
+              if campaigns:
+                  for c in campaigns:
+                      print(f"✅ PATREON_CAMPAIGN_ID = {c['id']}")
+              else:
+                  print(f"⚠ 응답: {json.dumps(data, indent=2)}")
+          EOF

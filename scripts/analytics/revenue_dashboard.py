@@ -85,18 +85,38 @@ def fetch_youtube_stats() -> dict:
 def fetch_lemonsqueezy_stats() -> dict:
     token = os.environ.get("LEMONSQUEEZY_API_KEY", "")
     if not token:
-        return {"error": "no token"}
+        return {"error": "LEMONSQUEEZY_API_KEY 시크릿 없음"}
     try:
         headers = {"Authorization": f"Bearer {token}",
                    "Accept": "application/vnd.api+json"}
+
+        # 스토어 목록 먼저 확인 (API 키 유효성 검증 + store_id 확보)
+        stores_r = requests.get(f"{LS_API}/stores", headers=headers, timeout=10)
+        print(f"  LS /stores → HTTP {stores_r.status_code}")
+        if stores_r.status_code == 401:
+            return {"error": "API 키 인증 실패 (401) — app.lemonsqueezy.com → Settings → API 키 재확인"}
+        if stores_r.status_code != 200:
+            return {"error": f"HTTP {stores_r.status_code}: {stores_r.text[:150]}"}
+
+        stores = stores_r.json().get("data", [])
+        if not stores:
+            return {"total_revenue": 0, "total_orders": 0, "month_revenue": 0,
+                    "note": "스토어 없음 — app.lemonsqueezy.com 에서 스토어 생성 필요"}
+
+        store_id = stores[0]["id"]
+        print(f"  LS store_id={store_id}")
+
+        # 주문 목록 조회
         r = requests.get(f"{LS_API}/orders", headers=headers,
-                         params={"page[size]": 50}, timeout=10)
+                         params={"filter[store_id]": store_id, "page[size]": 50},
+                         timeout=10)
+        print(f"  LS /orders → HTTP {r.status_code}")
         if r.status_code != 200:
-            return {"error": f"HTTP {r.status_code}"}
+            return {"error": f"주문 조회 실패 HTTP {r.status_code}: {r.text[:150]}"}
+
         orders = r.json().get("data", [])
         total  = sum(o["attributes"].get("total", 0) for o in orders) / 100
         count  = len(orders)
-        # 이번 달 수익
         now    = datetime.now()
         month_total = sum(
             o["attributes"].get("total", 0) / 100 for o in orders
@@ -182,7 +202,13 @@ def build_dashboard(yt: dict, ls: dict, strategy: dict) -> str:
   {_harvest_btn("Lemon Squeezy 출금", "https://app.lemonsqueezy.com/payouts", "매월 자동 지급")}
 </div>"""
     else:
-        ls_body = f'<p class="muted">LEMONSQUEEZY_API_KEY 설정 시 데이터 표시</p>'
+        err_msg = ls.get("error", "알 수 없는 오류")
+        note    = ls.get("note", "")
+        ls_body = (f'<p class="error">⚠ {err_msg}</p>'
+                   + (f'<p class="muted">{note}</p>' if note else "")
+                   + '<div class="harvest-row">'
+                   + _harvest_btn("Lemon Squeezy 설정", "https://app.lemonsqueezy.com/settings/api")
+                   + '</div>')
 
     # ── 상품 목록 카드 ──
     products = strategy.get("products", [])

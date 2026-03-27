@@ -52,8 +52,8 @@ jobs:
       - name: Assemble video
         id: assemble
         env:
-          GROQ_API_KEY:   ${{ secrets.GROQ_API_KEY }}
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GROQ_API_KEY:        ${{ secrets.GROQ_API_KEY }}
+          ELEVENLABS_API_KEY:  ${{ secrets.ELEVENLABS_API_KEY }}
         run: |
           set -o pipefail
           TOPIC="${{ github.event.inputs.topic }}"
@@ -95,4 +95,3 @@ jobs:
           git add .github/run_logs/last_run.txt
           git commit -m "ci: run #${{ github.run_number }} $STATUS [skip ci]" || true
           git push origin HEAD:${{ github.ref_name }}
-# triggered Fri Mar 27 01:55:53 UTC 2026

@@ -33,7 +33,7 @@ jobs:
       - name: Generate dashboard
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python -u scripts/analytics/revenue_dashboard.py
+        run: python -u -m scripts.analytics.revenue_dashboard
 
       - name: Deploy to GitHub Pages
         run: |
@@ -42,6 +42,8 @@ jobs:
           git fetch origin ${{ github.ref_name }}
           git reset --soft origin/${{ github.ref_name }}
           git add docs/dashboard.html
+          git add .github/run_logs/revenue_history.json || true
+          git add .github/run_logs/health.json || true
           git commit -m "ci: dashboard update $(date -u +%Y-%m-%d) [skip ci]" || echo "No changes"
           git push origin HEAD:${{ github.ref_name }} || \
             (git pull origin ${{ github.ref_name }} --rebase && git push origin HEAD:${{ github.ref_name }})

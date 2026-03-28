@@ -1,8 +1,8 @@
 status: success
 assemble_outcome: success
 upload_outcome: success
-run: 31
-timestamp: 2026-03-27T21:43:20Z
+run: 32
+timestamp: 2026-03-28T09:36:52Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -16,9 +16,9 @@ timestamp: 2026-03-27T21:43:20Z
 🎬 Producing video: 'AI tools make $1000 monthly.'
 
 [1/3] Generating script...
-  ✓ Title:     1000 AI Automation (2026)
+  ✓ Title:     1000$ AI Automation (2026)
   ✓ Tags:      19 tags
-  ✓ Thumbnail: 1000 DAILY AI
+  ✓ Thumbnail: 1000$ DAILY AI
 
 [2/3] Synthesizing voice...
   ✓ gTTS voice: audio.mp3
@@ -27,14 +27,14 @@ timestamp: 2026-03-27T21:43:20Z
   ✓ Thumbnail: thumbnail.jpg
   ✓ Video assembled: final.mp4
 
-✅ Video ready: 20260327_214216
-   Title:  1000 AI Automation (2026)
-   Size:   5.3 MB
+✅ Video ready: 20260328_093555
+   Title:  1000$ AI Automation (2026)
+   Size:   5.2 MB
 --- upload log ---
   Upload session: https://www.googleapis.com/upload/youtube/v3/videos?uploadTy...
-  Uploading: final.mp4 (5.5 MB)
-  Upload progress: 75%
-  ✓ Uploaded: https://youtu.be/1TV67axoLR8
+  Uploading: final.mp4 (5.4 MB)
+  Upload progress: 77%
+  ✓ Uploaded: https://youtu.be/6pMxN0yC7dc
   ✓ Thumbnail uploaded
 
-🎉 Done! Watch at: https://youtu.be/1TV67axoLR8
+🎉 Done! Watch at: https://youtu.be/6pMxN0yC7dc

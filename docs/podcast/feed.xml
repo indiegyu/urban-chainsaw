@@ -21,5 +21,35 @@
   </image>
   <itunes:image href="https://example.github.io/urban-chainsaw/podcast/cover.jpg"/>
   
+  <item>
+    <title>20260326_043753</title>
+    <description><![CDATA[]]></description>
+    <enclosure url="https://example.github.io/urban-chainsaw/podcast/audio/20260326_043753/voice.mp3" length="1591296" type="audio/mpeg"/>
+    <guid isPermaLink="false">20260326_043753</guid>
+    <pubDate>Sat, 28 Mar 2026 09:58:53 +0000</pubDate>
+    <itunes:duration>00:05:00</itunes:duration>
+    <itunes:explicit>no</itunes:explicit>
+    <itunes:episodeType>full</itunes:episodeType>
+  </item>
+  <item>
+    <title>20260326_042416</title>
+    <description><![CDATA[]]></description>
+    <enclosure url="https://example.github.io/urban-chainsaw/podcast/audio/20260326_042416/voice.mp3" length="1673664" type="audio/mpeg"/>
+    <guid isPermaLink="false">20260326_042416</guid>
+    <pubDate>Sat, 28 Mar 2026 09:58:53 +0000</pubDate>
+    <itunes:duration>00:05:00</itunes:duration>
+    <itunes:explicit>no</itunes:explicit>
+    <itunes:episodeType>full</itunes:episodeType>
+  </item>
+  <item>
+    <title>20260326_042255</title>
+    <description><![CDATA[]]></description>
+    <enclosure url="https://example.github.io/urban-chainsaw/podcast/audio/20260326_042255/voice.mp3" length="1657728" type="audio/mpeg"/>
+    <guid isPermaLink="false">20260326_042255</guid>
+    <pubDate>Sat, 28 Mar 2026 09:58:53 +0000</pubDate>
+    <itunes:duration>00:05:00</itunes:duration>
+    <itunes:explicit>no</itunes:explicit>
+    <itunes:episodeType>full</itunes:episodeType>
+  </item>
 </channel>
 </rss>

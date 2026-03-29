@@ -1,8 +1,8 @@
-status: success
-assemble_outcome: success
-upload_outcome: success
-run: 33
-timestamp: 2026-03-28T21:36:45Z
+status: assemble_failed
+assemble_outcome: failure
+upload_outcome: skipped
+run: 34
+timestamp: 2026-03-29T09:35:12Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -10,31 +10,25 @@ timestamp: 2026-03-28T21:36:45Z
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
   ✓ Google Trends: 5 keywords scored
-  ✅ Topic selected: AI tools make $1000 monthly.
-  📊 Trend-selected topic: 'AI tools make $1000 monthly.'
+  ✅ Topic selected: How to make passive income with AI tools make money 2026 in 2026
+  📊 Trend-selected topic: 'How to make passive income with AI tools make money 2026 in '
 
-🎬 Producing video: 'AI tools make $1000 monthly.'
+🎬 Producing video: 'How to make passive income with AI tools make money 2026 in 2026'
 
 [1/3] Generating script...
-  ✓ Title:     7 AI Tools $1000/month (2026)
-  ✓ Tags:      20 tags
-  ✓ Thumbnail: $1000 AI MONTHLY
-
-[2/3] Synthesizing voice...
-  ✓ gTTS voice: audio.mp3
-
-[3/3] Generating thumbnail & assembling video...
-  ✓ Thumbnail: thumbnail.jpg
-  ✓ Video assembled: final.mp4
-
-✅ Video ready: 20260328_213554
-   Title:  7 AI Tools $1000/month (2026)
-   Size:   4.8 MB
+Traceback (most recent call last):
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 261, in <module>
+    run(topic)
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 232, in run
+    meta = generate_script(topic, groq_key, seo_context=seo_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 61, in generate_script
+    meta_raw = _groq_post(headers, [
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 47, in _groq_post
+    resp.raise_for_status()
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.groq.com/openai/v1/chat/completions
 --- upload log ---
-  Upload session: https://www.googleapis.com/upload/youtube/v3/videos?uploadTy...
-  Uploading: final.mp4 (5.0 MB)
-  Upload progress: 83%
-  ✓ Uploaded: https://youtu.be/lDsjCjNBhgo
-  ✓ Thumbnail uploaded
-
-🎉 Done! Watch at: https://youtu.be/lDsjCjNBhgo
+(no log)

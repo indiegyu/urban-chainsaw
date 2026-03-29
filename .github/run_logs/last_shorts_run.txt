@@ -1,25 +1,23 @@
 type: shorts
-status: success
-run: 3
-timestamp: 2026-03-28T15:24:32Z
+status: upload_failed
+run: 4
+timestamp: 2026-03-29T15:23:54Z
 --- shorts log ---
 
 🎬 [Shorts] Generating script...
-  ✓ Title: Make $1000/mo with AI #Shorts
-
-🎙️  [Shorts] Synthesizing voice...
-  ✓ gTTS voice
-
-🖼️  [Shorts] Assembling vertical video...
-  ✓ Shorts thumbnail: thumbnail.jpg
-  ✓ Shorts video: final.mp4
-
-✅ Shorts ready: 20260328_152412 (1.0 MB)
+Traceback (most recent call last):
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 216, in <module>
+    run()
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 199, in run
+    meta = generate_shorts_script(groq_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 56, in generate_shorts_script
+    meta_raw = _groq_post(headers, [
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 35, in _groq_post
+    r.raise_for_status()
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.groq.com/openai/v1/chat/completions
 --- upload log ---
-  Upload session: https://www.googleapis.com/upload/youtube/v3/videos?uploadTy...
-  Uploading: final.mp4 (1.0 MB)
-
-  ✓ Uploaded: https://youtu.be/jtjO0YdDiBs
-  ✓ Thumbnail uploaded
-
-🎉 Done! Watch at: https://youtu.be/jtjO0YdDiBs
+(no log)

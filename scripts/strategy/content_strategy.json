@@ -1,8 +1,7 @@
 {
   "_meta": "이 파일은 weekly_optimizer.py가 자동으로 업데이트합니다. 수동 편집 불필요.",
-  "last_updated": "2026-03-27",
-  "version": 1,
-
+  "last_updated": "2026-03-30",
+  "version": 2,
   "top_performing_formats": [
     "X AI Tools That Pay $Y/Month",
     "How to Make $X with [Tool] in 2026",
@@ -10,7 +9,6 @@
     "The $0 AI Business Model Nobody Talks About",
     "ChatGPT Made Me $X in One Week — Here's How"
   ],
-
   "top_performing_topics": [
     "AI tools for passive income",
     "ChatGPT side hustles",
@@ -18,11 +16,8 @@
     "print on demand with AI",
     "make money online 2026"
   ],
-
   "avoid_topics": [],
-
   "best_thumbnail_style": "number + dollar amount (e.g. '7 FREE TOOLS' or '$500/DAY')",
-
   "target_cpm_keywords": [
     "make money online",
     "passive income",
@@ -31,7 +26,6 @@
     "financial freedom",
     "automated income"
   ],
-
   "product_ideas": [
     "AI Income Starter Kit — 50 ChatGPT prompts for making money",
     "Faceless YouTube Blueprint — step-by-step PDF guide",
@@ -39,7 +33,6 @@
     "Passive Income Automation Checklist — PDF",
     "ChatGPT Side Hustle Playbook — 20 proven methods"
   ],
-
   "weekly_stats": {
     "total_videos": 0,
     "avg_views": 0,
@@ -48,6 +41,5 @@
     "top_video_title": "",
     "top_video_views": 0
   },
-
   "gumroad_products_created": []
 }

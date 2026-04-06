@@ -1,10 +1,18 @@
 """
 Search adapters for each source.
 Each function returns a list of dicts: {title, snippet, url, source}
+
+Sources:
+  naver   - 네이버 뉴스 + 블로그 (동적 쿼리, 무료 25,000/일)
+  google  - Google Custom Search API (동적 쿼리, 무료 100/일)
+  twitter - Twitter v2 recent search (동적 쿼리, 무료 500k/월)
+
+NOTE: Google Alerts RSS는 운영자가 수동 설정해야 하므로 제거.
+      Google Custom Search API를 사용하면 유저 키워드를 동적으로 검색 가능.
 """
 
 import os
-import xml.etree.ElementTree as ET
+import re
 
 import requests
 
@@ -64,63 +72,51 @@ def fetch_naver(term: str, exact_match: bool) -> list[dict]:
 
 def _strip_tags(text: str) -> str:
     """Remove HTML tags like <b>, </b> from Naver API responses."""
-    import re
     return re.sub(r"<[^>]+>", "", text)
 
 
-# ---------- Google Alerts RSS ----------
+# ---------- Google Custom Search ----------
 
-def fetch_google_alerts(term: str) -> list[dict]:
+def fetch_google(term: str, exact_match: bool) -> list[dict]:
     """
-    Google Alerts RSS URL은 환경변수로 키워드별로 설정.
-    GOOGLE_ALERTS_RSS_{N} 형태로 여러 개 지원.
-    키워드 매핑: GOOGLE_ALERTS_TERM_{N}=소음발광, GOOGLE_ALERTS_RSS_{N}=https://...
-
-    단순화를 위해 GOOGLE_ALERTS_RSS_URLS 환경변수에
-    "키워드1=URL1,키워드2=URL2" 형태로 저장.
+    Google Custom Search API (동적 쿼리 지원).
+    무료: 100 queries/day.
+    설정: https://programmablesearchengine.google.com → 검색 엔진 생성 → API 키 발급.
+    환경변수: GOOGLE_CSE_API_KEY, GOOGLE_CSE_ID
     """
-    mapping_str = os.environ.get("GOOGLE_ALERTS_RSS_URLS", "")
-    if not mapping_str:
+    api_key = os.environ.get("GOOGLE_CSE_API_KEY", "")
+    cse_id = os.environ.get("GOOGLE_CSE_ID", "")
+    if not (api_key and cse_id):
         return []
 
-    mapping: dict[str, str] = {}
-    for pair in mapping_str.split(","):
-        if "=" in pair:
-            k, v = pair.split("=", 1)
-            mapping[k.strip()] = v.strip()
-
-    rss_url = mapping.get(term)
-    if not rss_url:
-        return []
-
+    query = _build_query(term, exact_match)
     try:
-        resp = requests.get(rss_url, timeout=TIMEOUT)
+        resp = requests.get(
+            "https://www.googleapis.com/customsearch/v1",
+            params={
+                "key": api_key,
+                "cx": cse_id,
+                "q": query,
+                "num": 10,
+                "sort": "date",
+                "lr": "lang_ko",
+            },
+            timeout=TIMEOUT,
+        )
         resp.raise_for_status()
-        return _parse_atom_feed(resp.text)
+        items = resp.json().get("items", [])
+        return [
+            {
+                "title": item.get("title", ""),
+                "snippet": item.get("snippet", ""),
+                "url": item.get("link", ""),
+                "source": "Google",
+            }
+            for item in items
+        ]
     except Exception as e:
-        print(f"  [Google Alerts] 오류: {e}")
+        print(f"  [Google] 오류: {e}")
         return []
-
-
-def _parse_atom_feed(xml_text: str) -> list[dict]:
-    ns = {"atom": "http://www.w3.org/2005/Atom"}
-    try:
-        root = ET.fromstring(xml_text)
-    except ET.ParseError:
-        return []
-
-    results = []
-    for entry in root.findall("atom:entry", ns):
-        title_el = entry.find("atom:title", ns)
-        link_el = entry.find("atom:link", ns)
-        summary_el = entry.find("atom:summary", ns)
-        results.append({
-            "title": title_el.text if title_el is not None else "",
-            "snippet": summary_el.text if summary_el is not None else "",
-            "url": link_el.get("href", "") if link_el is not None else "",
-            "source": "Google Alerts",
-        })
-    return results
 
 
 # ---------- Twitter/X ----------
@@ -189,7 +185,7 @@ def search_all(
     if "naver" in sources:
         raw += fetch_naver(term, exact_match)
     if "google" in sources:
-        raw += fetch_google_alerts(term)
+        raw += fetch_google(term, exact_match)
     if "twitter" in sources:
         raw += fetch_twitter(term, exact_match)
 

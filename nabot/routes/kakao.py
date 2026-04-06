@@ -14,12 +14,21 @@
 - 플랜 업그레이드 안내
 """
 
+import os
 from fastapi import APIRouter, Request
 from db import crud
 from services.search import search_all
 from services.notify import send_to_user
 
 router = APIRouter(prefix="/kakao")
+
+# 오픈빌더 블록 ID - 오픈빌더에서 블록 생성 후 .env에 설정
+# 오픈빌더 > 블록 > 블록 상세 > 우측 상단 블록 ID 복사
+BLOCK_MAIN = os.environ.get("BLOCK_MAIN", "BLOCK_MAIN")
+BLOCK_ADD_KEYWORD = os.environ.get("BLOCK_ADD_KEYWORD", "BLOCK_ADD_KEYWORD")
+BLOCK_LIST_KEYWORDS = os.environ.get("BLOCK_LIST_KEYWORDS", "BLOCK_LIST_KEYWORDS")
+BLOCK_SEARCH_NOW = os.environ.get("BLOCK_SEARCH_NOW", "BLOCK_SEARCH_NOW")
+BLOCK_UPGRADE = os.environ.get("BLOCK_UPGRADE", "BLOCK_UPGRADE")
 
 
 # ---------- 응답 빌더 ----------
@@ -38,10 +47,10 @@ def simple_text(text: str, quick_replies: list[dict] | None = None) -> dict:
 
 def main_menu_replies() -> list[dict]:
     return [
-        {"label": "키워드 추가", "action": "block", "blockId": "BLOCK_ADD_KEYWORD"},
-        {"label": "내 키워드 목록", "action": "block", "blockId": "BLOCK_LIST_KEYWORDS"},
-        {"label": "지금 검색해줘", "action": "block", "blockId": "BLOCK_SEARCH_NOW"},
-        {"label": "플랜 업그레이드", "action": "block", "blockId": "BLOCK_UPGRADE"},
+        {"label": "키워드 추가", "action": "block", "blockId": BLOCK_ADD_KEYWORD},
+        {"label": "내 키워드 목록", "action": "block", "blockId": BLOCK_LIST_KEYWORDS},
+        {"label": "지금 검색해줘", "action": "block", "blockId": BLOCK_SEARCH_NOW},
+        {"label": "플랜 업그레이드", "action": "block", "blockId": BLOCK_UPGRADE},
     ]
 
 
@@ -108,8 +117,8 @@ async def webhook_add_keyword(request: Request):
             return simple_text(
                 upgrade_msg,
                 quick_replies=[
-                    {"label": "업그레이드", "action": "block", "blockId": "BLOCK_UPGRADE"},
-                    {"label": "돌아가기", "action": "block", "blockId": "BLOCK_MAIN"},
+                    {"label": "업그레이드", "action": "block", "blockId": BLOCK_UPGRADE},
+                    {"label": "돌아가기", "action": "block", "blockId": BLOCK_MAIN},
                 ],
             )
         return simple_text(f"오류가 발생했어요: {e}")
@@ -215,7 +224,7 @@ async def webhook_upgrade(request: Request):
              "webLinkUrl": "https://nabot.kr/pay/standard"},
             {"label": "프로 결제", "action": "webLink",
              "webLinkUrl": "https://nabot.kr/pay/pro"},
-            {"label": "돌아가기", "action": "block", "blockId": "BLOCK_MAIN"},
+            {"label": "돌아가기", "action": "block", "blockId": BLOCK_MAIN},
         ],
     )
 
@@ -241,8 +250,10 @@ async def trigger_search(request: Request):
 # ---------- helpers ----------
 
 def _sources_for_plan(plan: str) -> list[str]:
+    """
+    무료: 네이버만 (Twitter API 쿼터 절약)
+    스탠다드+: 네이버 + Google CSE + Twitter
+    """
     if plan == "free":
-        return ["naver", "google"]
-    if plan == "standard":
-        return ["naver", "google", "twitter"]
+        return ["naver"]
     return ["naver", "google", "twitter"]

@@ -1,0 +1,23 @@
+app = "nabot"
+primary_region = "nrt"  # 도쿄 (한국에서 가장 가까운 Fly.io 리전)
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false   # 웹훅 수신을 위해 항상 켜둠
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[env]
+  DATA_DIR = "/app/data"
+
+[mounts]
+  source = "nabot_data"
+  destination = "/app/data"

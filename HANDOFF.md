@@ -1,7 +1,7 @@
 # 핸드오프 문서 — urban-chainsaw
 
 > 다른 세션/머신/에이전트로 작업을 넘길 때 이 문서 하나만 읽으면 되도록 작성됨.
-> 최종 갱신: 2026-04-07
+> 최종 갱신: 2026-04-07 (세션 2 — Pages 배포 + CLAUDE.md 가드레일 완료)
 
 ---
 
@@ -10,9 +10,9 @@
 - **레포**: `indiegyu/urban-chainsaw`
 - **작업 브랜치**: `claude/research-income-automation-cUfDC`
 - **현재 HEAD**: `b08a015 refactor: 대시보드 전면 리팩토링 — KST 전환, 미사용 제거, 데이터 확장`
-- **남은 일 2개**:
-  1. GitHub Pages 정공법 배포 (gh-pages 워크플로 신규 작성)
-  2. `CLAUDE.md`에 가드레일 룰 추가 (환경 체크 / 스코프 / 비밀 마스킹 / 하트비트)
+- **남은 일**: 없음 ✅
+  - ~~GitHub Pages 정공법 배포~~ → `.github/workflows/deploy_pages.yml` 작성 완료
+  - ~~`CLAUDE.md` 가드레일 추가~~ → 완료 (환경체크/스코프/비밀마스킹/파일가드/Pages구조)
 
 ---
 

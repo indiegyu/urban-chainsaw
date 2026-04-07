@@ -45,7 +45,10 @@
   "activated_streams": [
     "hashnode",
     "kofi",
-    "sellfy"
+    "sellfy",
+    "substack",
+    "affiliate_amazon",
+    "notion_templates"
   ],
   "income_streams": {
     "hashnode": {
@@ -78,8 +81,36 @@
       "required_secrets": [
         "SELLFY_API_KEY"
       ]
+    },
+    "substack": {
+      "name": "Substack 뉴스레터",
+      "activated_at": "2026-04-07T07:17:23.647946",
+      "revenue_type": "newsletter subscriptions",
+      "est_monthly": "$50-300",
+      "status": "waiting_for_secrets",
+      "required_secrets": [
+        "SUBSTACK_API_KEY"
+      ]
+    },
+    "affiliate_amazon": {
+      "name": "Amazon 어필리에이트 자동삽입",
+      "activated_at": "2026-04-07T07:17:23.647961",
+      "revenue_type": "affiliate commissions",
+      "est_monthly": "$30-150",
+      "status": "waiting_for_secrets",
+      "required_secrets": [
+        "AMAZON_ASSOCIATE_TAG"
+      ]
+    },
+    "notion_templates": {
+      "name": "Notion 템플릿 자동 생성",
+      "activated_at": "2026-04-07T07:17:23.647984",
+      "revenue_type": "digital products",
+      "est_monthly": "$50-200",
+      "status": "active",
+      "required_secrets": []
     }
   },
-  "last_expansion": "2026-03-31T07:15:12.638361",
-  "total_pipelines": 3
+  "last_expansion": "2026-04-07T07:17:23.648253",
+  "total_pipelines": 9
 }

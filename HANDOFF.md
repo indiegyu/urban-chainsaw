@@ -1,7 +1,7 @@
 # 핸드오프 문서 — urban-chainsaw
 
 > 다른 세션/머신/에이전트로 작업을 넘길 때 이 문서 하나만 읽으면 되도록 작성됨.
-> 최종 갱신: 2026-04-07 (세션 2 — Pages 배포 + CLAUDE.md 가드레일 완료)
+> 최종 갱신: 2026-04-09 (세션 3 — 5개 워크플로 버그 수정 + 블로그→Hashnode/Medium 연결)
 
 ---
 
@@ -9,209 +9,124 @@
 
 - **레포**: `indiegyu/urban-chainsaw`
 - **작업 브랜치**: `claude/research-income-automation-cUfDC`
-- **현재 HEAD**: `b08a015 refactor: 대시보드 전면 리팩토링 — KST 전환, 미사용 제거, 데이터 확장`
-- **남은 일**: 없음 ✅
-  - ~~GitHub Pages 정공법 배포~~ → `.github/workflows/deploy_pages.yml` 작성 완료
-  - ~~`CLAUDE.md` 가드레일 추가~~ → 완료 (환경체크/스코프/비밀마스킹/파일가드/Pages구조)
+- **현재 수익**: $0 (YouTube 미수익화 상태 — 1000 구독자 필요)
+- **파이프라인 갭**: 마지막 성공 실행 Run#31 (2026-03-27). 이후 12일 공백
+- **남은 일**:
+  - [ ] GitHub Secrets 추가 — 아래 표 참조 (필수: `LEMONSQUEEZY_API_KEY`, `HASHNODE_ACCESS_TOKEN`)
+  - [ ] GitHub Actions가 `claude/research-income-automation-cUfDC` 브랜치에서 실행 중인지 확인
+  - [ ] `run_all.yml` 수동 dispatch → 전체 파이프라인 즉시 재가동
 
 ---
 
-## 1. 환경 셋업 (다른 머신에서 시작할 때 무조건 먼저)
+## 1. 환경 셋업
 
 ```bash
-# 1) 레포 위치 확인 — 없으면 클론
-cd ~ && [ -d urban-chainsaw ] || git clone https://github.com/indiegyu/urban-chainsaw.git
-cd ~/urban-chainsaw
-
-# 2) 작업 브랜치로 이동 + 최신화
+cd ~/projects/urban-chainsaw  # 또는 git clone https://github.com/indiegyu/urban-chainsaw.git
 git fetch origin claude/research-income-automation-cUfDC
 git checkout claude/research-income-automation-cUfDC
-git pull origin claude/research-income-automation-cUfDC
-
-# 3) 상태 점검
-git log --oneline -5
-git status -s
+git pull
+cat HANDOFF.md
 ```
-
-**중요**: 위 3단계를 건너뛰고 작업하면 어제처럼 환각(엉뚱한 디렉토리에서 엉뚱한 작업)이 발생함.
 
 ---
 
 ## 2. 프로젝트 컨텍스트
 
-`$0` 예산으로 굴리는 AI 자동 수익 시스템. GitHub Actions 14개 파이프라인.
+`$0` 예산 AI 자동 수익 시스템. GitHub Actions 파이프라인이 매일 콘텐츠 생성.
 
 ### 활성 파이프라인 (출력 검증됨)
-| 파이프라인 | 주기 (KST) | 출력 |
+
+| 파이프라인 | 주기 (UTC) | 출력 |
 |---|---|---|
-| YouTube 영상 | 매일 18:00, 06:00 | `scripts/video/output/` |
-| YouTube Shorts | 매일 00:00 | `last_shorts_run.txt` |
-| 블로그 | 매일 17:00, 01:00 | `scripts/blog/output/` |
-| POD 디자인 | 매일 17:00 | `scripts/pod/output/` |
-| KDP 이북 | 매주 일 16:00 | `scripts/ebook/output/` |
-| AI 전략 최적화 | 매주 월 | `content_strategy.json` |
-| 대시보드 | 매일 07:00 | `docs/dashboard.html` |
-
-### 제거된 (미작동) 파이프라인
-Dev.to, Twitter/X, Ko-fi, AI Tools 디렉토리, 자동확장, Podcast RSS, Lemon Squeezy, Etsy.
-대시보드에서 이미 빠짐.
+| YouTube 영상 | 매일 09:00, 21:00 | `scripts/video/output/` |
+| YouTube Shorts | 매일 15:00 | `.github/run_logs/last_shorts_run.txt` |
+| 블로그 생성 | 매일 08:00, 16:00 | `scripts/blog/output/` |
+| 블로그 발행 | 매일 08:30 (생성 후) | Hashnode + Medium (API 키 설정 시) |
+| POD 디자인 | 매일 08:00 | `scripts/pod/output/` (커밋됨) |
+| KDP 이북 | 매주 일 07:00 | `scripts/ebook/output/` |
+| Lemon Squeezy 상품 | 수·토 07:00 | `scripts/products/output/` |
+| AI 전략 최적화 | 매주 월 06:00 | `content_strategy.json` |
+| 대시보드 | 매일 22:00 | `docs/dashboard.html` |
 
 ---
 
-## 3. 최근 작업 흐름 (커밋별)
+## 3. 세션 3에서 수정한 버그 (2026-04-09)
 
-```
-b08a015  refactor: 대시보드 전면 리팩토링 — KST 전환, 미사용 제거, 데이터 확장
-b1b5523  docs: 프로젝트 상태 메모 추가 (CLAUDE.md)
-c177ed4  feat: 파이프라인 안정성 강화 + 콘텐츠 품질 개선 + 대시보드 고도화
-```
+### 수익 = 0의 근본 원인 진단
 
-### `c177ed4`에서 한 일
-- `scripts/utils/retry.py` 신규: 재시도 + 헬스체크 + 에러 알림 유틸
-- 영상/블로그 프롬프트 품질 강화
-- 대시보드 7일 트렌드 + 건강도 카드
+| 원인 | 수정 여부 |
+|---|---|
+| `weekly_optimize.yml`: 대시보드 직접 실행 → 상대 임포트 깨짐 | ✅ `python -m scripts.analytics.revenue_dashboard`로 수정 |
+| `daily_pod.yml`: 커밋 단계 없음 → CI 종료 시 디자인 파일 유실 | ✅ git commit 단계 추가 + `permissions: contents: write` 추가 |
+| `run_all.yml`: `BRANCH: main` 하드코딩 → 작업 브랜치가 아닌 main에 dispatch | ✅ `${{ github.ref_name }}`으로 변경 |
+| `daily_shorts.yml`: YAML 블록 내 `&& exit` 구문 오류 → Shorts 업로드 실패 무시 | ✅ `run: |` 블록으로 교정 |
+| `daily_blog.yml`: 블로그 생성 후 외부 발행 없음 → 트래픽 0 | ✅ Hashnode + Medium 발행 단계 추가 |
+| `.github/run_logs/` git 미추적 | ✅ `.gitkeep` 추가 |
 
-### `b08a015`에서 한 일 (대시보드 리팩토링)
-큰 파일 한방 작성으로 세션이 멈추는 문제 → **3-파일 분리 아키텍처**로 해결.
+### 수익 = 0의 남은 원인 (코드 외적 — 사용자 설정 필요)
 
-```
-scripts/analytics/
-├── dashboard_data.py   # 데이터 수집 (KST, YouTube API, 로컬 출력 카운트, 건강도)
-├── dashboard_html.py   # HTML 카드/스파크라인 렌더링
-└── revenue_dashboard.py # 컨트롤러 (data → snapshot → html → write)
-```
-
-**실행**: 반드시 모듈 모드로.
-```bash
-python -u -m scripts.analytics.revenue_dashboard
-```
-(상대 임포트 때문. 직접 `python revenue_dashboard.py` 하면 깨짐.)
-
-`.github/workflows/daily_dashboard.yml`도 위 명령으로 변경 완료.
+| 원인 | 해결 방법 |
+|---|---|
+| YouTube 미수익화 (구독자 < 1000) | 콘텐츠 지속 업로드 (현재 4개 영상) |
+| Lemon Squeezy API 키 미설정 | `LEMONSQUEEZY_API_KEY` GitHub Secret 추가 |
+| Hashnode 미연동 | `HASHNODE_ACCESS_TOKEN` + `HASHNODE_PUBLICATION_ID` 추가 |
+| Medium 미연동 | `MEDIUM_TOKEN` GitHub Secret 추가 |
+| AdSense 미승인 | 블로그 20~30개 포스트 후 신청 |
 
 ---
 
-## 4. 핵심 코드 스니펫
+## 4. GitHub Secrets 체크리스트
 
-### KST 시간 처리 (`dashboard_data.py`)
-```python
-from datetime import datetime, timezone, timedelta
+### 필수 (수익 발생에 직결)
 
-KST = timezone(timedelta(hours=9))
+| Secret 이름 | 용도 | 발급처 |
+|---|---|---|
+| `GROQ_API_KEY` | 모든 AI 생성 | console.groq.com |
+| `GOOGLE_CLIENT_ID` | YouTube API | Google Cloud Console |
+| `GOOGLE_CLIENT_SECRET` | YouTube API | Google Cloud Console |
+| `YOUTUBE_REFRESH_TOKEN` | YouTube 업로드 | OAuth 플로우 |
+| `YT_FULL_REFRESH_TOKEN` | YouTube Shorts | OAuth 플로우 |
 
-def now_kst() -> datetime:
-    return datetime.now(KST)
+### 수익화에 필요 (미설정 시 워크플로 스킵 — 크래시 없음)
 
-def now_kst_str() -> str:
-    return now_kst().strftime("%Y-%m-%d %H:%M KST")
-
-def relative_time_kst(ts_str: str) -> str:
-    """ISO 타임스탬프 → '3시간 전' 같은 상대 표기"""
-    ...
-```
-
-### 재시도 유틸 (`scripts/utils/retry.py`)
-```python
-def retry_api_call(func, max_retries=3, base_delay=2.0):
-    """지수 백오프 재시도. 마지막 시도 실패 시 예외 재발생."""
-    for attempt in range(max_retries):
-        try:
-            return func()
-        except Exception as e:
-            if attempt == max_retries - 1:
-                raise
-            time.sleep(base_delay * (2 ** attempt))
-
-def notify_error(pipeline: str, error_msg: str, context: dict = None):
-    """Discord webhook + GitHub Job Summary로 에러 발송."""
-    ...
-
-class PipelineHealthCheck:
-    """.github/run_logs/health.json에 성공/실패 이벤트 누적 (최근 100건)."""
-    ...
-```
-
-### 대시보드 컨트롤러 (`revenue_dashboard.py` 핵심부)
-```python
-from .dashboard_data import (
-    now_kst_str, fetch_youtube_stats, count_local_outputs,
-    fetch_pipeline_status, save_revenue_snapshot, fetch_pipeline_health,
-)
-from .dashboard_html import (
-    card_youtube, card_content, card_trend, card_strategy,
-    card_health, card_pipelines,
-)
-
-def run():
-    yt = fetch_youtube_stats()
-    outputs = count_local_outputs()
-    pipe_status = fetch_pipeline_status()
-    health = fetch_pipeline_health()
-    trend = save_revenue_snapshot(yt, outputs)
-    html = build_dashboard(yt, outputs, pipe_status, health, trend)
-    Path("docs/dashboard.html").write_text(html, encoding="utf-8")
-```
+| Secret 이름 | 용도 | 발급처 |
+|---|---|---|
+| `LEMONSQUEEZY_API_KEY` | 디지털 상품 판매 | app.lemonsqueezy.com → Settings → API |
+| `HASHNODE_ACCESS_TOKEN` | 블로그 자동 발행 | hashnode.com/settings/developer |
+| `HASHNODE_PUBLICATION_ID` | Hashnode 블로그 ID | Hashnode 블로그 설정 |
+| `MEDIUM_TOKEN` | Medium 발행 | medium.com/me/settings → Integration Token |
+| `ADSENSE_CLIENT_ID` | Google AdSense 광고 | AdSense 계정 승인 후 |
+| `BEEHIIV_API_KEY` | 뉴스레터 발송 | beehiiv.com → Settings → API |
+| `BEEHIIV_PUB_ID` | Beehiiv Publication | Beehiiv 대시보드 |
 
 ---
 
-## 5. 남은 작업 — 상세
+## 5. 핵심 파일 구조
 
-### A. GitHub Pages 정공법 배포 ⚠️ 미해결
-
-**증상**: 워크플로는 성공하고 `docs/dashboard.html`도 갱신되는데, GitHub Pages 사이트에는 반영 안 됨.
-
-**원인 (추정)**: Pages source가 `main` 브랜치인데 우리 작업은 `claude/research-income-automation-cUfDC`에만 푸시됨.
-
-**해결안**: `gh-pages` 브랜치로 배포하는 워크플로 신규 작성. 예시:
-
-```yaml
-# .github/workflows/deploy_pages.yml
-name: Deploy Pages
-on:
-  push:
-    branches: [claude/research-income-automation-cUfDC]
-    paths: ['docs/**']
-  workflow_run:
-    workflows: ["Daily Dashboard"]
-    types: [completed]
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          publish_branch: gh-pages
 ```
+.github/workflows/
+  daily_youtube.yml    — 영상 생성+업로드 (09:00, 21:00 UTC)
+  daily_shorts.yml     — Shorts 생성+업로드 (15:00 UTC) [버그수정됨]
+  daily_blog.yml       — 블로그 생성+Hashnode/Medium발행 [Hashnode추가됨]
+  daily_pod.yml        — POD 디자인 생성+커밋 [커밋단계추가됨]
+  daily_dashboard.yml  — 대시보드 갱신 (22:00 UTC)
+  weekly_optimize.yml  — 주간 전략+대시보드 [명령수정됨]
+  weekly_gumroad.yml   — Lemon Squeezy 상품 등록
+  weekly_ebook.yml     — KDP 이북 생성
+  run_all.yml          — 전체 파이프라인 수동 실행 [브랜치버그수정됨]
 
-그 다음 GitHub Settings → Pages → Source를 `gh-pages` 브랜치로 변경 (수동 1회).
-
-### B. `CLAUDE.md` 가드레일 추가
-
-어제 텔레그램 봇 세션이 헛돌았던 구조적 원인 5가지에 대한 룰:
-
-```markdown
-## 새 세션 시작 시 필수 체크리스트
-1. `cd ~/urban-chainsaw` 가능한지 확인. 없으면 git clone부터.
-2. `git branch --show-current`가 `claude/research-income-automation-cUfDC`인지 확인.
-3. `git pull` 후 `git log --oneline -5`로 최신 상태 점검.
-
-## 스코프 가드레일
-- 이 레포와 무관한 작업(Peekaboo, DuckDNS, nginx, Cloudflare 등) 금지.
-- 막혔을 때 "그럴듯한 다른 일"로 빠지지 말고 즉시 보고하고 멈출 것.
-
-## 비밀 정보 마스킹
-- API 키, 토큰, 비밀번호는 절대 메시지/로그/커밋에 평문으로 쓰지 말 것.
-- 환경변수 이름만 언급할 것 (예: `${GROQ_API_KEY}`).
-
-## 하트비트
-- 30분 이상 침묵하지 말 것. 진행 중이면 "○○ 진행 중" 한 줄이라도 보고.
+scripts/
+  analytics/
+    dashboard_data.py      — 데이터 레이어
+    dashboard_html.py      — HTML 렌더링
+    revenue_dashboard.py   — 컨트롤러
+  publish/
+    hashnode_publisher.py  — Hashnode 발행
+    medium_publisher.py    — Medium 발행
+    pages_deploy.py        — GitHub Pages 빌드
+  products/
+    auto_product.py        — Lemon Squeezy 상품 생성
+    gumroad_publisher.py   — Lemon Squeezy 등록
 ```
 
 ---
@@ -221,30 +136,37 @@ jobs:
 | 함정 | 회피 |
 |---|---|
 | `revenue_dashboard.py`를 직접 실행 | 반드시 `python -m scripts.analytics.revenue_dashboard` |
-| 큰 파일 한 번에 Write | 파일을 200줄 이내로 분리. 어제 746줄 한방 쓰다 세션 멈춤 |
-| 기본 push가 실패하면 hook bypass | `--no-verify` 절대 금지. 원인 찾기 |
-| 핸드오프에 절대경로 박기 | `~/urban-chainsaw`로 통일. 머신마다 홈 다름 |
+| 큰 파일 한 번에 Write | 파일을 200줄 이내로 분리 |
+| 기본 push가 실패하면 hook bypass | `--no-verify` 절대 금지 |
+| 핸드오프에 절대경로 박기 | `~/projects/urban-chainsaw`로 통일 |
+| `run_all.yml` 수동 dispatch 전 브랜치 확인 | `github.ref_name` 반드시 작업 브랜치여야 함 |
 
 ---
 
-## 7. 참고 파일
-
-- `CLAUDE.md` — 프로젝트 상태 메모 (커밋됨)
-- `scripts/analytics/dashboard_data.py` — 데이터 레이어
-- `scripts/analytics/dashboard_html.py` — 뷰 레이어
-- `scripts/analytics/revenue_dashboard.py` — 컨트롤러
-- `scripts/utils/retry.py` — 재시도/알림 유틸
-- `.github/workflows/daily_dashboard.yml` — 대시보드 워크플로
-- `.github/run_logs/health.json` — 파이프라인 건강도 누적
-
----
-
-## 8. 다음 세션 첫 명령 (복붙용)
+## 7. 즉시 해야 할 첫 번째 행동 (복붙용)
 
 ```bash
-cd ~/urban-chainsaw && \
-git fetch origin claude/research-income-automation-cUfDC && \
-git checkout claude/research-income-automation-cUfDC && \
-git pull && \
-cat HANDOFF.md
+# 1. 레포 최신화
+cd ~/projects/urban-chainsaw && git pull
+
+# 2. 전체 파이프라인 즉시 실행 (GitHub UI → Actions → 🚀 전체 파이프라인 즉시 실행 → Run workflow)
+# 또는 gh CLI:
+gh workflow run run_all.yml --ref claude/research-income-automation-cUfDC
+
+# 3. 실행 결과 확인
+gh run list --limit 10
+```
+
+---
+
+## 8. 수익화 로드맵
+
+```
+현재: $0
+  ↓  콘텐츠 지속 업로드 + Hashnode/Medium 발행 (자동)
+1개월: 블로그 트래픽 + Hashnode 광고 수익 시작
+  ↓  Lemon Squeezy API 키 설정 → 디지털 상품 판매 시작
+2개월: YouTube 1000 구독자 → AdSense 수익 시작
+  ↓  AdSense 승인 (블로그 30개 포스트 후)
+3개월: 다채널 수익 (YouTube AdSense + 블로그 AdSense + Hashnode + 디지털 상품)
 ```

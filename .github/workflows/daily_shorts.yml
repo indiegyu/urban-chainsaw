@@ -40,8 +40,9 @@ jobs:
         env:
           GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-        run: python -u scripts/video/assemble_shorts.py 2>&1 | tee /tmp/shorts.log
-             && exit ${PIPESTATUS[0]}
+        run: |
+          python -u scripts/video/assemble_shorts.py 2>&1 | tee /tmp/shorts.log
+          exit ${PIPESTATUS[0]}
 
       - name: Upload Shorts to YouTube
         id: upload

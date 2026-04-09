@@ -23,11 +23,24 @@
 | `BEEHIIV_API_KEY` | Beehiiv 뉴스레터 자동 발송 | Beehiiv Dashboard → Settings → API |
 | `BEEHIIV_PUB_ID` | Beehiiv 퍼블리케이션 ID | 같은 위치에서 확인 (`pub_xxxxxxxx`) |
 
-### 수익화 — 광고
+### 수익화 — 광고 (AdSense)
 | Secret 이름 | 설명 | 획득 방법 |
 |---|---|---|
-| `ADSENSE_CLIENT_ID` | Google AdSense 클라이언트 ID | AdSense → 계정 → 계정 정보 (`ca-pub-xxxxxxxxxx`) |
+| `ADSENSE_CLIENT_ID` | Google AdSense 퍼블리셔 ID | AdSense → 계정 → 계정 정보 (`ca-pub-xxxxxxxxxx` 형식) |
 | `ADSENSE_API_KEY` | AdSense Reporting API | Google Cloud Console → APIs → AdSense |
+
+#### AdSense 삽입 절차
+
+1. [Google AdSense](https://adsense.google.com) 가입 및 사이트 등록 (`indiegyu.github.io/urban-chainsaw`)
+2. 승인 완료 후 **계정 → 계정 정보**에서 퍼블리셔 ID 확인 (`ca-pub-XXXXXXXXXXXXXXXX`)
+3. GitHub Secret 등록:
+   ```bash
+   gh secret set ADSENSE_CLIENT_ID --body "ca-pub-XXXXXXXXXXXXXXXX"
+   ```
+4. 다음 배포(`deploy_pages.yml`) 실행 시 `docs/*.html`의 `<!-- ADSENSE_CLIENT_ID -->` 플레이스홀더가 실제 AdSense 자동 광고 스크립트로 자동 치환됩니다.
+5. Secret이 미설정이면 플레이스홀더는 그대로 유지되며 광고가 표시되지 않습니다 (사이트가 깨지지 않음).
+
+> **플레이스홀더 위치**: `docs/index.html`, `docs/dashboard.html`, 대시보드 자동 생성 시 `revenue_dashboard.py` → `docs/dashboard.html`
 
 ### 수익화 — 제품/POD
 | Secret 이름 | 설명 | 획득 방법 |
@@ -64,6 +77,10 @@
 | `GOOGLE_CLIENT_SECRET` | Google OAuth 클라이언트 Secret | 같은 위치 |
 | `YOUTUBE_REFRESH_TOKEN` | YouTube Data API refresh token | OAuth 인증 후 발급 |
 | `YT_FULL_REFRESH_TOKEN` | YouTube Full scope refresh token | OAuth 인증 후 발급 (업로드 권한 포함) |
+
+> **YouTube 토큰 상세 설정 방법**: [docs/yt_token_setup.md](yt_token_setup.md) 참고
+>
+> **토큰 없이 대시보드 실행**: `YOUTUBE_TEST_MODE=true python -m scripts.analytics.revenue_dashboard`
 
 ---
 

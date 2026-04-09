@@ -25,6 +25,17 @@ jobs:
           ref: claude/research-income-automation-cUfDC
           fetch-depth: 1
 
+      - name: Inject AdSense (if secret is set)
+        if: ${{ secrets.ADSENSE_CLIENT_ID != '' }}
+        env:
+          ADSENSE_CLIENT_ID: ${{ secrets.ADSENSE_CLIENT_ID }}
+        run: |
+          SNIPPET="<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}\" crossorigin=\"anonymous\"></script>"
+          for f in docs/*.html; do
+            sed -i "s|<!-- ADSENSE_CLIENT_ID -->|${SNIPPET}|g" "$f"
+          done
+          echo "AdSense injected into docs/*.html"
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

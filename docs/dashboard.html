@@ -6,197 +6,139 @@
 <title>AI Income Daily — 수익 대시보드</title>
 <meta http-equiv="refresh" content="3600">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#080e1a;color:#e2e8f0;min-height:100vh}
-
-  /* 상단 헤더 */
-  .header{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);
-           padding:36px 20px 30px;text-align:center;border-bottom:1px solid #2d2d6b}
-  .header h1{font-size:1.5em;font-weight:700;color:#a5b4fc;letter-spacing:.05em;margin-bottom:4px}
-  .header .amount{font-size:3.5em;font-weight:800;color:#fff;margin:8px 0;line-height:1}
-  .header .amount-label{color:#818cf8;font-size:.9em;margin-bottom:16px}
-  .header .pipeline-count{display:inline-block;background:rgba(99,102,241,.2);
-    border:1px solid rgba(99,102,241,.4);border-radius:20px;
-    padding:6px 18px;font-size:.85em;color:#a5b4fc}
-
-  /* 레이아웃 */
-  .main{max-width:960px;margin:0 auto;padding:28px 16px}
-
-  /* 수확 버튼 섹션 */
-  .harvest-section{background:#0f172a;border:1px solid #1e293b;border-radius:16px;
-                    padding:24px;margin-bottom:24px}
-  .harvest-section h2{font-size:1em;color:#64748b;text-transform:uppercase;
-                       letter-spacing:.08em;margin-bottom:16px}
-  .harvest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-  .harvest-link{background:#1e293b;border:1px solid #334155;border-radius:10px;
-                 padding:14px 16px;text-decoration:none;display:block;transition:.15s}
-  .harvest-link:hover{border-color:#6366f1;background:#1e2a45;transform:translateY(-1px)}
-  .harvest-link .h-icon{font-size:1.3em;display:block;margin-bottom:6px}
-  .harvest-link .h-name{color:#e2e8f0;font-weight:600;font-size:.9em;display:block}
-  .harvest-link .h-note{color:#475569;font-size:.75em;display:block;margin-top:2px}
-
-  /* 카드 그리드 */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:16px}
-  .card{background:#0f172a;border:1px solid #1e293b;border-radius:14px;overflow:hidden}
-  .card-header{padding:14px 20px;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:10px}
-  .card-header .card-title{font-size:.8em;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-  .card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .card-body{padding:20px}
-
-  /* 통계 */
-  .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-bottom:14px}
-  .stat{background:#1e293b;border-radius:10px;padding:12px;text-align:center}
-  .stat-num{display:block;font-size:1.4em;font-weight:700;color:#fff}
-  .stat-label{font-size:.7em;color:#475569;margin-top:3px;display:block;line-height:1.3}
-
-  /* 배지 */
-  .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8em;font-weight:500}
-  .badge.green{background:#052e16;color:#86efac;border:1px solid #166534}
-  .badge.yellow{background:#1c1400;color:#fbbf24;border:1px solid #92400e}
-
-  /* 버튼 */
-  .btn-primary{background:#4f46e5;color:#fff;padding:8px 16px;border-radius:8px;
-               text-decoration:none;font-size:.82em;font-weight:600;white-space:nowrap}
-  .btn-primary:hover{background:#4338ca}
-  .btn-secondary{background:#1e293b;color:#94a3b8;padding:8px 16px;border-radius:8px;
-                  text-decoration:none;font-size:.82em;border:1px solid #334155;white-space:nowrap}
-  .btn-secondary:hover{border-color:#6366f1;color:#e2e8f0}
-
-  /* 테이블 */
-  .data-table{width:100%;border-collapse:collapse;font-size:.83em}
-  .data-table th{text-align:left;padding:8px 6px;color:#475569;border-bottom:1px solid #1e293b;font-weight:500}
-  .data-table td{padding:8px 6px;border-bottom:1px solid #0f172a}
-
-  /* 태그 */
-  .tag{background:#1e3a5f;color:#93c5fd;padding:3px 10px;border-radius:12px;
-        font-size:.78em;margin-right:5px;margin-bottom:4px;display:inline-block}
-
-  .muted{color:#475569;font-size:.83em}
-  .error{color:#f87171;font-size:.83em}
-
-  .footer{text-align:center;color:#1e293b;font-size:.75em;padding:24px 0 40px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#080e1a;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);padding:32px 20px 26px;text-align:center;border-bottom:1px solid #2d2d6b}
+.header h1{font-size:1.4em;font-weight:700;color:#a5b4fc;letter-spacing:.05em;margin-bottom:4px}
+.header .amount{font-size:3.2em;font-weight:800;color:#fff;margin:6px 0;line-height:1}
+.header .sub{color:#818cf8;font-size:.85em;margin-bottom:14px}
+.header .pill{display:inline-block;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);border-radius:20px;padding:5px 16px;font-size:.82em;color:#a5b4fc}
+.main{max-width:960px;margin:0 auto;padding:24px 16px}
+.harvest{background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:20px}
+.harvest h2{font-size:.9em;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.hlink{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px 14px;text-decoration:none;display:block;transition:.15s}
+.hlink:hover{border-color:#6366f1;background:#1e2a45;transform:translateY(-1px)}
+.hlink .hi{font-size:1.2em;display:block;margin-bottom:4px}
+.hlink .hn{color:#e2e8f0;font-weight:600;font-size:.85em;display:block}
+.hlink .hd{color:#475569;font-size:.72em;display:block;margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:14px}
+.card{background:#0f172a;border:1px solid #1e293b;border-radius:12px;overflow:hidden}
+.card-h{padding:12px 18px;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:8px}
+.card-h .ct{font-size:.78em;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.card-b{padding:18px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:8px;margin-bottom:12px}
+.stat{background:#1e293b;border-radius:8px;padding:10px;text-align:center}
+.stat-num{display:block;font-size:1.3em;font-weight:700;color:#fff}
+.stat-label{font-size:.68em;color:#475569;margin-top:2px;display:block;line-height:1.2}
+.badge{display:inline-block;padding:3px 10px;border-radius:16px;font-size:.78em;font-weight:500}
+.badge.green{background:#052e16;color:#86efac;border:1px solid #166534}
+.badge.yellow{background:#1c1400;color:#fbbf24;border:1px solid #92400e}
+.btn-primary{background:#4f46e5;color:#fff;padding:7px 14px;border-radius:7px;text-decoration:none;font-size:.8em;font-weight:600;white-space:nowrap}
+.btn-primary:hover{background:#4338ca}
+.btn-secondary{background:#1e293b;color:#94a3b8;padding:7px 14px;border-radius:7px;text-decoration:none;font-size:.8em;border:1px solid #334155;white-space:nowrap}
+.btn-secondary:hover{border-color:#6366f1;color:#e2e8f0}
+.data-table{width:100%;border-collapse:collapse;font-size:.8em}
+.data-table th{text-align:left;padding:7px 5px;color:#475569;border-bottom:1px solid #1e293b;font-weight:500}
+.data-table td{padding:7px 5px;border-bottom:1px solid #0f172a}
+.tag{background:#1e3a5f;color:#93c5fd;padding:2px 9px;border-radius:10px;font-size:.76em;margin-right:4px;margin-bottom:3px;display:inline-block}
+.muted{color:#475569;font-size:.8em}
+.error{color:#f87171;font-size:.8em}
+.footer{text-align:center;color:#1e293b;font-size:.72em;padding:20px 0 36px}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <p class="header h1">AI INCOME DAILY</p>
-  <h1>💰 수익 대시보드</h1>
+  <h1>AI INCOME DAILY</h1>
   <div class="amount">$0.00</div>
-  <div class="amount-label">이번 달 YouTube 예상 수익 · 2026-03-27 12:00 UTC 기준</div>
-  <span class="pipeline-count">🚀 자동 파이프라인 11개 운영 중</span>
+  <div class="sub">이번 달 예상 수익 · 2026-04-09 12:52 KST 기준</div>
+  <span class="pill">자동 파이프라인 6개 운영 중</span>
 </div>
 
 <div class="main">
 
-  <!-- 수확 링크 -->
-  <div class="harvest-section">
-    <h2>🌾 수확하기</h2>
-    <div class="harvest-grid">
-      <a href="https://studio.youtube.com" target="_blank" class="harvest-link">
-        <span class="h-icon">🎬</span>
-        <span class="h-name">YouTube Studio</span>
-        <span class="h-note">수익 → 지급 신청</span>
-      </a>
-      <a href="https://adsense.google.com" target="_blank" class="harvest-link">
-        <span class="h-icon">💵</span>
-        <span class="h-name">Google AdSense</span>
-        <span class="h-note">$100 이상 시 출금</span>
-      </a>
-      <a href="https://dev.to/dashboard" target="_blank" class="harvest-link">
-        <span class="h-icon">📊</span>
-        <span class="h-name">Dev.to</span>
-        <span class="h-note">발행 통계 확인</span>
-      </a>
-      <a href="https://ko-fi.com" target="_blank" class="harvest-link">
-        <span class="h-icon">☕</span>
-        <span class="h-name">Ko-fi</span>
-        <span class="h-note">후원금 수령</span>
-      </a>
-      <a href="https://kdp.amazon.com" target="_blank" class="harvest-link">
-        <span class="h-icon">📚</span>
-        <span class="h-name">Amazon KDP</span>
-        <span class="h-note">이북 인세 수령</span>
-      </a>
-      <a href="https://github.com/indiegyu/urban-chainsaw/actions" target="_blank" class="harvest-link">
-        <span class="h-icon">⚙️</span>
-        <span class="h-name">GitHub Actions</span>
-        <span class="h-note">워크플로 현황</span>
-      </a>
+  <div class="harvest">
+    <h2>수확하기</h2>
+    <div class="hgrid">
+      <a href="https://studio.youtube.com" target="_blank" class="hlink">
+        <span class="hi">🎬</span><span class="hn">YouTube Studio</span><span class="hd">수익 확인</span></a>
+      <a href="https://adsense.google.com" target="_blank" class="hlink">
+        <span class="hi">💵</span><span class="hn">AdSense</span><span class="hd">$100 이상 출금</span></a>
+      <a href="https://kdp.amazon.com" target="_blank" class="hlink">
+        <span class="hi">📚</span><span class="hn">Amazon KDP</span><span class="hd">이북 인세</span></a>
+      <a href="https://github.com/indiegyu/urban-chainsaw/actions" target="_blank" class="hlink">
+        <span class="hi">⚙️</span><span class="hn">GitHub Actions</span><span class="hd">워크플로 현황</span></a>
     </div>
   </div>
 
-  <!-- 카드 그리드 -->
   <div class="grid">
-
-    <!-- YouTube -->
     <div class="card">
-      <div class="card-header">
-        <div class="card-dot" style="background:#ff0000"></div>
-        <span class="card-title">YouTube 채널</span>
-      </div>
-      <div class="card-body"><p class="error">⚠ YouTube 데이터 로드 실패: token 확인 필요</p></div>
+      <div class="card-h"><div class="dot" style="background:#ff0000"></div><span class="ct">YouTube 채널</span></div>
+      <div class="card-b"><p class="error">YouTube 데이터 로드 실패: token 확인 필요</p></div>
     </div>
-
-    <!-- 콘텐츠 생산량 -->
     <div class="card">
-      <div class="card-header">
-        <div class="card-dot" style="background:#10b981"></div>
-        <span class="card-title">콘텐츠 생산 현황</span>
-      </div>
-      <div class="card-body">
+      <div class="card-h"><div class="dot" style="background:#10b981"></div><span class="ct">콘텐츠 생산 현황</span></div>
+      <div class="card-b">
 <div class="stats-row">
-  <div class="stat"><span class="stat-num">0</span><span class="stat-label">생성된 영상</span></div>
-  <div class="stat"><span class="stat-num">0</span><span class="stat-label">블로그 포스트</span></div>
-  <div class="stat"><span class="stat-num">0</span><span class="stat-label">POD 디자인</span></div>
+  <div class="stat"><span class="stat-num">4</span><span class="stat-label">영상</span></div>
+  <div class="stat"><span class="stat-num">6</span><span class="stat-label">블로그</span></div>
+  <div class="stat"><span class="stat-num">13</span><span class="stat-label">POD</span></div>
+  <div class="stat"><span class="stat-num">1</span><span class="stat-label">이북</span></div>
 </div>
-<p class="muted">매일 자동 생성 · GitHub Actions Artifacts에서 다운로드 가능</p>
+<p style="font-size:.78em;color:#64748b;margin-top:2px">📄 20260327_170010_make-1000-monthly-w · 04/09 12:52</p><p style="font-size:.78em;color:#64748b;margin-top:2px">📄 20260326_044102_chatgpt-side-hustle · 04/09 12:52</p><p style="font-size:.78em;color:#64748b;margin-top:2px">📄 20260326_044058_dropshipping-vs-pri · 04/09 12:52</p>
 <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-  <a href="https://indiegyu.github.io/urban-chainsaw/" target="_blank" class="btn-primary">📝 블로그 보기</a>
-  <a href="https://github.com/indiegyu/urban-chainsaw/actions" target="_blank" class="btn-secondary">📦 결과물 다운로드</a>
-  <a href="https://dev.to/dashboard" target="_blank" class="btn-secondary">📊 Dev.to 통계</a>
+  <a href="https://indiegyu.github.io/urban-chainsaw/" target="_blank" class="btn-primary">블로그 보기</a>
+  <a href="https://github.com/indiegyu/urban-chainsaw/actions" target="_blank" class="btn-secondary">Actions</a>
 </div></div>
     </div>
-
-    <!-- 전략 -->
     <div class="card">
-      <div class="card-header">
-        <div class="card-dot" style="background:#6366f1"></div>
-        <span class="card-title">AI 전략 상태</span>
-      </div>
-      <div class="card-body">
-<p><strong>전략 v1</strong>
-   <span class="muted" style="margin-left:8px">업데이트: 2026-03-27</span></p>
-<p style="margin-top:10px"><strong>현재 최적 토픽:</strong></p>
-<p style="margin-top:6px"><span class="tag">AI tools for passive income</span> <span class="tag">ChatGPT side hustles</span> <span class="tag">faceless YouTube automation</span> <span class="tag">print on demand with AI</span></p>
-<p class="muted" style="margin-top:12px">매주 월요일 YouTube 성과 분석 → 자동 업데이트</p></div>
+      <div class="card-h"><div class="dot" style="background:#818cf8"></div><span class="ct">7일 추이</span></div>
+      <div class="card-b"><p class="muted">데이터 수집 중... (2일 후 트렌드 표시)</p></div>
     </div>
-
-    <!-- 파이프라인 -->
     <div class="card">
-      <div class="card-header">
-        <div class="card-dot" style="background:#f59e0b"></div>
-        <span class="card-title">전체 파이프라인 현황</span>
-      </div>
-      <div class="card-body">
-<p style="margin-bottom:12px">
-  <strong style="color:#6ee7b7">🟢 활성 11개</strong>
-  <span style="margin-left:12px;color:#fbbf24">🟡 대기 2개</span>
-</p>
+      <div class="card-h"><div class="dot" style="background:#6366f1"></div><span class="ct">AI 전략</span></div>
+      <div class="card-b">
+<p><strong>전략 v1</strong>
+   <span class="muted" style="margin-left:8px">2026-03-27</span></p>
+<p style="margin-top:8px"><span class="tag">AI tools for passive income</span> <span class="tag">ChatGPT side hustles</span> <span class="tag">faceless YouTube automation</span> <span class="tag">print on demand with AI</span> <span class="tag">make money online 2026</span></p>
+
+<p class="muted" style="margin-top:10px">매주 월요일 YouTube 성과 분석 → 자동 업데이트</p></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="dot" style="background:#6ee7b7"></div><span class="ct">파이프라인 건강도</span></div>
+      <div class="card-b">
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+  <div style="position:relative;width:72px;height:72px">
+    <svg viewBox="0 0 36 36" width="72" height="72">
+      <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none" stroke="#1e293b" stroke-width="3"/>
+      <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none" stroke="#6ee7b7" stroke-width="3" stroke-dasharray="100, 100" stroke-linecap="round"/>
+    </svg>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1em;font-weight:700;color:#6ee7b7">100%</div>
+  </div>
+  <div>
+    <p style="font-weight:600;color:#e2e8f0">7일 성공률</p>
+    <p style="color:#64748b;font-size:.8em">실행 0회 · 에러 0회</p>
+  </div>
+</div>
+<p style="color:#6ee7b7;font-size:.8em">최근 에러 없음</p></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="dot" style="background:#f59e0b"></div><span class="ct">파이프라인 현황</span></div>
+      <div class="card-b">
+<p style="margin-bottom:10px"><strong style="color:#6ee7b7">활성 6개</strong>
+<span class="muted" style="margin-left:8px">시간은 KST 기준</span></p>
 <table class="data-table">
-<tr><th>파이프라인</th><th>주기</th><th>수익</th><th>최근 실행</th><th></th></tr>
-<tr><td style="font-size:.85em">📺 YouTube 영상</td><td style="color:#94a3b8;font-size:.78em">매일 x2</td><td style="color:#6ee7b7;font-size:.78em">AdSense CPM</td><td style="font-size:.75em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">2시간 전</span> <span style="color:#475569">· success</span></td><td><a href="https://studio.youtube.com" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">🩳 YouTube Shorts</td><td style="color:#94a3b8;font-size:.78em">매일 x1</td><td style="color:#6ee7b7;font-size:.78em">AdSense + 노출</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://studio.youtube.com" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">📝 블로그 포스트</td><td style="color:#94a3b8;font-size:.78em">매일 x2</td><td style="color:#6ee7b7;font-size:.78em">어필리에이트 링크</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://indiegyu.github.io/urban-chainsaw/" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">🔧 Dev.to 발행</td><td style="color:#94a3b8;font-size:.78em">매일</td><td style="color:#6ee7b7;font-size:.78em">트래픽 → 채널 유입</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://dev.to/dashboard" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">🎨 POD 티셔츠 디자인</td><td style="color:#94a3b8;font-size:.78em">매일</td><td style="color:#6ee7b7;font-size:.78em">Etsy 연동 대기</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://github.com/indiegyu/urban-chainsaw/actions" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">📚 AI Tools 디렉토리</td><td style="color:#94a3b8;font-size:.78em">매일</td><td style="color:#6ee7b7;font-size:.78em">어필리에이트 SEO</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://indiegyu.github.io/urban-chainsaw/ai-tools.html" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">☕ Ko-fi 후원 버튼</td><td style="color:#94a3b8;font-size:.78em">상시</td><td style="color:#6ee7b7;font-size:.78em">방문자 후원</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://ko-fi.com" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">🐦 Twitter/X 포스팅</td><td style="color:#94a3b8;font-size:.78em">매일</td><td style="color:#6ee7b7;font-size:.78em">바이럴 트래픽</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://analytics.twitter.com" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">📖 KDP 이북 생성</td><td style="color:#94a3b8;font-size:.78em">매주 일</td><td style="color:#6ee7b7;font-size:.78em">Amazon 인세 70%</td><td style="font-size:.75em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">3초 전</span> <span style="color:#475569">· 1개 이북</span></td><td><a href="https://kdp.amazon.com" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">🧠 AI 전략 최적화</td><td style="color:#94a3b8;font-size:.78em">매주 월</td><td style="color:#6ee7b7;font-size:.78em">성과 기반 자동개선</td><td style="font-size:.75em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">3초 전</span> <span style="color:#475569">· 전략 파일 최신</span></td><td><a href="https://github.com/indiegyu/urban-chainsaw/actions" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr><tr><td style="font-size:.85em">🚀 파이프라인 자동확장</td><td style="color:#94a3b8;font-size:.78em">매주 화</td><td style="color:#6ee7b7;font-size:.78em">신규 수익모델 추가</td><td style="color:#334155;font-size:.75em">–</td><td><a href="https://github.com/indiegyu/urban-chainsaw/actions" target="_blank" style="color:#818cf8;font-size:.8em">→</a></td></tr>
-</table>
-<p style="margin-top:16px;margin-bottom:8px;color:#fbbf24;font-size:.85em;font-weight:600">⏳ 설정 대기</p>
-<table class="data-table">
-<tr><td>🍋 Lemon Squeezy 디지털 상품</td><td colspan="4" style="color:#fbbf24;font-size:.78em">API 키 인증 확인 필요</td></tr><tr><td>🛒 Etsy 디지털 상품</td><td colspan="4" style="color:#fbbf24;font-size:.78em">ETSY_SHOP_ID 미등록</td></tr>
+<tr><th>파이프라인</th><th>주기</th><th>실행 시간</th><th>수익</th><th>상태</th></tr>
+<tr><td style="font-size:.83em">📺 YouTube 영상</td><td style="color:#94a3b8;font-size:.76em">매일 2회</td><td style="color:#64748b;font-size:.76em">18:00, 06:00</td><td style="color:#6ee7b7;font-size:.76em">AdSense CPM</td><td style="font-size:.73em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">12일 전</span> <span style="color:#475569">· success</span></td></tr><tr><td style="font-size:.83em">🩳 YouTube Shorts</td><td style="color:#94a3b8;font-size:.76em">매일 1회</td><td style="color:#64748b;font-size:.76em">00:00</td><td style="color:#6ee7b7;font-size:.76em">AdSense + 노출</td><td style="font-size:.73em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">12일 전</span> <span style="color:#475569">· success</span></td></tr><tr><td style="font-size:.83em">📝 블로그 포스트</td><td style="color:#94a3b8;font-size:.76em">매일 2회</td><td style="color:#64748b;font-size:.76em">17:00, 01:00</td><td style="color:#6ee7b7;font-size:.76em">어필리에이트</td><td style="font-size:.73em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">4초 전</span> <span style="color:#475569">· 6개 포스트</span></td></tr><tr><td style="font-size:.83em">🎨 POD 디자인</td><td style="color:#94a3b8;font-size:.76em">매일 1회</td><td style="color:#64748b;font-size:.76em">17:00</td><td style="color:#6ee7b7;font-size:.76em">Etsy/Printify</td><td style="font-size:.73em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">4초 전</span> <span style="color:#475569">· 13개 디자인</span></td></tr><tr><td style="font-size:.83em">📖 KDP 이북</td><td style="color:#94a3b8;font-size:.76em">매주 일</td><td style="color:#64748b;font-size:.76em">16:00</td><td style="color:#6ee7b7;font-size:.76em">Amazon 인세</td><td style="font-size:.73em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">4초 전</span> <span style="color:#475569">· 1개 이북</span></td></tr><tr><td style="font-size:.83em">🧠 AI 전략 최적화</td><td style="color:#94a3b8;font-size:.76em">매주 월</td><td style="color:#64748b;font-size:.76em">자동</td><td style="color:#6ee7b7;font-size:.76em">성과 기반 개선</td><td style="font-size:.73em"><span style="color:#6ee7b7">✓</span> <span style="color:#64748b">4초 전</span> <span style="color:#475569">· 전략 파일 최신</span></td></tr>
 </table></div>
     </div>
-
   </div>
 </div>
 
-<div class="footer">마지막 업데이트: 2026-03-27 12:00 UTC · 매일 22:00 UTC 자동 갱신</div>
-
+<div class="footer">마지막 업데이트: 2026-04-09 12:52 KST · 매일 07:00 KST 자동 갱신</div>
 </body>
 </html>

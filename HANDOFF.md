@@ -1,19 +1,20 @@
 # 핸드오프 문서 — urban-chainsaw
 
 > 다른 세션/머신/에이전트로 작업을 넘길 때 이 문서 하나만 읽으면 되도록 작성됨.
-> 최종 갱신: 2026-04-09 (세션 3 — 5개 워크플로 버그 수정 + 블로그→Hashnode/Medium 연결)
+> 최종 갱신: 2026-04-09 (세션 4 — 제휴 링크 파이프라인 추가 + 테스트 모드 인프라)
 
 ---
 
 ## 0. 30초 요약
 
 - **레포**: `indiegyu/urban-chainsaw`
-- **작업 브랜치**: `claude/research-income-automation-cUfDC`
+- **작업 브랜치**: `dev/auto-monetize-20260409-1202`
 - **현재 수익**: $0 (YouTube 미수익화 상태 — 1000 구독자 필요)
 - **파이프라인 갭**: 마지막 성공 실행 Run#31 (2026-03-27). 이후 12일 공백
 - **남은 일**:
   - [ ] GitHub Secrets 추가 — 아래 표 참조 (필수: `LEMONSQUEEZY_API_KEY`, `HASHNODE_ACCESS_TOKEN`)
-  - [ ] GitHub Actions가 `claude/research-income-automation-cUfDC` 브랜치에서 실행 중인지 확인
+  - [ ] 제휴 ID Secrets 추가 (선택): `AMAZON_TAG`, `FIVERR_AFF_ID`, `ELEVENLABS_AFF_ID` 등
+  - [ ] GitHub Actions가 `dev/auto-monetize-20260409-1202` 브랜치에서 실행 중인지 확인
   - [ ] `run_all.yml` 수동 dispatch → 전체 파이프라인 즉시 재가동
 
 ---
@@ -43,6 +44,7 @@ cat HANDOFF.md
 | 블로그 생성 | 매일 08:00, 16:00 | `scripts/blog/output/` |
 | 블로그 발행 | 매일 08:30 (생성 후) | Hashnode + Medium (API 키 설정 시) |
 | POD 디자인 | 매일 08:00 | `scripts/pod/output/` (커밋됨) |
+| **제휴 링크 페이지** | **매일 10:00** | **`scripts/monetize/output/`** |
 | KDP 이북 | 매주 일 07:00 | `scripts/ebook/output/` |
 | Lemon Squeezy 상품 | 수·토 07:00 | `scripts/products/output/` |
 | AI 전략 최적화 | 매주 월 06:00 | `content_strategy.json` |
@@ -50,7 +52,24 @@ cat HANDOFF.md
 
 ---
 
-## 3. 세션 3에서 수정한 버그 (2026-04-09)
+## 3. 세션 4에서 추가한 기능 (2026-04-09)
+
+### 제휴 링크 파이프라인 신규 추가
+
+| 작업 | 내용 |
+|---|---|
+| `scripts/monetize/affiliate_generator.py` | 매일 제휴 링크 컬렉션 HTML 자동 생성 (8개 카테고리) |
+| `scripts/utils/test_mode.py` | `TEST_MODE=1` 환경변수로 시크릿 없이 CI 실행 가능한 스텁 인프라 |
+| `.github/workflows/daily_affiliate.yml` | 매일 10:00 UTC 자동 실행, 결과 커밋 |
+| `run_all.yml` | `daily_affiliate.yml`을 콘텐츠 1단계에 포함 |
+
+**제휴 Secrets (미설정 시 fallback URL 사용 — 크래시 없음):**
+`AMAZON_TAG`, `FIVERR_AFF_ID`, `ELEVENLABS_AFF_ID`, `CONVERTKIT_AFF_ID`,
+`SEMRUSH_AFF_ID`, `PRINTIFY_AFF_ID`, `HOSTINGER_AFF_ID`, `JASPER_AFF_ID`
+
+---
+
+## 3-prev. 세션 3에서 수정한 버그 (2026-04-09)
 
 ### 수익 = 0의 근본 원인 진단
 

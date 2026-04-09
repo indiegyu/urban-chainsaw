@@ -74,6 +74,7 @@ def build_dashboard(yt, strategy, outputs, pipe_status, rev_history, health):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI Income Daily — 수익 대시보드</title>
 <meta http-equiv="refresh" content="3600">
+<!-- ADSENSE_CLIENT_ID -->
 <style>{CSS}</style>
 </head>
 <body>

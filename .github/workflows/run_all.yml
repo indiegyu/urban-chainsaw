@@ -20,6 +20,7 @@ jobs:
             "daily_shorts.yml"
             "daily_pod.yml"
             "daily_podcast.yml"
+            "daily_affiliate.yml"
             "weekly_gumroad.yml"
             "weekly_ebook.yml"
             "weekly_optimize.yml"

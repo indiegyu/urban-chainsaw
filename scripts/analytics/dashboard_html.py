@@ -44,8 +44,22 @@ def _sparkline(values, width=180, height=36, color="#818cf8"):
 # ── 개별 카드 빌더들 ─────────────────────────────────────────────────────────
 
 def card_youtube(yt):
-    if "error" in yt or not yt:
-        return f'<p class="error">YouTube 데이터 로드 실패: {yt.get("error","token 확인 필요")}</p>'
+    if not yt or "error" in yt:
+        err_type = yt.get("error_type", "") if yt else ""
+        raw_msg = yt.get("error", "token 확인 필요") if yt else "데이터 없음"
+        first_line = raw_msg.splitlines()[0] if raw_msg else raw_msg
+        if err_type == "token_missing":
+            guide = (
+                '<p class="error" style="white-space:pre-line;line-height:1.7">'
+                f'⚠️ {first_line}<br>'
+                '<a href="yt_token_setup.md" style="color:#818cf8">📄 설정 가이드 보기</a> &nbsp;|&nbsp;'
+                '<code style="background:#1e293b;padding:2px 6px;border-radius:4px;font-size:.8em">'
+                'YOUTUBE_TEST_MODE=true python -m scripts.analytics.revenue_dashboard'
+                '</code> 로 임시 실행 가능'
+                '</p>'
+            )
+            return guide
+        return f'<p class="error">YouTube 데이터 로드 실패: {first_line}</p>'
 
     subs = yt.get("subscribers", 0)
     badge = ('<span class="badge green">수익화 조건 충족</span>' if yt.get("monetized")

@@ -66,9 +66,33 @@ def _parse_log_field(text: str, field: str) -> str:
 
 # ── YouTube 채널 통계 + 최근 영상 상세 ────────────────────────────────────────
 
+_YT_TEST_DATA = {
+    "subscribers": 0, "total_views": 0, "video_count": 0,
+    "recent_views": 0, "recent_likes": 0, "est_monthly": 0.0,
+    "top_video": {}, "recent_videos": [], "monetized": False,
+    "subs_needed": 1000, "_test_mode": True,
+}
+
+
 def fetch_youtube_stats() -> dict:
+    if os.environ.get("YOUTUBE_TEST_MODE", "").lower() in ("1", "true", "yes"):
+        return _YT_TEST_DATA
+
+    token_path = Path(TOKEN_PATH)
+    if not token_path.exists():
+        return {
+            "error": (
+                "token.json 없음 — YouTube OAuth 토큰이 필요합니다.\n"
+                "로컬: python scripts/video/make_token.py 실행 후 환경변수 설정\n"
+                "CI: YOUTUBE_REFRESH_TOKEN GitHub Secret 등록 필요\n"
+                "자세한 설정 방법: docs/yt_token_setup.md 참고\n"
+                "임시 대체: YOUTUBE_TEST_MODE=true 환경변수 설정"
+            ),
+            "error_type": "token_missing",
+        }
+
     try:
-        tok = json.loads(Path(TOKEN_PATH).read_text())
+        tok = json.loads(token_path.read_text())
         r = requests.post(tok["token_uri"], data={
             "client_id": tok["client_id"], "client_secret": tok["client_secret"],
             "refresh_token": tok["refresh_token"], "grant_type": "refresh_token",

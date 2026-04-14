@@ -48,7 +48,10 @@
     "sellfy",
     "substack",
     "affiliate_amazon",
-    "notion_templates"
+    "notion_templates",
+    "promptbase",
+    "tiktok",
+    "instagram_reels"
   ],
   "income_streams": {
     "hashnode": {
@@ -109,8 +112,41 @@
       "est_monthly": "$50-200",
       "status": "active",
       "required_secrets": []
+    },
+    "promptbase": {
+      "name": "PromptBase 프롬프트 판매",
+      "activated_at": "2026-04-14T07:46:22.677630",
+      "revenue_type": "digital products",
+      "est_monthly": "$30-100",
+      "status": "waiting_for_secrets",
+      "required_secrets": [
+        "PROMPTBASE_EMAIL",
+        "PROMPTBASE_PASSWORD"
+      ]
+    },
+    "tiktok": {
+      "name": "TikTok 자동 포스팅",
+      "activated_at": "2026-04-14T07:46:22.677652",
+      "revenue_type": "creator fund + traffic",
+      "est_monthly": "$50-500",
+      "status": "waiting_for_secrets",
+      "required_secrets": [
+        "TIKTOK_ACCESS_TOKEN",
+        "TIKTOK_OPEN_ID"
+      ]
+    },
+    "instagram_reels": {
+      "name": "Instagram Reels 자동 업로드",
+      "activated_at": "2026-04-14T07:46:22.677858",
+      "revenue_type": "traffic + affiliate",
+      "est_monthly": "$50-200",
+      "status": "waiting_for_secrets",
+      "required_secrets": [
+        "INSTAGRAM_ACCESS_TOKEN",
+        "INSTAGRAM_BUSINESS_ID"
+      ]
     }
   },
-  "last_expansion": "2026-04-07T07:17:23.648253",
-  "total_pipelines": 9
+  "last_expansion": "2026-04-14T07:46:22.677894",
+  "total_pipelines": 12
 }

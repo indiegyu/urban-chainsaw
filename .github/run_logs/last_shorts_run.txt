@@ -1,8 +1,23 @@
 type: shorts
 status: upload_failed
-run: 21
-timestamp: 2026-04-15T16:30:50Z
+run: 22
+timestamp: 2026-04-16T16:17:26Z
 --- shorts log ---
-(no log)
+
+🎬 [Shorts] Generating script...
+Traceback (most recent call last):
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 216, in <module>
+    run()
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 199, in run
+    meta = generate_shorts_script(groq_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 56, in generate_shorts_script
+    meta_raw = _groq_post(headers, [
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 35, in _groq_post
+    r.raise_for_status()
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.groq.com/openai/v1/chat/completions
 --- upload log ---
 (no log)

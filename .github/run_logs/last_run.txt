@@ -1,8 +1,8 @@
 status: assemble_failed
 assemble_outcome: failure
 upload_outcome: skipped
-run: 73
-timestamp: 2026-04-17T21:51:56Z
+run: 74
+timestamp: 2026-04-18T09:45:17Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -10,10 +10,10 @@ timestamp: 2026-04-17T21:51:56Z
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
   ✓ Google Trends: 5 keywords scored
-  ✅ Topic selected: How to make passive income with faceless YouTube income in 2026
-  📊 Trend-selected topic: 'How to make passive income with faceless YouTube income in 2'
+  ✅ Topic selected: How to make passive income with AI tools make money 2026 in 2026
+  📊 Trend-selected topic: 'How to make passive income with AI tools make money 2026 in '
 
-🎬 Producing video: 'How to make passive income with faceless YouTube income in 2026'
+🎬 Producing video: 'How to make passive income with AI tools make money 2026 in 2026'
 
 [1/3] Generating script...
 Traceback (most recent call last):

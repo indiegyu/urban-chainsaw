@@ -51,7 +51,8 @@
     "notion_templates",
     "promptbase",
     "tiktok",
-    "instagram_reels"
+    "instagram_reels",
+    "github_sponsors"
   ],
   "income_streams": {
     "hashnode": {
@@ -145,8 +146,16 @@
         "INSTAGRAM_ACCESS_TOKEN",
         "INSTAGRAM_BUSINESS_ID"
       ]
+    },
+    "github_sponsors": {
+      "name": "GitHub Sponsors 프로필 최적화",
+      "activated_at": "2026-04-21T07:50:34.235600",
+      "revenue_type": "sponsorships",
+      "est_monthly": "$50-500",
+      "status": "active",
+      "required_secrets": []
     }
   },
-  "last_expansion": "2026-04-14T07:46:22.677894",
-  "total_pipelines": 12
+  "last_expansion": "2026-04-21T07:50:34.235651",
+  "total_pipelines": 11
 }

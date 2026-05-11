@@ -1,20 +1,20 @@
 status: assemble_failed
 assemble_outcome: failure
 upload_outcome: skipped
-run: 120
-timestamp: 2026-05-11T12:09:56Z
+run: 121
+timestamp: 2026-05-11T22:12:14Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
 🔍 Researching trending topics...
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
-  ⚠ pytrends: HTTPSConnectionPool(host='trends.google.com', port=443): Max retries exceeded with url: /trends/api/widgetdata/multiline?req=%7B%22time%22%3A+%222026-05-04T12%5C%5C%3A09%5C%5C%3A53+2026-05-11T12%5C%5C%3A09%5C%5C%3A53%22%2C+%22resolution%22%3A+%22HOUR%22%2C+%22locale%22%3A+%22en-US%22%2C+%22comparisonItem%22%3A+%5B%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22AI+tools+make+money+2026%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22passive+income+automation+2026%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22ChatGPT+side+hustle%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22faceless+YouTube+income%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22AI+side+hustle+beginner%22%7D%5D%7D%7D%5D%2C+%22requestOptions%22%3A+%7B%22property%22%3A+%22%22%2C+%22backend%22%3A+%22CM%22%2C+%22category%22%3A+0%7D%2C+%22userConfig%22%3A+%7B%22userType%22%3A+%22USER_TYPE_SCRAPER%22%7D%7D&token=APO0_qgAAAAAagMYkbioeyRnJlo0L2jdCXsp-a0hvB39&tz=360 (Caused by ResponseError('too many 429 error responses'))
+  ⚠ pytrends: HTTPSConnectionPool(host='trends.google.com', port=443): Max retries exceeded with url: /trends/api/widgetdata/multiline?req=%7B%22time%22%3A+%222026-05-04T22%5C%5C%3A12%5C%5C%3A10+2026-05-11T22%5C%5C%3A12%5C%5C%3A10%22%2C+%22resolution%22%3A+%22HOUR%22%2C+%22locale%22%3A+%22en-US%22%2C+%22comparisonItem%22%3A+%5B%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22AI+tools+make+money+2026%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22passive+income+automation+2026%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22ChatGPT+side+hustle%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22faceless+YouTube+income%22%7D%5D%7D%7D%2C+%7B%22geo%22%3A+%7B%7D%2C+%22complexKeywordsRestriction%22%3A+%7B%22keyword%22%3A+%5B%7B%22type%22%3A+%22BROAD%22%2C+%22value%22%3A+%22AI+side+hustle+beginner%22%7D%5D%7D%7D%5D%2C+%22requestOptions%22%3A+%7B%22property%22%3A+%22%22%2C+%22backend%22%3A+%22CM%22%2C+%22category%22%3A+0%7D%2C+%22userConfig%22%3A+%7B%22userType%22%3A+%22USER_TYPE_SCRAPER%22%7D%7D&token=APO0_qgAAAAAagOluvFqhvGSNJ9F4JQaKiTap-URCF91&tz=360 (Caused by ResponseError('too many 429 error responses'))
   ✓ Google Trends: 0 keywords scored
-  ✅ Topic selected: The $0 AI business model that actually works in 2026
-  📊 Trend-selected topic: 'The $0 AI business model that actually works in 2026'
+  ✅ Topic selected: How I make $3000/month with ChatGPT automation
+  📊 Trend-selected topic: 'How I make $3000/month with ChatGPT automation'
 
-🎬 Producing video: 'The $0 AI business model that actually works in 2026'
+🎬 Producing video: 'How I make $3000/month with ChatGPT automation'
 
 [1/3] Generating script...
 Traceback (most recent call last):
@@ -28,7 +28,7 @@ Traceback (most recent call last):
                ^^^^^^^^^^^^^^^^^^^^^
   File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 47, in _groq_post
     resp.raise_for_status()
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1028, in raise_for_status
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1167, in raise_for_status
     raise HTTPError(http_error_msg, response=self)
 requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.groq.com/openai/v1/chat/completions
 --- upload log ---

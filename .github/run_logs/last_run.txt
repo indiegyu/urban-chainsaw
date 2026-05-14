@@ -1,8 +1,8 @@
 status: assemble_failed
 assemble_outcome: failure
 upload_outcome: skipped
-run: 126
-timestamp: 2026-05-14T11:12:53Z
+run: 127
+timestamp: 2026-05-14T22:15:32Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -27,7 +27,7 @@ Traceback (most recent call last):
                ^^^^^^^^^^^^^^^^^^^^^
   File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 47, in _groq_post
     resp.raise_for_status()
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1168, in raise_for_status
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1167, in raise_for_status
     raise HTTPError(http_error_msg, response=self)
 requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.groq.com/openai/v1/chat/completions
 --- upload log ---

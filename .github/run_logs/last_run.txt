@@ -1,8 +1,8 @@
 status: assemble_failed
 assemble_outcome: failure
 upload_outcome: skipped
-run: 125
-timestamp: 2026-05-13T22:18:24Z
+run: 126
+timestamp: 2026-05-14T11:12:53Z
 --- assemble log ---
 
 [0/3] Researching trending topics...

@@ -1,7 +1,7 @@
 type: shorts
 status: upload_failed
-run: 83
-timestamp: 2026-06-16T16:32:33Z
+run: 84
+timestamp: 2026-06-17T16:15:57Z
 --- shorts log ---
 
 🎬 [Shorts] Generating script...

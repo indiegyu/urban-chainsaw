@@ -1,0 +1,35 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [claude/research-income-automation-cUfDC]
+    paths: ["docs/**"]
+  workflow_run:
+    workflows: ["Daily Revenue Dashboard"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # workflow_run 트리거의 경우 성공한 경우에만 배포
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/research-income-automation-cUfDC
+          fetch-depth: 1
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          keep_files: false
+          commit_message: "deploy: ${{ github.sha }} [skip ci]"

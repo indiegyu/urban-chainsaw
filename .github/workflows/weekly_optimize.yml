@@ -36,7 +36,7 @@ jobs:
         run: python -u scripts/analytics/weekly_optimizer.py
 
       - name: Generate revenue dashboard
-        run: python -u scripts/analytics/revenue_dashboard.py
+        run: python -u -m scripts.analytics.revenue_dashboard
 
       - name: Commit strategy + dashboard
         run: |
@@ -45,6 +45,7 @@ jobs:
           git fetch origin ${{ github.ref_name }}
           git reset --soft origin/${{ github.ref_name }}
           git add scripts/strategy/content_strategy.json docs/dashboard.html
+          git add .github/run_logs/revenue_history.json 2>/dev/null || true
           git commit -m "ci: strategy+dashboard week $(date +%V) [skip ci]" || echo "No changes"
           git push origin HEAD:${{ github.ref_name }} || \
             (git pull origin ${{ github.ref_name }} --rebase && git push origin HEAD:${{ github.ref_name }})

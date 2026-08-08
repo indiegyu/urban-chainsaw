@@ -16,6 +16,9 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils.retry import retry_api_call, notify_error, notify_success
+
 YOUTUBE_API = "https://www.googleapis.com/youtube/v3"
 GROQ_API    = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL  = "llama-3.3-70b-versatile"
@@ -25,12 +28,14 @@ TOKEN_PATH    = "token.json"
 
 def get_access_token() -> str:
     tok = json.loads(Path(TOKEN_PATH).read_text())
-    r = requests.post(tok["token_uri"], data={
-        "client_id": tok["client_id"], "client_secret": tok["client_secret"],
-        "refresh_token": tok["refresh_token"], "grant_type": "refresh_token",
-    })
-    r.raise_for_status()
-    return r.json()["access_token"]
+    def _refresh():
+        r = requests.post(tok["token_uri"], data={
+            "client_id": tok["client_id"], "client_secret": tok["client_secret"],
+            "refresh_token": tok["refresh_token"], "grant_type": "refresh_token",
+        }, timeout=15)
+        r.raise_for_status()
+        return r.json()["access_token"]
+    return retry_api_call(_refresh, max_retries=3)
 
 
 def get_channel_videos(token: str) -> list[dict]:

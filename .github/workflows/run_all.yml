@@ -12,7 +12,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          BRANCH: main
+          BRANCH: ${{ github.ref_name }}
         run: |
           content_workflows=(
             "daily_blog.yml"
@@ -51,7 +51,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          BRANCH: main
+          BRANCH: ${{ github.ref_name }}
         run: |
           publish_workflows=(
             "daily_publish.yml"
@@ -83,7 +83,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          BRANCH: main
+          BRANCH: ${{ github.ref_name }}
         run: |
           echo "▶ 실행: daily_dashboard.yml"
           curl -s -X POST \

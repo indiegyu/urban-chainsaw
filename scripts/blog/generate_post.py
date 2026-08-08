@@ -44,16 +44,24 @@ TRENDING_TOPICS = [
 AFFILIATE_LINKS = {}  # 레거시 호환성 유지 (실제 삽입은 link_inserter.py가 처리)
 
 
+_sys_path = str(Path(__file__).parent.parent)
+if _sys_path not in sys.path:
+    sys.path.insert(0, _sys_path)
+from utils.retry import retry_api_call, notify_error, notify_success, PipelineHealthCheck
+
+
 def _groq_request(messages: list, groq_api_key: str, max_tokens: int = 2048) -> str:
     headers = {"Authorization": f"Bearer {groq_api_key}", "Content-Type": "application/json"}
-    resp = requests.post(
-        GROQ_API_URL,
-        headers=headers,
-        json={"model": GROQ_MODEL, "messages": messages, "temperature": 0.7, "max_tokens": max_tokens},
-        timeout=60,
-    )
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
+    def _call():
+        resp = requests.post(
+            GROQ_API_URL,
+            headers=headers,
+            json={"model": GROQ_MODEL, "messages": messages, "temperature": 0.7, "max_tokens": max_tokens},
+            timeout=60,
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
+    return retry_api_call(_call, max_retries=3)
 
 
 def generate_blog_post(topic: str, groq_api_key: str) -> dict:
@@ -90,14 +98,28 @@ def generate_blog_post(topic: str, groq_api_key: str) -> dict:
     # Step 2: HTML 본문만 (JSON 불필요, 그냥 텍스트)
     html_content = _groq_request([
         {"role": "system", "content": (
-            "Write a complete SEO blog post in clean HTML (body tags only). "
-            "Structure: intro paragraph, 4-5 H2 sections (each 150-200 words), conclusion with CTA. "
-            "Total ~1000 words. Use <strong> for emphasis. "
-            "Where tools like n8n, hostinger, convertkit, beehiiv, or printify are mentioned, "
-            "wrap them like: {{AFFILIATE:toolname}}"
+            "You are a top SEO content writer. Write a complete blog post in clean HTML (body tags only).\n\n"
+            "STRUCTURE (total 1200-1500 words):\n"
+            "1. INTRO (100-150 words): Start with a bold stat or surprising fact. "
+            "State the problem. Promise the solution. Use <strong> for key phrases.\n"
+            "2. BODY (4-6 H2 sections, each 150-250 words):\n"
+            "   - Each section: clear H2 heading with keyword → explanation → "
+            "specific tool/method → concrete result/number\n"
+            "   - Include <blockquote> for pro tips or key takeaways\n"
+            "   - Use ordered/unordered lists for steps and comparisons\n"
+            "   - Mention specific tools naturally: n8n, hostinger, convertkit, beehiiv, printify\n"
+            "   - Wrap tool mentions like: {{AFFILIATE:toolname}}\n"
+            "3. FAQ SECTION: Add H2 'Frequently Asked Questions' with 3 Q&A pairs using H3 for questions\n"
+            "4. CONCLUSION (100 words): Summarize top 3 takeaways, clear CTA to subscribe/follow\n\n"
+            "SEO RULES:\n"
+            "- Target keyword should appear in first 100 words and 2-3 H2 headings\n"
+            "- Use LSI keywords naturally throughout\n"
+            "- Short paragraphs (2-3 sentences max)\n"
+            "- Include internal linking placeholders: {{INTERNAL:related-topic}}\n"
+            "STYLE: Authoritative but conversational. Data-driven. No fluff."
         )},
         {"role": "user", "content": f"Write about: {topic}"},
-    ], groq_api_key, max_tokens=3000)
+    ], groq_api_key, max_tokens=4000)
 
     meta["html"] = html_content
     meta["word_count"] = len(html_content.split())
@@ -246,30 +268,40 @@ def run(topic: str = None, count: int = 1):
     ghost_url = os.environ.get("GHOST_URL", "")
     ghost_key = os.environ.get("GHOST_ADMIN_API_KEY", "")
 
+    health = PipelineHealthCheck()
+
     if not topic:
         # 실시간 트렌드로 주제 선택 시도
         try:
-            import sys
-            sys.path.insert(0, str(Path(__file__).parent.parent))
             from research.trend_researcher import research as do_research
             print("🔍 Running trend research for blog topic...")
             result = do_research(groq_api_key=groq_key)
             topic = result["topic"]
-            print(f"  📊 Trend-selected: '{topic[:60]}'")
+            health.step_ok("트렌드 연구", f"주제: {topic[:50]}")
         except Exception as e:
-            print(f"  ⚠ Trend research failed ({e}), using static topic")
+            health.step_warn("트렌드 연구", str(e))
             topic = random.choice(TRENDING_TOPICS)
 
     print(f"\n📝 Generating: '{topic}'")
-    post = generate_blog_post(topic, groq_key)
-    post["html"] = insert_affiliate_links(post["html"])
+    try:
+        post = generate_blog_post(topic, groq_key)
+        post["html"] = insert_affiliate_links(post["html"])
+        health.step_ok("포스트 생성", f"{post.get('word_count', '?')}단어")
+    except Exception as e:
+        health.step_fail("포스트 생성", str(e))
+        notify_error("blog", f"Post generation failed: {e}")
+        raise
 
     saved = save_post(post, OUTPUT_DIR)
+    health.step_ok("파일 저장", saved.name)
     print(f"  ✓ Saved: {saved.name}")
     print(f"  ✓ Title: {post['title']}")
     print(f"  ✓ Words: ~{post.get('word_count', '?')}")
 
     ghost_post_url = publish_to_ghost(post, ghost_url, ghost_key)
+
+    notify_success("blog", f"블로그 포스트 생성: {post['title'][:50]}")
+    health.write_github_summary("블로그 포스트")
 
     return {"post": post, "file": str(saved), "ghost_url": ghost_post_url}
 

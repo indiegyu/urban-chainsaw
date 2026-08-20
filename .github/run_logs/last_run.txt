@@ -1,8 +1,8 @@
 status: assemble_failed
 assemble_outcome: failure
 upload_outcome: skipped
-run: 321
-timestamp: 2026-08-20T09:30:50Z
+run: 322
+timestamp: 2026-08-20T21:32:31Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -10,10 +10,10 @@ timestamp: 2026-08-20T09:30:50Z
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
   ✓ Google Trends: 5 keywords scored
-  ✅ Topic selected: How to make passive income with faceless YouTube income in 2026
-  📊 Trend-selected topic: 'How to make passive income with faceless YouTube income in 2'
+  ✅ Topic selected: How to make passive income with AI tools make money 2026 in 2026
+  📊 Trend-selected topic: 'How to make passive income with AI tools make money 2026 in '
 
-🎬 Producing video: 'How to make passive income with faceless YouTube income in 2026'
+🎬 Producing video: 'How to make passive income with AI tools make money 2026 in 2026'
 
 [1/3] Generating script...
 Traceback (most recent call last):
@@ -27,7 +27,7 @@ Traceback (most recent call last):
                ^^^^^^^^^^^^^^^^^^^^^
   File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_video.py", line 47, in _groq_post
     resp.raise_for_status()
-  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/requests/models.py", line 1167, in raise_for_status
+  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/requests/models.py", line 1167, in raise_for_status
     raise HTTPError(http_error_msg, response=self)
 requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.groq.com/openai/v1/chat/completions
 --- upload log ---

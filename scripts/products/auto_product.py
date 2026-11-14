@@ -2,42 +2,39 @@
 AI 디지털 상품 자동 생성
 ==========================
 content_strategy.json의 product_ideas를 읽어서
-Groq으로 PDF 전자책 / 프롬프트팩 콘텐츠를 자동 생성합니다.
+LLM(Gemini 무료 티어 우선)으로 PDF 전자책 / 프롬프트팩 콘텐츠를 자동 생성합니다.
 
 생성 상품:
   - PDF 가이드 (HTML → PDF 변환)
   - ChatGPT 프롬프트팩 (텍스트 파일)
 """
 
-import os
+import sys
 import json
-import requests
 from pathlib import Path
 from datetime import datetime
 
-GROQ_API   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
+from utils.site import channel_line  # noqa: E402
 
 STRATEGY_PATH = Path(__file__).parent.parent / "strategy" / "content_strategy.json"
 OUTPUT_DIR    = Path(__file__).parent / "output"
 
 
-def groq(messages: list, groq_key: str, max_tokens: int = 3000) -> str:
-    r = requests.post(GROQ_API, headers={
-        "Authorization": f"Bearer {groq_key}", "Content-Type": "application/json",
-    }, json={"model": GROQ_MODEL, "messages": messages,
-             "temperature": 0.7, "max_tokens": max_tokens}, timeout=60)
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"].strip()
+def _llm(messages: list, max_tokens: int = 3000, json_mode: bool = False) -> str:
+    return llm_complete(
+        messages, max_tokens=max_tokens, temperature=0.7, json_mode=json_mode
+    )
 
 
-def generate_pdf_guide(topic: str, groq_key: str) -> dict:
+def generate_pdf_guide(topic: str) -> dict:
     """PDF 전자책 콘텐츠를 HTML로 생성합니다."""
     print(f"  📄 PDF 가이드 생성: '{topic[:50]}'")
 
     # 1. 목차 + 메타
     import re
-    meta_raw = groq([
+    meta_raw = _llm([
         {"role": "system", "content": (
             "Output ONLY valid JSON with: "
             "title (catchy product title, max 60 chars), "
@@ -47,23 +44,24 @@ def generate_pdf_guide(topic: str, groq_key: str) -> dict:
             "target_buyer (one sentence who this is for)"
         )},
         {"role": "user", "content": f"Digital PDF guide about: {topic}"},
-    ], groq_key, max_tokens=400)
+    ], max_tokens=400, json_mode=True)
     raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
-    if "```" in raw:
-        raw = raw.split("```")[1].lstrip("json").strip()
-    meta = json.loads(raw)
+    try:
+        meta = json.loads(raw)
+    except json.JSONDecodeError:
+        meta = extract_json(raw)
 
     # 2. 본문 (챕터별)
     chapters_html = []
     for ch in meta.get("chapters", [])[:6]:
-        content = groq([
+        content = _llm([
             {"role": "system", "content": (
                 "Write a 300-word chapter for a practical digital guide. "
                 "Use HTML: <h2> for title, <p> for paragraphs, <ul><li> for bullet points. "
                 "Be specific, actionable, include real examples and numbers."
             )},
             {"role": "user", "content": f"Chapter: {ch}\nGuide topic: {topic}"},
-        ], groq_key, max_tokens=600)
+        ], max_tokens=600)
         chapters_html.append(content)
 
     # 3. HTML 조립
@@ -98,8 +96,8 @@ def generate_pdf_guide(topic: str, groq_key: str) -> dict:
 {''.join(chapters_html)}
 
 <div class="footer">
-  <p>Get more free AI income tips at <strong>AI Income Daily</strong> on YouTube</p>
-  <p>Subscribe for a new strategy every day → youtube.com/@AIIncomeDaily</p>
+  <p>Get more free AI income tips from <strong>AI Income Daily</strong></p>
+  <p>{channel_line("Subscribe for a new strategy every day →")}</p>
 </div>
 </body>
 </html>"""
@@ -114,12 +112,12 @@ def generate_pdf_guide(topic: str, groq_key: str) -> dict:
     }
 
 
-def generate_prompt_pack(topic: str, groq_key: str) -> dict:
+def generate_prompt_pack(topic: str) -> dict:
     """ChatGPT 프롬프트팩을 생성합니다."""
     print(f"  📦 프롬프트팩 생성: '{topic[:50]}'")
 
     import re
-    meta_raw = groq([
+    meta_raw = _llm([
         {"role": "system", "content": (
             "Output ONLY valid JSON with: "
             "title (prompt pack product title, max 60 chars), "
@@ -127,14 +125,15 @@ def generate_prompt_pack(topic: str, groq_key: str) -> dict:
             "price_usd (integer: 7 or 9 or 15)"
         )},
         {"role": "user", "content": f"ChatGPT prompt pack for: {topic}"},
-    ], groq_key, max_tokens=200)
+    ], max_tokens=200, json_mode=True)
     raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
-    if "```" in raw:
-        raw = raw.split("```")[1].lstrip("json").strip()
-    meta = json.loads(raw)
+    try:
+        meta = json.loads(raw)
+    except json.JSONDecodeError:
+        meta = extract_json(raw)
 
     # 50개 프롬프트 생성
-    prompts_raw = groq([
+    prompts_raw = _llm([
         {"role": "system", "content": (
             "Write 50 specific, ready-to-use ChatGPT prompts. "
             "Format each as: [NUMBER]. [PROMPT TITLE]\nPrompt: [the actual prompt text]\n\n"
@@ -142,21 +141,21 @@ def generate_prompt_pack(topic: str, groq_key: str) -> dict:
             "Each prompt should be 1-3 sentences."
         )},
         {"role": "user", "content": f"Topic: {topic}\nCreate 50 premium ChatGPT prompts."},
-    ], groq_key, max_tokens=3000)
+    ], max_tokens=3000)
 
     content = f"""{meta['title']}
 {'=' * 60}
 {meta.get('description', '')}
 
 © {datetime.now().year} AI Income Daily
-Get more free tips: YouTube @AIIncomeDaily
+{channel_line("Get more free tips:")}
 {'=' * 60}
 
 {prompts_raw}
 
 {'=' * 60}
-BONUS: Join AI Income Daily on YouTube for daily strategies
-Subscribe: youtube.com/@AIIncomeDaily
+BONUS: Join AI Income Daily for daily strategies
+{channel_line("Subscribe:")}
 {'=' * 60}
 """
 
@@ -196,7 +195,6 @@ def save_product(product: dict) -> Path:
 def run():
     from dotenv import load_dotenv
     load_dotenv()
-    groq_key = os.environ["GROQ_API_KEY"]
 
     # 전략 파일에서 이번 주 상품 아이디어 선택
     strategy = json.loads(STRATEGY_PATH.read_text())
@@ -214,9 +212,9 @@ def run():
     from datetime import date
     week_num = date.today().isocalendar()[1]
     if week_num % 2 == 0:
-        product = generate_pdf_guide(topic, groq_key)
+        product = generate_pdf_guide(topic)
     else:
-        product = generate_prompt_pack(topic, groq_key)
+        product = generate_prompt_pack(topic)
 
     path = save_product(product)
 

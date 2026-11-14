@@ -15,16 +15,17 @@ Beehiiv 무료 플랜: 구독자 2,500명, 무제한 발송
 필요한 환경변수:
   BEEHIIV_API_KEY    — API Key (Settings → API)
   BEEHIIV_PUB_ID     — Publication ID (pub_XXXX)
-  GROQ_API_KEY       — 뉴스레터 콘텐츠 생성
+  GEMINI_API_KEY     — 뉴스레터 콘텐츠 생성 (무료 티어)
   GITHUB_PAGES_URL   — 블로그 URL (클릭 유도용)
 """
 
-import os, json, re, requests
+import os, sys, json, re, requests
 from pathlib import Path
 from datetime import datetime, timezone
 
-GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
+
 BLOG_OUTPUT = Path(__file__).parent.parent / "blog" / "output"
 PAGES_URL   = os.environ.get("GITHUB_PAGES_URL", "").rstrip("/")
 
@@ -32,32 +33,24 @@ NEWSLETTER_NAME = "AI Income Insider"
 NEWSLETTER_TAGLINE = "Daily strategies to earn more with AI 🤖"
 
 
-def groq_request(messages: list, groq_key: str, max_tokens: int = 3000) -> str:
-    resp = requests.post(GROQ_URL, headers={
-        "Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"
-    }, json={
-        "model": GROQ_MODEL,
-        "messages": messages,
-        "temperature": 0.7,
-        "max_tokens": max_tokens,
-    }, timeout=60)
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
+def _llm_request(messages: list, max_tokens: int = 3000, json_mode: bool = False) -> str:
+    return llm_complete(messages, max_tokens=max_tokens, temperature=0.7, json_mode=json_mode)
 
 
-def generate_newsletter_content(groq_key: str, blog_post_title: str = "") -> dict:
+def generate_newsletter_content(blog_post_title: str = "") -> dict:
     """오늘의 뉴스레터 콘텐츠를 2단계로 생성합니다."""
     today = datetime.now().strftime("%B %d, %Y")
 
     # Step 1: 메타데이터
-    meta_raw = groq_request([
+    meta_raw = _llm_request([
         {"role": "system", "content": 'Output valid JSON only with keys: "subject" (email subject line, 50 chars max, emoji ok), "preview" (preview text, 80 chars)'},
         {"role": "user", "content": f"Daily AI income newsletter for {today}. Blog post: {blog_post_title}"}
-    ], groq_key, max_tokens=150)
+    ], max_tokens=150, json_mode=True)
     meta_raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
-    if "```" in meta_raw:
-        meta_raw = meta_raw.split("```")[1].lstrip("json").strip()
-    meta = json.loads(meta_raw)
+    try:
+        meta = json.loads(meta_raw)
+    except json.JSONDecodeError:
+        meta = extract_json(meta_raw)
 
     # 환경변수에서 어필리에이트 정보
     kofi_user   = os.environ.get("KOFI_USERNAME", "")
@@ -70,7 +63,7 @@ def generate_newsletter_content(groq_key: str, blog_post_title: str = "") -> dic
     blog_url = f"{PAGES_URL}" if PAGES_URL else "#"
     blog_link = f"<p style='margin-top:16px'><a href='{blog_url}' style='background:#6366f1;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:700'>Read Full Article →</a></p>" if blog_post_title else ""
 
-    body = groq_request([
+    body = _llm_request([
         {"role": "system", "content": (
             "Write a daily email newsletter in HTML. Structure:\n"
             "1. Warm greeting (1 sentence)\n"
@@ -82,7 +75,7 @@ def generate_newsletter_content(groq_key: str, blog_post_title: str = "") -> dic
             "Max 400 words. Mobile-friendly HTML."
         )},
         {"role": "user", "content": f"Date: {today}. Focus topic: {blog_post_title or 'AI side hustles and passive income'}"}
-    ], groq_key, max_tokens=1500)
+    ], max_tokens=1500)
 
     # 수익화 섹션: 추천 도구 + 어필리에이트
     tools_section = f"""
@@ -182,7 +175,6 @@ def create_beehiiv_post(content: dict, pub_id: str, api_key: str) -> dict:
 def run():
     beehiiv_key = os.environ.get("BEEHIIV_API_KEY", "")
     pub_id      = os.environ.get("BEEHIIV_PUB_ID", "")
-    groq_key    = os.environ.get("GROQ_API_KEY", "")
 
     if not beehiiv_key or not pub_id:
         print("BEEHIIV_API_KEY / BEEHIIV_PUB_ID not set — skipping newsletter")
@@ -200,7 +192,7 @@ def run():
             pass
 
     print(f"\n📧 뉴스레터 생성 중... (주제: {blog_title[:50] or 'AI income'})")
-    content = generate_newsletter_content(groq_key, blog_title)
+    content = generate_newsletter_content(blog_title)
     print(f"  제목: {content['subject']}")
 
     result = create_beehiiv_post(content, pub_id, beehiiv_key)

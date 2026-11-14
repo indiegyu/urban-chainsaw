@@ -14,13 +14,15 @@ GitHub Pages에 SEO 최적화된 AI 툴 디렉토리 페이지를 자동 생성.
 """
 
 import os
+import sys
 import json
-import requests
 from pathlib import Path
 from datetime import datetime
 
-GROQ_API   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
+from utils.site import youtube_link  # noqa: E402
+
 DOCS_DIR   = Path("docs")
 STATE_FILE = Path("scripts/publish/.tools_state.json")
 
@@ -77,23 +79,20 @@ def _build_seed_tools() -> list:
     ]
 
 
-def _groq(messages, groq_key, max_tokens=1000) -> str:
-    r = requests.post(GROQ_API, headers={
-        "Authorization": f"Bearer {groq_key}", "Content-Type": "application/json",
-    }, json={"model": GROQ_MODEL, "messages": messages,
-             "temperature": 0.6, "max_tokens": max_tokens}, timeout=30)
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"].strip()
+def _llm(messages, max_tokens=1000, json_mode=False) -> str:
+    return llm_complete(
+        messages, max_tokens=max_tokens, temperature=0.6, json_mode=json_mode
+    )
 
 
-def generate_tool_descriptions(tools: list[dict], groq_key: str) -> list[dict]:
-    """Groq으로 각 툴의 SEO 설명 + 수익화 use case를 생성합니다."""
+def generate_tool_descriptions(tools: list[dict]) -> list[dict]:
+    """LLM으로 각 툴의 SEO 설명 + 수익화 use case를 생성합니다."""
     import re
     names = [t["name"] for t in tools if not t.get("description")]
     if not names:
         return tools
 
-    raw = _groq([
+    raw = _llm([
         {"role": "system", "content": (
             "Output ONLY valid JSON array. For each tool in the list, output an object with:\n"
             "- name: tool name (exact)\n"
@@ -102,16 +101,14 @@ def generate_tool_descriptions(tools: list[dict], groq_key: str) -> list[dict]:
             "- best_for: 3-word phrase (who benefits most)"
         )},
         {"role": "user", "content": f"Write descriptions for these AI tools: {', '.join(names)}"},
-    ], groq_key, max_tokens=1500)
+    ], max_tokens=1500, json_mode=True)
     raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', raw)
     if "```" in raw:
         raw = raw.split("```")[1].lstrip("json").strip()
-    arr_match = re.search(r'\[.*\]', raw, re.S)
-    if arr_match:
-        raw = arr_match.group(0)
     try:
-        desc_map = {d["name"]: d for d in json.loads(raw)}
-    except Exception:
+        desc_map = {d["name"]: d for d in extract_json(raw)}
+    except Exception as exc:
+        print(f"  ⚠ 툴 설명 파싱 실패: {exc}")
         return tools  # 설명 생성 실패 시 원본 툴 목록 그대로 반환
     for tool in tools:
         if tool["name"] in desc_map:
@@ -215,7 +212,7 @@ def build_html(tools: list[dict], strategy: dict) -> str:
 <header>
   <h1>🤖 Best AI Tools to Make Money Online</h1>
   <p>Updated {datetime.now().strftime('%B %Y')} · {len(tools)} tools · All free to start</p>
-  <p style="margin-top:1em"><a href="https://www.youtube.com/@psg9806" style="color:#6366f1">▶ Watch daily AI income tips on YouTube →</a></p>
+  <p style="margin-top:1em">{youtube_link("▶ Watch daily AI income tips on YouTube →", style="color:#6366f1")}</p>
 </header>
 <nav>{nav_links}</nav>
 <main>
@@ -223,7 +220,7 @@ def build_html(tools: list[dict], strategy: dict) -> str:
 {product_html}
 </main>
 <footer>
-  <p>Updated weekly by <a href="https://www.youtube.com/@psg9806">AI Income Daily</a> · Subscribe for daily tips</p>
+  <p>Updated weekly by {youtube_link("AI Income Daily") or "AI Income Daily"} · Subscribe for daily tips</p>
   <p style="margin-top:.5em;font-size:.8em">Some links may be affiliate links. We only recommend tools we use.</p>
 </footer>
 </body>
@@ -233,7 +230,6 @@ def build_html(tools: list[dict], strategy: dict) -> str:
 def run():
     from dotenv import load_dotenv
     load_dotenv()
-    groq_key = os.environ.get("GROQ_API_KEY", "")
 
     print("🗂️  AI Tools 디렉토리 빌드 중...")
 
@@ -243,10 +239,15 @@ def run():
         state = json.loads(STATE_FILE.read_text())
     tools = state.get("tools", _build_seed_tools())
 
-    # Groq으로 설명 생성 (없는 것만)
-    if groq_key:
-        tools = generate_tool_descriptions(tools, groq_key)
-        print(f"  ✓ {len(tools)}개 툴 설명 생성")
+    # LLM으로 설명 생성 (없는 것만). 키가 없으면 시드 설명 그대로 페이지를 만듭니다.
+    if os.environ.get("GEMINI_API_KEY") or os.environ.get("GROQ_API_KEY"):
+        try:
+            tools = generate_tool_descriptions(tools)
+            print(f"  ✓ {len(tools)}개 툴 설명 생성")
+        except Exception as exc:
+            print(f"  ⚠ 설명 생성 실패 — 시드 설명으로 진행: {exc}")
+    else:
+        print("  ⚠ LLM 키 없음 — 시드 설명으로 페이지 생성 (설명 자동 생성 생략)")
 
     # strategy.json 로드 (상품 링크 포함)
     strategy = {}

@@ -29,11 +29,47 @@ cp .env.example .env
 
 | 서비스 | 용도 | 가입 |
 |--------|------|------|
-| Groq | AI 텍스트 생성 (무료) | console.groq.com |
+| **Google Gemini** | AI 텍스트 생성 (무료 티어, 주력) | aistudio.google.com/apikey |
+| Groq / OpenRouter | AI 텍스트 생성 (선택 폴백) | console.groq.com · openrouter.ai/keys |
 | Ideogram.ai | AI 이미지 생성 (무료 25/일) | ideogram.ai |
 | ElevenLabs | 음성 합성 (무료 10K chars/월) | elevenlabs.io |
 | Pexels | 스톡 영상 (완전 무료) | pexels.com/api |
 | Printify | POD 플랫폼 (무료) | printify.com |
+
+### 1-1. LLM 설정 (Gemini 무료 티어)
+
+모든 스크립트는 `scripts/llm.py` 하나를 거쳐 LLM을 호출합니다.
+키만 바꾸면 provider가 바뀌고, 코드는 손대지 않습니다.
+
+```bash
+export GEMINI_API_KEY=AIza...        # 필수 (무료)
+# export GROQ_API_KEY=...            # 선택 폴백1 (기본 모델 openai/gpt-oss-120b)
+# export OPENROUTER_API_KEY=...      # 선택 폴백2 (기본 모델 openrouter/free)
+```
+
+| 환경변수 | 기본값 | 설명 |
+|---|---|---|
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-3.8-flash` | 앞에서부터 시도 |
+| `LLM_PROVIDER_ORDER` | `gemini,groq,openrouter` | 폴백 순서 |
+| `GEMINI_MIN_INTERVAL` | `4.2` | 호출 간 최소 간격(초) — 무료 15 RPM 보호 |
+| `LLM_MAX_RETRIES` | `3` | provider 한 곳당 재시도 횟수 |
+
+동작 방식:
+- 429(요청 한도) → `RetryInfo.retryDelay` 만큼 대기 후 재시도
+- 일일 할당량(RPD) 소진 → 그 모델은 포기하고 다음 모델/provider로 폴백
+- 404(모델 종료)·401(키 오류) → 즉시 다음 모델/provider로 폴백
+- 전부 실패하면 예외로 종료(exit 1) — 조용히 성공한 척하지 않습니다
+
+상태 확인:
+```bash
+python scripts/llm.py            # 어떤 provider/모델이 잡혀 있는지
+python scripts/llm.py --check    # 실제로 1회 호출해 보기
+```
+
+테스트:
+```bash
+python -m unittest discover -s tests -v
+```
 
 ### 2. Phase 1: POD 즉시 시작 (가장 빠른 수익)
 ```bash

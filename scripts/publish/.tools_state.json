@@ -1,0 +1,110 @@
+{
+  "tools": [
+    {
+      "name": "Groq",
+      "url": "https://groq.com",
+      "category": "AI LLM",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Canva",
+      "url": "https://partner.canva.com/c/canva",
+      "category": "Design",
+      "free": true,
+      "affiliate": true
+    },
+    {
+      "name": "ElevenLabs",
+      "url": "https://elevenlabs.io",
+      "category": "AI Voice",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Printify",
+      "url": "https://printify.com",
+      "category": "Print on Demand",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Fiverr",
+      "url": "https://fiverr.com",
+      "category": "Freelance",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Hostinger",
+      "url": "https://hostinger.com",
+      "category": "Web Hosting",
+      "free": false,
+      "affiliate": false
+    },
+    {
+      "name": "Jasper AI",
+      "url": "https://jasper.ai",
+      "category": "AI Writing",
+      "free": false,
+      "affiliate": false
+    },
+    {
+      "name": "ConvertKit",
+      "url": "https://convertkit.com",
+      "category": "Email Marketing",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Semrush",
+      "url": "https://semrush.com",
+      "category": "SEO Tools",
+      "free": false,
+      "affiliate": false
+    },
+    {
+      "name": "HuggingFace",
+      "url": "https://huggingface.co",
+      "category": "AI Models",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "GitHub Actions",
+      "url": "https://github.com/features/actions",
+      "category": "Automation",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Perplexity AI",
+      "url": "https://perplexity.ai",
+      "category": "AI Search",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Ideogram",
+      "url": "https://ideogram.ai",
+      "category": "AI Image",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Suno AI",
+      "url": "https://suno.com",
+      "category": "AI Music",
+      "free": true,
+      "affiliate": false
+    },
+    {
+      "name": "Beehiiv",
+      "url": "https://beehiiv.com",
+      "category": "Newsletter",
+      "free": true,
+      "affiliate": false
+    }
+  ],
+  "last_updated": "2026-11-15T05:10:19.547265"
+}

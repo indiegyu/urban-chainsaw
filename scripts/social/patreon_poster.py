@@ -16,14 +16,17 @@ Patreon 자동 포스트
 """
 
 import os
+import sys
 import json
 import requests
 from pathlib import Path
 from datetime import datetime
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as _llm_complete  # noqa: E402
+
 API           = "https://www.patreon.com/api/oauth2/api"
-GROQ_API      = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL    = "llama-3.3-70b-versatile"
+
 STRATEGY_PATH = Path("scripts/strategy/content_strategy.json")
 STATE_FILE    = Path("scripts/social/.patreon_posted.json")
 
@@ -32,8 +35,8 @@ def _headers(token: str) -> dict:
     return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
 
-def generate_patreon_post(groq_key: str, is_premium: bool = False) -> dict:
-    """이번 주 Patreon 포스트 콘텐츠를 Groq으로 생성합니다."""
+def generate_patreon_post(is_premium: bool = False) -> dict:
+    """이번 주 Patreon 포스트 콘텐츠를 LLM으로 생성합니다."""
     import re
 
     strategy = {}
@@ -44,11 +47,8 @@ def generate_patreon_post(groq_key: str, is_premium: bool = False) -> dict:
     week = datetime.now().strftime("Week %V, %Y")
 
     tier = "exclusive premium" if is_premium else "free preview"
-    raw = requests.post(GROQ_API, headers={
-        "Authorization": f"Bearer {groq_key}", "Content-Type": "application/json",
-    }, json={
-        "model": GROQ_MODEL,
-        "messages": [
+    content = _llm_complete(
+        [
             {"role": "system", "content": (
                 "Write a Patreon creator post in clean HTML (body only). "
                 f"This is a {tier} post for an AI income channel. "
@@ -62,11 +62,10 @@ def generate_patreon_post(groq_key: str, is_premium: bool = False) -> dict:
                 f"{'Include specific income numbers, tool names, and a downloadable resource mention.' if is_premium else 'Give a taste of value, tease the premium content.'}"
             )},
         ],
-        "temperature": 0.8,
-        "max_tokens": 600,
-    }, timeout=30)
+        temperature=0.8,
+        max_tokens=600,
+    ).strip()
 
-    content = raw.json()["choices"][0]["message"]["content"].strip() if raw.status_code == 200 else ""
     title = f"{'🔒 ' if is_premium else ''}AI Income {week} — {'Full Strategy' if is_premium else 'Weekly Tip'}"
 
     return {"title": title, "content": content, "is_premium": is_premium}
@@ -107,7 +106,6 @@ def run():
 
     token       = os.environ.get("PATREON_ACCESS_TOKEN", "")
     campaign_id = os.environ.get("PATREON_CAMPAIGN_ID", "")
-    groq_key    = os.environ.get("GROQ_API_KEY", "")
 
     if not token or not campaign_id:
         missing = [k for k, v in {"PATREON_ACCESS_TOKEN": token,
@@ -128,9 +126,9 @@ def run():
     print("🎯 Patreon 주간 포스트 발행...")
 
     # 무료 포스트 (공개)
-    free_post    = generate_patreon_post(groq_key, is_premium=False)
+    free_post    = generate_patreon_post(is_premium=False)
     # 유료 포스트 (구독자 전용)
-    premium_post = generate_patreon_post(groq_key, is_premium=True)
+    premium_post = generate_patreon_post(is_premium=True)
 
     ok1 = post_to_patreon(campaign_id, token, free_post)
     ok2 = post_to_patreon(campaign_id, token, premium_post)

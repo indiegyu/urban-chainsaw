@@ -6,7 +6,7 @@ Dev.to API로 자동 발행합니다.
 
 필요한 환경변수:
   DEVTO_API_KEY  — https://dev.to/settings/extensions 에서 발급 (무료)
-  GROQ_API_KEY   — 태그/요약 자동 생성용
+  GEMINI_API_KEY — 태그/요약 자동 생성용 (무료 티어, 선택)
 
 Dev.to는 월 100만 UV 이상의 개발자 커뮤니티로, 포스트 하나당
 AdSense 연동 없이도 canonical URL을 내 블로그로 지정해 SEO 트래픽을 가져올 수 있습니다.
@@ -16,9 +16,10 @@ import os, sys, json, re, glob, requests
 from pathlib import Path
 from datetime import datetime
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
+
 DEVTO_API  = "https://dev.to/api/articles"
-GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
 
 BLOG_OUTPUT   = Path(__file__).parent.parent / "blog" / "output"
 PUBLISHED_LOG = Path(__file__).parent / ".devto_published.json"
@@ -52,29 +53,30 @@ def html_to_markdown(html: str) -> str:
     return md.strip()
 
 
-def groq_tags(title: str, groq_key: str) -> list:
-    """Groq으로 Dev.to 태그 4개 생성."""
+def llm_tags(title: str) -> list:
+    """LLM으로 Dev.to 태그 4개 생성 (실패 시 기본 태그)."""
+    default_tags = ["productivity", "ai", "tutorial", "career"]
+    if not os.environ.get("GEMINI_API_KEY") and not os.environ.get("GROQ_API_KEY"):
+        return default_tags
     try:
-        resp = requests.post(GROQ_URL, headers={
-            "Authorization": f"Bearer {groq_key}",
-            "Content-Type": "application/json"
-        }, json={
-            "model": GROQ_MODEL,
-            "messages": [
+        raw = llm_complete(
+            [
                 {"role": "system", "content": "Output a JSON array of exactly 4 dev.to tags (lowercase, no spaces, max 20 chars each). Common tags: webdev, productivity, ai, tutorial, career, beginners, javascript, python"},
-                {"role": "user", "content": f"Title: {title}"}
+                {"role": "user", "content": f"Title: {title}"},
             ],
-            "max_tokens": 80, "temperature": 0.3
-        }, timeout=30)
-        raw = resp.json()["choices"][0]["message"]["content"].strip()
-        raw = re.sub(r'```.*?```', '', raw, flags=re.S).strip()
-        tags = json.loads(raw)
-        return [str(t).lower().replace(" ", "")[:20] for t in tags[:4]]
+            max_tokens=80,
+            temperature=0.3,
+            json_mode=True,
+        )
+        tags = extract_json(raw)
+        if isinstance(tags, dict):
+            tags = tags.get("tags", [])
+        return [str(t).lower().replace(" ", "")[:20] for t in tags[:4]] or default_tags
     except Exception:
-        return ["productivity", "ai", "tutorial", "career"]
+        return default_tags
 
 
-def publish_to_devto(json_path: Path, html_path: Path, devto_key: str, groq_key: str) -> dict:
+def publish_to_devto(json_path: Path, html_path: Path, devto_key: str) -> dict:
     """단일 포스트를 Dev.to에 발행합니다."""
     meta = json.loads(json_path.read_text())
     html = html_path.read_text()
@@ -87,7 +89,7 @@ def publish_to_devto(json_path: Path, html_path: Path, devto_key: str, groq_key:
     body_html = re.sub(r'<p class="meta"[^>]*>.*?</p>', '', body_html, flags=re.S)
     body_md = html_to_markdown(body_html)
 
-    tags = groq_tags(meta.get("title", ""), groq_key)
+    tags = llm_tags(meta.get("title", ""))
 
     # canonical_url: 검색 엔진 크레딧이 내 블로그로 돌아오게 함 (SEO 핵심)
     canonical = f"{PAGES_URL}/{html_path.name}" if PAGES_URL else ""
@@ -119,7 +121,6 @@ def publish_to_devto(json_path: Path, html_path: Path, devto_key: str, groq_key:
 
 def run():
     devto_key = os.environ.get("DEVTO_API_KEY", "")
-    groq_key  = os.environ.get("GROQ_API_KEY", "")
 
     if not devto_key:
         print("DEVTO_API_KEY not set — skipping Dev.to publish")
@@ -142,7 +143,7 @@ def run():
         if not html_f.exists():
             continue
         try:
-            publish_to_devto(jf, html_f, devto_key, groq_key)
+            publish_to_devto(jf, html_f, devto_key)
             published.add(stem)
             posted += 1
         except Exception as e:

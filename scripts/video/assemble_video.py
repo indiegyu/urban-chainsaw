@@ -1,10 +1,10 @@
 """
 Phase 3 – YouTube 자동화: 영상 조립 (이미지+오디오 루프 방식)
 =============================================================
-Groq 스크립트 → gTTS 음성 → PIL 썸네일 → FFmpeg 이미지 루프 합병
+LLM(Gemini 무료 티어 우선) 스크립트 → gTTS 음성 → PIL 썸네일 → FFmpeg 이미지 루프 합병
 
 파이프라인 (3단계, ~2분 내 완료):
-  1. Groq → 스크립트 + 메타데이터 생성
+  1. LLM → 스크립트 + 메타데이터 생성
   2. gTTS → 음성 합성 (ElevenLabs 없이도 작동)
   3. PIL 썸네일 + FFmpeg 이미지-오디오 루프 → final.mp4
 
@@ -14,18 +14,21 @@ Groq 스크립트 → gTTS 음성 → PIL 썸네일 → FFmpeg 이미지 루프 
   - 480p, ultrafast preset으로 인코딩 속도 최적화
 
 필수 환경변수:
-  GROQ_API_KEY=...
+  GEMINI_API_KEY=...   (무료 티어, https://aistudio.google.com/apikey)
   ELEVENLABS_API_KEY=... (선택 – 없으면 gTTS 사용)
+  보조: GROQ_API_KEY / OPENROUTER_API_KEY (선택 폴백)
 """
 
 import os
+import sys
 import json
 import subprocess
-import requests
 from pathlib import Path
 
-GROQ_API   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
 
 ELEVENLABS_API      = "https://api.elevenlabs.io/v1"
 ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Rachel
@@ -34,31 +37,23 @@ OUTPUT_DIR       = Path(__file__).parent / "output"
 VIDEO_RESOLUTION = "854x480"   # 480p – 빠른 인코딩
 
 
-# ── 1. 스크립트 생성 (Groq) ──────────────────────────────────────────────────
-def _groq_post(headers: dict, messages: list, temperature: float = 0.8,
-               max_tokens: int = 4096) -> str:
-    resp = requests.post(
-        GROQ_API,
-        headers=headers,
-        json={"model": GROQ_MODEL, "messages": messages,
-              "temperature": temperature, "max_tokens": max_tokens},
-        timeout=60,
+# ── 1. 스크립트 생성 (LLM) ───────────────────────────────────────────────────
+def _llm(messages: list, temperature: float = 0.8, max_tokens: int = 4096,
+         json_mode: bool = False) -> str:
+    return llm_complete(
+        messages, max_tokens=max_tokens, temperature=temperature, json_mode=json_mode
     )
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
 
 
-def generate_script(topic: str, groq_api_key: str, seo_context: str = "") -> dict:
+def generate_script(topic: str, seo_context: str = "") -> dict:
     """2-step 방식: JSON 메타 + plain text 스크립트 분리.
     seo_context: trend_researcher에서 수집한 SEO 힌트 (선택)."""
     import re
-    headers = {"Authorization": f"Bearer {groq_api_key}", "Content-Type": "application/json"}
-
     seo_hint = (f"\n\nSEO MARKET DATA (use to optimize title/tags/thumbnail):\n{seo_context}"
                 if seo_context else "")
 
     # Step 1: JSON 메타데이터만 (script 없음 → 파싱 오류 방지)
-    meta_raw = _groq_post(headers, [
+    meta_raw = _llm([
         {"role": "system", "content": (
             "Output ONLY valid JSON (no markdown, no code blocks) with these exact keys:\n"
             "- title: YouTube title max 70 chars. MUST include a specific number (e.g. '7 tools', '$500/month') "
@@ -70,14 +65,15 @@ def generate_script(topic: str, groq_api_key: str, seo_context: str = "") -> dic
             "Include $ amount or number if possible. Example: '$500 DAILY AI' or '7 FREE TOOLS'"
         )},
         {"role": "user", "content": f"Topic: {topic}{seo_hint}"},
-    ], max_tokens=700)
+    ], max_tokens=700, json_mode=True)
     meta_raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
-    if "```" in meta_raw:
-        meta_raw = meta_raw.split("```")[1].lstrip("json").strip()
-    meta = json.loads(meta_raw)
+    try:
+        meta = json.loads(meta_raw)
+    except json.JSONDecodeError:
+        meta = extract_json(meta_raw)
 
     # Step 2: 스크립트 plain text
-    script = _groq_post(headers, [
+    script = _llm([
         {"role": "system", "content": (
             "Write a 900-1100 word engaging spoken narration for a faceless YouTube channel "
             "about AI tools and passive income. Rules: "
@@ -194,7 +190,6 @@ def run(topic: str = None):
     import sys
 
     load_dotenv()
-    groq_key   = os.environ["GROQ_API_KEY"]
     eleven_key = os.environ.get("ELEVENLABS_API_KEY", "")
 
     seo_context = ""
@@ -205,7 +200,7 @@ def run(topic: str = None):
             sys.path.insert(0, str(Path(__file__).parent.parent))
             from research.trend_researcher import research as do_research
             print("\n[0/3] Researching trending topics...")
-            result = do_research(groq_api_key=groq_key)
+            result = do_research()
             topic = result["topic"]
             seo_context = result.get("seo_context", "")
             print(f"  📊 Trend-selected topic: '{topic[:60]}'")
@@ -229,7 +224,7 @@ def run(topic: str = None):
 
     # 1. 스크립트 (SEO 컨텍스트 주입)
     print("\n[1/3] Generating script...")
-    meta = generate_script(topic, groq_key, seo_context=seo_context)
+    meta = generate_script(topic, seo_context=seo_context)
     (out_dir / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2))
     print(f"  ✓ Title:     {meta['title'][:65]}")
     print(f"  ✓ Tags:      {len(meta.get('tags', []))} tags")

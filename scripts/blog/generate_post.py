@@ -1,7 +1,7 @@
 """
 Phase 2 – AI 블로그 포스트 생성기 (Ghost 없이 직접 실행)
 ==========================================================
-Groq으로 SEO 블로그 글을 생성하고 HTML/Markdown 파일로 저장합니다.
+LLM(Gemini 무료 티어 우선)으로 SEO 블로그 글을 생성하고 HTML/Markdown 파일로 저장합니다.
 Ghost CMS가 있으면 자동 발행하고, 없으면 파일로 저장합니다.
 
 사용법:
@@ -19,10 +19,12 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete  # noqa: E402
+from utils.site import youtube_link  # noqa: E402
+
 load_dotenv()
 
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL   = "llama-3.3-70b-versatile"
 OUTPUT_DIR   = Path(__file__).parent / "output"
 
 # 트렌딩 틈새 주제 (수익성 높은 카테고리)
@@ -44,29 +46,23 @@ TRENDING_TOPICS = [
 AFFILIATE_LINKS = {}  # 레거시 호환성 유지 (실제 삽입은 link_inserter.py가 처리)
 
 
-def _groq_request(messages: list, groq_api_key: str, max_tokens: int = 2048) -> str:
-    headers = {"Authorization": f"Bearer {groq_api_key}", "Content-Type": "application/json"}
-    resp = requests.post(
-        GROQ_API_URL,
-        headers=headers,
-        json={"model": GROQ_MODEL, "messages": messages, "temperature": 0.7, "max_tokens": max_tokens},
-        timeout=60,
+def _llm_request(messages: list, max_tokens: int = 2048, json_mode: bool = False) -> str:
+    return llm_complete(
+        messages, max_tokens=max_tokens, temperature=0.7, json_mode=json_mode
     )
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
 
 
-def generate_blog_post(topic: str, groq_api_key: str) -> dict:
-    """Groq으로 완전한 SEO 블로그 포스트를 2단계로 생성합니다."""
+def generate_blog_post(topic: str) -> dict:
+    """LLM으로 완전한 SEO 블로그 포스트를 2단계로 생성합니다."""
     # Step 1: 메타데이터만 JSON으로
-    meta_raw = _groq_request([
+    meta_raw = _llm_request([
         {"role": "system", "content": (
             "Output valid JSON only (no markdown, no code blocks) with keys: "
             "'title' (max 70 chars SEO title), 'slug' (url-friendly), "
             "'meta_description' (155 chars), 'tags' (list of 5 strings)"
         )},
         {"role": "user", "content": f"Blog post topic: {topic}"},
-    ], groq_api_key, max_tokens=300)
+    ], max_tokens=300, json_mode=True)
     import re
     meta_raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
     if "```" in meta_raw:
@@ -88,7 +84,7 @@ def generate_blog_post(topic: str, groq_api_key: str) -> dict:
         }
 
     # Step 2: HTML 본문만 (JSON 불필요, 그냥 텍스트)
-    html_content = _groq_request([
+    html_content = _llm_request([
         {"role": "system", "content": (
             "Write a complete SEO blog post in clean HTML (body tags only). "
             "Structure: intro paragraph, 4-5 H2 sections (each 150-200 words), conclusion with CTA. "
@@ -97,7 +93,7 @@ def generate_blog_post(topic: str, groq_api_key: str) -> dict:
             "wrap them like: {{AFFILIATE:toolname}}"
         )},
         {"role": "user", "content": f"Write about: {topic}"},
-    ], groq_api_key, max_tokens=3000)
+    ], max_tokens=3000)
 
     meta["html"] = html_content
     meta["word_count"] = len(html_content.split())
@@ -149,9 +145,7 @@ def _build_post_cta() -> str:
   <div style="display:flex;flex-wrap:wrap;justify-content:center">
     {sub_btn}
     {kofi_btn}
-    <a href="https://www.youtube.com/@psg9806" target="_blank"
-       style="display:inline-block;background:#ff0000;color:#fff;padding:10px 22px;
-              border-radius:8px;text-decoration:none;font-weight:700;margin:4px 4px">▶ YouTube 구독</a>
+    {youtube_link("▶ YouTube 구독", style="display:inline-block;background:#ff0000;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:700;margin:4px 4px")}
   </div>
 </div>"""
 
@@ -242,7 +236,6 @@ def publish_to_ghost(post: dict, ghost_url: str, ghost_api_key: str) -> str | No
 
 
 def run(topic: str = None, count: int = 1):
-    groq_key = os.environ.get("GROQ_API_KEY", "")
     ghost_url = os.environ.get("GHOST_URL", "")
     ghost_key = os.environ.get("GHOST_ADMIN_API_KEY", "")
 
@@ -253,7 +246,7 @@ def run(topic: str = None, count: int = 1):
             sys.path.insert(0, str(Path(__file__).parent.parent))
             from research.trend_researcher import research as do_research
             print("🔍 Running trend research for blog topic...")
-            result = do_research(groq_api_key=groq_key)
+            result = do_research()
             topic = result["topic"]
             print(f"  📊 Trend-selected: '{topic[:60]}'")
         except Exception as e:
@@ -261,7 +254,7 @@ def run(topic: str = None, count: int = 1):
             topic = random.choice(TRENDING_TOPICS)
 
     print(f"\n📝 Generating: '{topic}'")
-    post = generate_blog_post(topic, groq_key)
+    post = generate_blog_post(topic)
     post["html"] = insert_affiliate_links(post["html"])
 
     saved = save_post(post, OUTPUT_DIR)

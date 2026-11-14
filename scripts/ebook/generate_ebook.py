@@ -1,7 +1,7 @@
 """
 Amazon KDP 자동 이북 생성기
 ============================
-Groq AI로 5,000~15,000자 분량의 전문 이북을 생성하고
+LLM(Gemini 무료 티어 우선)으로 5,000~15,000자 분량의 전문 이북을 생성하고
 HTML → PDF로 변환 후 KDP 업로드용으로 저장합니다.
 
 Amazon KDP 수익:
@@ -16,19 +16,21 @@ Amazon KDP 수익:
 
 무료 도구:
   - wkhtmltopdf (GitHub Actions에서 apt-get으로 설치)
-  - Groq API (무료 티어)
+  - Gemini API (무료 티어)
 
 필요한 환경변수:
-  GROQ_API_KEY — Groq API 키
+  GEMINI_API_KEY — Google AI Studio 무료 키 (https://aistudio.google.com/apikey)
 """
 
 import os, sys, json, re, time
-import requests
 from pathlib import Path
 from datetime import datetime
 
-GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete  # noqa: E402
+from utils.health import fail  # noqa: E402
+from utils.site import youtube_link  # noqa: E402
+
 OUTPUT_DIR = Path(__file__).parent / "output"
 
 # KDP에서 잘 팔리는 틈새 주제들 (경쟁 낮고 수요 높은)
@@ -97,22 +99,12 @@ EBOOK_TOPICS = [
 ]
 
 
-def groq_request(messages: list, groq_key: str, max_tokens: int = 4000) -> str:
-    resp = requests.post(GROQ_URL, headers={
-        "Authorization": f"Bearer {groq_key}",
-        "Content-Type": "application/json"
-    }, json={
-        "model": GROQ_MODEL,
-        "messages": messages,
-        "temperature": 0.7,
-        "max_tokens": max_tokens,
-    }, timeout=90)
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
+def _llm_request(messages: list, max_tokens: int = 4000) -> str:
+    return llm_complete(messages, max_tokens=max_tokens, temperature=0.7)
 
 
-def generate_chapter(title: str, chapter: str, audience: str, groq_key: str) -> str:
-    content = groq_request([
+def generate_chapter(title: str, chapter: str, audience: str) -> str:
+    content = _llm_request([
         {"role": "system", "content": (
             f"You are a bestselling author writing an ebook titled '{title}'. "
             f"Target audience: {audience}. "
@@ -122,7 +114,7 @@ def generate_chapter(title: str, chapter: str, audience: str, groq_key: str) -> 
             "No fluff, no filler. Every sentence must provide value."
         )},
         {"role": "user", "content": f"Write the full content for: {chapter}"}
-    ], groq_key, max_tokens=1500)
+    ], max_tokens=1500)
     return content
 
 
@@ -151,8 +143,7 @@ def _build_ebook_cta() -> str:
   accelerate your results:</p>
   <ul>
     <li><strong>Daily AI Income Newsletter (Free):</strong> {newsletter_link} — actionable tips every morning.</li>
-    <li><strong>YouTube Channel:</strong> <a href="https://www.youtube.com/@psg9806">AI Income Daily on YouTube</a>
-    — step-by-step video tutorials, free.</li>
+    {f'<li><strong>YouTube Channel:</strong> {youtube_link("AI Income Daily on YouTube")} — step-by-step video tutorials, free.</li>' if youtube_link() else ''}
     <li><strong>Start Selling Today:</strong> {printify_link} — zero upfront cost, free to join.</li>
     <li><strong>Offer AI Services:</strong> {fiverr_link} — list your first gig in 30 minutes.</li>
     {f'<li><strong>Support the author:</strong> {kofi_link} — helps create more free content.</li>' if kofi_link else ''}
@@ -256,10 +247,6 @@ def html_to_pdf(html_path: Path, pdf_path: Path) -> bool:
 
 
 def run(topic_idx: int = None):
-    groq_key = os.environ.get("GROQ_API_KEY", "")
-    if not groq_key:
-        print("GROQ_API_KEY not set")
-        return
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -274,9 +261,12 @@ def run(topic_idx: int = None):
     chapters_content = []
     for i, chapter in enumerate(topic["chapters"]):
         print(f"  [{i+1}/{len(topic['chapters'])}] {chapter[:60]}...")
-        content = generate_chapter(topic["title"], chapter, topic["audience"], groq_key)
+        content = generate_chapter(topic["title"], chapter, topic["audience"])
         chapters_content.append(content)
         time.sleep(1)  # Rate limit
+
+    if not any(c.strip() for c in chapters_content):
+        fail("ebook", "이북 챕터를 하나도 생성하지 못했습니다")
 
     html = build_ebook_html(topic, chapters_content)
 

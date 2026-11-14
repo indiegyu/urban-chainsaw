@@ -2,7 +2,7 @@
 실시간 트렌드 연구: Google Trends + YouTube 검색 + Reddit
 =========================================================
 각 무료 소스에서 AI/수익화 관련 인기 주제를 수집하고
-Groq이 최적 YouTube 영상 주제를 선정합니다.
+LLM(Gemini 무료 티어 우선)이 최적 YouTube 영상 주제를 선정합니다.
 
 무료 소스:
   - pytrends   (Google Trends 비공식 API, 키 불필요)
@@ -11,14 +11,16 @@ Groq이 최적 YouTube 영상 주제를 선정합니다.
 """
 
 import os
+import sys
 import json
 import time
 import requests
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, LLMError  # noqa: E402
+
 YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
-GROQ_API         = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL       = "llama-3.3-70b-versatile"
 
 STRATEGY_PATH = Path(__file__).parent.parent / "strategy" / "content_strategy.json"
 
@@ -125,8 +127,8 @@ def _google_trends(keywords: list[str]) -> dict[str, int]:
     return {}
 
 
-def pick_best_topic(research_data: dict, groq_api_key: str) -> str:
-    """Groq에게 연구 데이터를 주고 최적 YouTube 주제를 AI로 선정합니다."""
+def pick_best_topic(research_data: dict) -> str:
+    """LLM에게 연구 데이터를 주고 최적 YouTube 주제를 AI로 선정합니다."""
     context_parts = []
 
     yt_titles = research_data.get("youtube_titles", [])
@@ -150,12 +152,8 @@ def pick_best_topic(research_data: dict, groq_api_key: str) -> str:
     context = "\n\n".join(context_parts) if context_parts else "No external data. Use best judgment."
 
     try:
-        r = requests.post(GROQ_API, headers={
-            "Authorization": f"Bearer {groq_api_key}",
-            "Content-Type": "application/json",
-        }, json={
-            "model": GROQ_MODEL,
-            "messages": [
+        topic = llm_complete(
+            [
                 {"role": "system", "content": (
                     "You are a YouTube growth strategist. Pick the single BEST video topic for a faceless "
                     "AI/passive income channel that will maximize views and ad revenue. "
@@ -168,14 +166,13 @@ def pick_best_topic(research_data: dict, groq_api_key: str) -> str:
                     f"Based on this real-time data, pick the BEST YouTube video topic:\n\n{context}"
                 )},
             ],
-            "temperature": 0.7,
-            "max_tokens": 100,
-        }, timeout=30)
-        if r.status_code == 200:
-            topic = r.json()["choices"][0]["message"]["content"].strip().strip('"').strip("'")
+            temperature=0.7,
+            max_tokens=100,
+        ).strip().strip('"').strip("'")
+        if topic:
             return topic
-    except Exception as e:
-        print(f"  ⚠ Groq topic selection failed: {e}")
+    except (LLMError, Exception) as e:
+        print(f"  ⚠ LLM topic selection failed: {e}")
 
     # 폴백: 트렌드 상위 키워드 기반
     if trends:
@@ -187,16 +184,15 @@ def pick_best_topic(research_data: dict, groq_api_key: str) -> str:
     return random.choice(FALLBACK_TOPICS)
 
 
-def research(groq_api_key: str = None, youtube_api_key: str = None) -> dict:
+def research(youtube_api_key: str = None, **_) -> dict:
     """
     전체 트렌드 연구 수행 후 최적 주제 + SEO 컨텍스트를 반환합니다.
 
     Returns:
-        topic        (str)  Groq이 선정한 최적 주제
-        seo_context  (str)  스크립트 생성 시 Groq에 주입할 SEO 힌트
+        topic        (str)  LLM이 선정한 최적 주제
+        seo_context  (str)  스크립트 생성 시 LLM에 주입할 SEO 힌트
         raw          (dict) 수집된 원본 데이터
     """
-    groq_key = groq_api_key or os.environ.get("GROQ_API_KEY", "")
     yt_key   = youtube_api_key or os.environ.get("YOUTUBE_API_KEY", "")
 
     # 전략 파일 기반 키워드 사용 (성과 기반으로 진화)
@@ -230,11 +226,11 @@ def research(groq_api_key: str = None, youtube_api_key: str = None) -> dict:
 
     raw = {"youtube_titles": youtube_titles, "reddit_hot": reddit_posts, "trends": trends}
 
-    # 4. Groq으로 최적 주제 AI 선정
-    topic = pick_best_topic(raw, groq_key)
+    # 4. LLM으로 최적 주제 AI 선정
+    topic = pick_best_topic(raw)
     print(f"  ✅ Topic selected: {topic[:70]}")
 
-    # 5. SEO 컨텍스트 구성 (스크립트 생성 Groq 프롬프트에 삽입됨)
+    # 5. SEO 컨텍스트 구성 (스크립트 생성 LLM 프롬프트에 삽입됨)
     seo_lines = []
     if youtube_titles:
         seo_lines.append("TOP YOUTUBE TITLES IN NICHE (for title/tag inspiration):")

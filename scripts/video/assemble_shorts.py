@@ -7,19 +7,21 @@ YouTube Shorts 자동 제작
 - 알고리즘이 신규 채널에 적극 추천 → 구독자 최단 경로
 
 기존 assemble_video.py와 동일한 3단계 구조:
-  1. Groq → 60초 분량 스크립트 + 메타데이터
+  1. LLM(Gemini 무료 티어 우선) → 60초 분량 스크립트 + 메타데이터
   2. gTTS / ElevenLabs → 음성
   3. PIL 세로 썸네일 + FFmpeg 이미지 루프
 """
 
 import os
+import sys
 import json
 import subprocess
-import requests
 from pathlib import Path
 
-GROQ_API   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
 
 ELEVENLABS_API      = "https://api.elevenlabs.io/v1"
 ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Rachel
@@ -27,19 +29,15 @@ ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Rachel
 OUTPUT_DIR = Path(__file__).parent / "output_shorts"
 
 
-def _groq_post(headers, messages, max_tokens=400) -> str:
-    r = requests.post(GROQ_API, headers=headers,
-                      json={"model": GROQ_MODEL, "messages": messages,
-                            "temperature": 0.85, "max_tokens": max_tokens},
-                      timeout=30)
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"].strip()
+def _llm(messages: list, max_tokens: int = 400, temperature: float = 0.85) -> str:
+    return llm_complete(
+        messages, max_tokens=max_tokens, temperature=temperature
+    )
 
 
-def generate_shorts_script(groq_key: str) -> dict:
+def generate_shorts_script() -> dict:
     """트렌드 기반 60초 Shorts 스크립트 생성."""
-    import re, sys
-    headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
+    import re
 
     # 전략 파일에서 상위 토픽 로드
     strategy_path = Path(__file__).parent.parent / "strategy" / "content_strategy.json"
@@ -53,7 +51,7 @@ def generate_shorts_script(groq_key: str) -> dict:
     topic_hint = f"Use one of these proven topics: {', '.join(top_topics[:3])}" if top_topics else ""
 
     # 메타데이터
-    meta_raw = _groq_post(headers, [
+    meta_raw = _llm([
         {"role": "system", "content": (
             "Output ONLY valid JSON with:\n"
             "- title: YouTube Shorts title (max 60 chars). Include #Shorts. "
@@ -66,12 +64,13 @@ def generate_shorts_script(groq_key: str) -> dict:
         {"role": "user", "content": f"Create a viral YouTube Short about AI income. {topic_hint}"},
     ], max_tokens=300)
     raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', meta_raw)
-    if "```" in raw:
-        raw = raw.split("```")[1].lstrip("json").strip()
-    meta = json.loads(raw)
+    try:
+        meta = json.loads(raw)
+    except json.JSONDecodeError:
+        meta = extract_json(raw)
 
     # 스크립트 (150~180 words = ~55초)
-    script = _groq_post(headers, [
+    script = _llm([
         {"role": "system", "content": (
             "Write a 150-word YouTube Shorts script. Rules:\n"
             "1. FIRST SENTENCE: shocking hook that stops the scroll (stat, claim, or question)\n"
@@ -188,7 +187,6 @@ def run():
     from datetime import datetime
     load_dotenv()
 
-    groq_key   = os.environ["GROQ_API_KEY"]
     eleven_key = os.environ.get("ELEVENLABS_API_KEY", "")
 
     ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -196,7 +194,7 @@ def run():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print("\n🎬 [Shorts] Generating script...")
-    meta = generate_shorts_script(groq_key)
+    meta = generate_shorts_script()
     (out_dir / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2))
     print(f"  ✓ Title: {meta['title'][:60]}")
 

@@ -62,7 +62,7 @@ def main():
     creds_file = base / "credentials.json"
     tok_file   = base / "token.json"
     tok_yt     = base / "token_yt.json"
-    groq_env   = base / ".env"
+    env_file   = base / ".env"
 
     creds = json.loads(creds_file.read_text())
     app   = creds.get("installed") or creds.get("web") or {}
@@ -76,11 +76,14 @@ def main():
         "YT_FULL_REFRESH_TOKEN": tyt.get("refresh_token", ""),
     }
 
-    # .env 파일에서 GROQ_API_KEY 추가
-    if groq_env.exists():
-        for line in groq_env.read_text().splitlines():
-            if line.startswith("GROQ_API_KEY="):
-                secrets["GROQ_API_KEY"] = line.split("=", 1)[1].strip()
+    # .env 파일에서 LLM 키(GEMINI 우선 + 선택 폴백) 추가
+    if env_file.exists():
+        wanted = ("GEMINI_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY")
+        for line in env_file.read_text().splitlines():
+            key, _, value = line.partition("=")
+            key = key.strip()
+            if key in wanted and value.strip():
+                secrets[key] = value.strip()
 
     # 비어있는 값 제거
     secrets = {k: v for k, v in secrets.items() if v}

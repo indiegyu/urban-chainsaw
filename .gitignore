@@ -17,6 +17,8 @@ scripts/ebook/output/*.pdf
 
 # 스케줄러 로그 및 리포트
 logs/
+# 실행 중에만 쓰는 헬스체크 기록 (Job Summary/Discord로 전달, 커밋 불필요)
+.github/run_logs/health.json
 reports/
 
 # Python

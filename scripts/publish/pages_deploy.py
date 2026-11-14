@@ -16,9 +16,12 @@ AdSense 승인 요건:
   ADSENSE_CLIENT_ID — ca-pub-XXXX (AdSense 승인 후 입력)
 """
 
-import os, shutil, json, re
+import os, sys, shutil, json, re
 from pathlib import Path
 from datetime import datetime
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.site import youtube_link  # noqa: E402
 
 BLOG_OUTPUT = Path(__file__).parent.parent / "blog" / "output"
 DOCS_DIR    = Path(__file__).parent.parent.parent / "docs"
@@ -181,7 +184,7 @@ footer {{ text-align:center; padding:28px 16px; color:#94a3b8; font-size:.82rem;
 <div class="top-bar">
   <span>🤖 AI Income Daily — 매일 자동 생성되는 수익화 블로그</span>
   <span>
-    <a href="https://www.youtube.com/@psg9806" target="_blank">▶ YouTube</a> &nbsp;|&nbsp;
+    {youtube_link("▶ YouTube") + " &nbsp;|&nbsp;" if youtube_link() else ""}
     <a href="dashboard.html">📊 대시보드</a>
     {f'&nbsp;|&nbsp;<a href="https://ko-fi.com/{KOFI_USER}" target="_blank">☕ Ko-fi</a>' if KOFI_USER else ""}
   </span>
@@ -192,9 +195,10 @@ footer {{ text-align:center; padding:28px 16px; color:#94a3b8; font-size:.82rem;
   <h1>🤖 {SITE_NAME}</h1>
   <p>{SITE_TAGLINE}</p>
   <div class="cta-strip">
-    <a href="https://www.youtube.com/@psg9806" target="_blank" class="cta-strip a btn-red">▶ YouTube 구독</a>
+    {youtube_link("▶ YouTube 구독", class_name="cta-strip a btn-red")}
     {f'<a href="https://www.beehiiv.com/subscribe/{BEEHIIV_PUB}" target="_blank" class="cta-strip a btn-indigo">📧 뉴스레터 구독</a>' if BEEHIIV_PUB else ""}
     {f'<a href="https://ko-fi.com/{KOFI_USER}" target="_blank" class="cta-strip a btn-ko">☕ 후원하기</a>' if KOFI_USER else ""}
+    <a href="store.html" style="background:#10b981;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.88em">🛒 Digital Products</a>
     <a href="ai-tools.html" style="background:#1e293b;color:#94a3b8;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.88em">🔧 AI Tools</a>
   </div>
 </header>
@@ -232,6 +236,17 @@ footer {{ text-align:center; padding:28px 16px; color:#94a3b8; font-size:.82rem;
       <a class="sidebar-tool" href="ai-tools.html" style="color:#6366f1;font-weight:700;font-size:.85em;display:block;margin-top:10px;text-align:center;text-decoration:none">모든 AI 도구 보기 →</a>
     </div>
 
+    <div class="sidebar-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#bbf7d0">
+      <h3 style="color:#065f46">🛒 디지털 상품</h3>
+      <a class="sidebar-tool" href="store.html" style="background:#fff;border-radius:8px;padding:10px;display:flex;border:1px solid #bbf7d0;text-decoration:none;color:#065f46;align-items:flex-start;gap:8px">
+        <span>🎬</span><span><strong>YouTube Playbook</strong><br><small style="color:#64748b">$9 — Faceless 채널 완전 가이드</small></span>
+      </a>
+      <a class="sidebar-tool" href="store.html" style="background:#fff;border-radius:8px;padding:10px;margin-top:8px;display:flex;border:1px solid #bbf7d0;text-decoration:none;color:#065f46;align-items:flex-start;gap:8px">
+        <span>⚡</span><span><strong>50 ChatGPT Prompts</strong><br><small style="color:#64748b">$5 — YouTube 크리에이터용</small></span>
+      </a>
+      <a href="store.html" style="color:#059669;font-weight:700;font-size:.85em;display:block;margin-top:10px;text-align:center;text-decoration:none">모든 상품 보기 →</a>
+    </div>
+
     {f'''<div class="sidebar-card" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-color:#312e81">
       <h3 style="color:#a5b4fc">📧 무료 뉴스레터</h3>
       <p style="color:#94a3b8;font-size:.82em;line-height:1.6;margin-bottom:14px">매일 AI 수익화 팁 · 스팸 없음</p>
@@ -256,7 +271,7 @@ footer {{ text-align:center; padding:28px 16px; color:#94a3b8; font-size:.82rem;
 <footer>
   <p>© {datetime.now().year} {SITE_NAME} · Powered by AI · <a href="privacy.html">Privacy Policy</a> · <a href="dashboard.html">Revenue Dashboard</a></p>
   <p style="margin-top:8px">
-    <a href="https://www.youtube.com/@psg9806" target="_blank" style="color:#6366f1">YouTube</a> &nbsp;|&nbsp;
+    {youtube_link("YouTube", style="color:#6366f1") + " &nbsp;|&nbsp;" if youtube_link() else ""}
     <a href="ai-tools.html" style="color:#6366f1">AI Tools Directory</a>
     {f'&nbsp;|&nbsp;<a href="https://ko-fi.com/{KOFI_USER}" target="_blank" style="color:#ff5e5b">Support Us ☕</a>' if KOFI_USER else ""}
   </p>

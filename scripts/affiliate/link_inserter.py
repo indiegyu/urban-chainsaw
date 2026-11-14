@@ -27,8 +27,13 @@ HTML 본문에서 키워드를 감지하고 Affiliate 링크로 자동 교체합
 
 import re
 import os
+import sys
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.site import youtube_link  # noqa: E402
 
 
 def _url(base: str, param: str, env_key: str, fallback: str) -> str:
@@ -247,11 +252,7 @@ def build_cta_box(beehiiv_pub_id: str = "", kofi_username: str = "") -> str:
   <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px">
     {subscribe_btn}
     {kofi_btn}
-    <a href="https://www.youtube.com/@psg9806" target="_blank" rel="noopener"
-       style="display:inline-block;background:#ff0000;color:#fff;padding:11px 24px;
-              border-radius:8px;text-decoration:none;font-weight:700;font-size:.9em;margin:4px">
-      ▶ YouTube 구독
-    </a>
+    {youtube_link("▶ YouTube 구독", style="display:inline-block;background:#ff0000;color:#fff;padding:11px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9em;margin:4px")}
   </div>
 </div>"""
 

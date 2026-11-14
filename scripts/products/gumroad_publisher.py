@@ -9,10 +9,14 @@ Gumroad보다 수수료 낮음 (5% vs 10%), API 완전 오픈.
 """
 
 import os
+import sys
 import json
 import requests
 from pathlib import Path
 from datetime import datetime
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.site import channel_line  # noqa: E402
 
 LS_API        = "https://api.lemonsqueezy.com/v1"
 OUTPUT_DIR    = Path(__file__).parent / "output"
@@ -116,8 +120,8 @@ def build_description(product: dict) -> str:
         "✅ Instant digital download\n"
         "✅ Practical, actionable content\n"
         "✅ Based on real AI income strategies\n\n"
-        "📌 From the AI Income Daily YouTube channel\n"
-        "🔔 Free daily tips: youtube.com/@AIIncomeDaily\n\n"
+        "📌 From the AI Income Daily team\n"
+        f"{channel_line('🔔 Free daily tips:')}\n\n"
         "30-day money-back guarantee."
     )
 

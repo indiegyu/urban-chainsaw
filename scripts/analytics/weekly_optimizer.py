@@ -3,22 +3,22 @@
 =====================================
 매주 월요일 실행:
   1. YouTube API로 모든 영상 조회수/좋아요/댓글 수집
-  2. Groq이 데이터 분석 → 다음 주 전략 도출
+  2. LLM(Gemini 무료 티어 우선)이 데이터 분석 → 다음 주 전략 도출
   3. content_strategy.json 자동 업데이트
 
 완전 무인화: 사람 개입 없이 시스템이 스스로 학습합니다.
 """
 
-import os
 import json
 import requests
 import sys
 from pathlib import Path
 from datetime import datetime
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
+
 YOUTUBE_API = "https://www.googleapis.com/youtube/v3"
-GROQ_API    = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL  = "llama-3.3-70b-versatile"
 STRATEGY_PATH = Path(__file__).parent.parent / "strategy" / "content_strategy.json"
 TOKEN_PATH    = "token.json"
 
@@ -72,8 +72,8 @@ def get_channel_videos(token: str) -> list[dict]:
     return videos
 
 
-def groq_analyze(videos: list[dict], current_strategy: dict, groq_key: str) -> dict:
-    """Groq으로 성과 데이터를 분석하고 새 전략을 JSON으로 반환합니다."""
+def analyze_performance(videos: list[dict], current_strategy: dict) -> dict:
+    """LLM으로 성과 데이터를 분석하고 새 전략을 JSON으로 반환합니다."""
     if not videos:
         print("  ⚠ 영상 데이터 없음 — 전략 업데이트 스킵")
         return {}
@@ -89,11 +89,8 @@ def groq_analyze(videos: list[dict], current_strategy: dict, groq_key: str) -> d
          if bottom5 else "")
     )
 
-    r = requests.post(GROQ_API, headers={
-        "Authorization": f"Bearer {groq_key}", "Content-Type": "application/json",
-    }, json={
-        "model": GROQ_MODEL,
-        "messages": [
+    raw_text = llm_complete(
+        [
             {"role": "system", "content": (
                 "You are a YouTube channel strategist. Analyze video performance data and output "
                 "ONLY valid JSON (no markdown) with these exact keys:\n"
@@ -111,20 +108,17 @@ def groq_analyze(videos: list[dict], current_strategy: dict, groq_key: str) -> d
                 f"Goal: maximize views AND advertiser CPM (finance/AI = high CPM)"
             )},
         ],
-        "temperature": 0.5,
-        "max_tokens": 800,
-    }, timeout=30)
-
-    if r.status_code != 200:
-        print(f"  ✗ Groq 분석 실패: {r.status_code}")
-        return {}
+        temperature=0.5,
+        max_tokens=800,
+        json_mode=True,
+    )
 
     import re
-    raw = r.json()["choices"][0]["message"]["content"].strip()
-    raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', raw)
-    if "```" in raw:
-        raw = raw.split("```")[1].lstrip("json").strip()
-    return json.loads(raw)
+    raw = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', raw_text)
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return extract_json(raw)
 
 
 def update_strategy(new_data: dict, videos: list[dict]):
@@ -141,7 +135,7 @@ def update_strategy(new_data: dict, videos: list[dict]):
             "top_video_views": videos[0]["views"],
         }
 
-    # Groq 분석 결과 병합
+    # LLM 분석 결과 병합
     for key in ["top_performing_formats", "top_performing_topics",
                 "avoid_topics", "best_thumbnail_style", "product_ideas"]:
         if key in new_data:
@@ -162,7 +156,6 @@ def update_strategy(new_data: dict, videos: list[dict]):
 def run():
     from dotenv import load_dotenv
     load_dotenv()
-    groq_key = os.environ["GROQ_API_KEY"]
 
     print("📊 주간 성과 분석 시작...")
 
@@ -177,10 +170,10 @@ def run():
         print(f"  ✗ YouTube 데이터 수집 실패: {e}")
         videos = []
 
-    # 2. Groq 분석
-    print("\n🤖 Groq 전략 분석 중...")
+    # 2. LLM 분석
+    print("\n🤖 LLM 전략 분석 중...")
     current = json.loads(STRATEGY_PATH.read_text())
-    new_strategy = groq_analyze(videos, current, groq_key)
+    new_strategy = analyze_performance(videos, current)
 
     # 3. 전략 업데이트
     print("\n📝 전략 파일 업데이트...")

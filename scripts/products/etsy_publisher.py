@@ -16,10 +16,14 @@ OAuth 토큰 발급:
 """
 
 import os
+import sys
 import json
 import requests
 from pathlib import Path
 from datetime import datetime
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.site import channel_line  # noqa: E402
 
 ETSY_API      = "https://openapi.etsy.com/v3/application"
 OUTPUT_DIR    = Path(__file__).parent / "output"
@@ -87,8 +91,8 @@ def build_etsy_description(product: dict) -> str:
         "✅ Based on real AI income strategies\n"
         "✅ Beginner-friendly\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
-        "📌 From AI Income Daily — Subscribe on YouTube for free daily tips!\n"
-        "🔔 youtube.com/@AIIncomeDaily\n\n"
+        "📌 From AI Income Daily — free daily tips every day!\n"
+        f"{channel_line('🔔 Subscribe:')}\n\n"
         "30-day satisfaction guarantee."
     )
 

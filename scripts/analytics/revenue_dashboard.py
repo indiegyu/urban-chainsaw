@@ -4,9 +4,12 @@
 실제 작동 중인 파이프라인만 표시.
 """
 
-import os, json, requests
+import os, sys, json, requests
 from pathlib import Path
 from datetime import datetime, timezone
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from utils.site import youtube_link  # noqa: E402
 
 YOUTUBE_API   = "https://www.googleapis.com/youtube/v3"
 STRATEGY_PATH = Path("scripts/strategy/content_strategy.json")
@@ -252,7 +255,7 @@ def build_dashboard(yt: dict, strategy: dict, outputs: dict, pipe_status: dict =
 <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
   <a href="https://studio.youtube.com" target="_blank" class="btn-primary">🎬 YouTube Studio</a>
   <a href="https://adsense.google.com" target="_blank" class="btn-secondary">💵 AdSense 출금</a>
-  <a href="https://www.youtube.com/@psg9806" target="_blank" class="btn-secondary">👁 채널 보기</a>
+  {youtube_link("👁 채널 보기", class_name="btn-secondary")}
 </div>"""
     else:
         yt_body = f'<p class="error">⚠ YouTube 데이터 로드 실패: {yt.get("error","token 확인 필요")}</p>'

@@ -7,15 +7,16 @@ Partner Program 참여 시 읽기 수에 비례한 수익 (월 $100~$1000+) 을 
 
 필요한 환경변수:
   MEDIUM_TOKEN    — https://medium.com/me/settings 에서 Integration Token 발급
-  GROQ_API_KEY    — 태그 자동 생성용
+  GEMINI_API_KEY  — 태그 자동 생성용 (무료 티어, 선택)
 """
 
 import os, sys, json, re, requests
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
+
 MEDIUM_API = "https://api.medium.com/v1"
-GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL  = "llama-3.3-70b-versatile"
 
 BLOG_OUTPUT   = Path(__file__).parent.parent / "blog" / "output"
 PUBLISHED_LOG = Path(__file__).parent / ".medium_published.json"
@@ -39,27 +40,30 @@ def get_medium_user_id(token: str) -> str:
     return resp.json()["data"]["id"]
 
 
-def groq_tags(title: str, groq_key: str) -> list:
+def llm_tags(title: str) -> list:
+    default_tags = ["Productivity", "Technology", "Side Hustle", "AI", "Make Money Online"]
+    if not os.environ.get("GEMINI_API_KEY") and not os.environ.get("GROQ_API_KEY"):
+        return default_tags
     try:
-        resp = requests.post(GROQ_URL, headers={
-            "Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"
-        }, json={
-            "model": GROQ_MODEL,
-            "messages": [
+        raw = llm_complete(
+            [
                 {"role": "system", "content": "Output a JSON array of exactly 5 Medium tags (title case, max 25 chars). Examples: Productivity, Artificial Intelligence, Make Money Online, Side Hustle, Technology"},
-                {"role": "user", "content": f"Title: {title}"}
+                {"role": "user", "content": f"Title: {title}"},
             ],
-            "max_tokens": 100, "temperature": 0.3
-        }, timeout=30)
-        raw = resp.json()["choices"][0]["message"]["content"].strip()
-        raw = re.sub(r'```.*?```', '', raw, flags=re.S).strip()
-        return json.loads(raw)[:5]
+            max_tokens=100,
+            temperature=0.3,
+            json_mode=True,
+        )
+        tags = extract_json(raw)
+        if isinstance(tags, dict):
+            tags = tags.get("tags", [])
+        return tags[:5] or default_tags
     except Exception:
-        return ["Productivity", "Technology", "Side Hustle", "AI", "Make Money Online"]
+        return default_tags
 
 
 def publish_to_medium(json_path: Path, html_path: Path,
-                      user_id: str, token: str, groq_key: str) -> dict:
+                      user_id: str, token: str) -> dict:
     meta = json.loads(json_path.read_text())
     html = html_path.read_text()
 
@@ -67,7 +71,7 @@ def publish_to_medium(json_path: Path, html_path: Path,
     body_match = re.search(r'<body[^>]*>(.*?)</body>', html, re.S)
     body = body_match.group(1) if body_match else html
 
-    tags = groq_tags(meta.get("title", ""), groq_key)
+    tags = llm_tags(meta.get("title", ""))
 
     payload = {
         "title": meta.get("title", "Untitled"),
@@ -95,7 +99,6 @@ def publish_to_medium(json_path: Path, html_path: Path,
 
 def run():
     token    = os.environ.get("MEDIUM_TOKEN", "")
-    groq_key = os.environ.get("GROQ_API_KEY", "")
 
     if not token:
         print("MEDIUM_TOKEN not set — skipping Medium publish")
@@ -124,7 +127,7 @@ def run():
         if not html_f.exists():
             continue
         try:
-            publish_to_medium(jf, html_f, user_id, token, groq_key)
+            publish_to_medium(jf, html_f, user_id, token)
             published.add(stem)
             posted += 1
         except Exception as e:

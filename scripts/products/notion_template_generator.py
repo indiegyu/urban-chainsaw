@@ -1,17 +1,19 @@
 """
 Notion 템플릿 자동 생성기
 ==========================
-Groq AI로 Notion 템플릿을 자동 생성하고
+LLM(Gemini 무료 티어 우선)으로 Notion 템플릿을 자동 생성하고
 Etsy/Lemon Squeezy에 디지털 상품으로 등록합니다.
 
 수익: Notion 템플릿은 Etsy에서 $5-25에 판매, 월 수백 달러 가능
 """
-import os, json, requests
+import sys, json
 from pathlib import Path
 from datetime import datetime
 
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json  # noqa: E402
+from utils.health import fail  # noqa: E402
+
 OUTPUT_DIR = Path(__file__).parent / "notion_templates"
 
 TEMPLATE_IDEAS = [
@@ -22,7 +24,7 @@ TEMPLATE_IDEAS = [
     "Freelance Client CRM — 고객 관리 + 인보이스 추적",
 ]
 
-def generate_template(topic: str, groq_key: str) -> dict:
+def generate_template(topic: str) -> dict:
     prompt = f"""Create a detailed Notion template specification for: "{topic}"
 
 Return JSON with:
@@ -38,37 +40,32 @@ Return JSON with:
 }}"""
 
     try:
-        resp = requests.post(GROQ_URL,
-            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
-            json={"model": GROQ_MODEL, "messages": [{"role": "user", "content": prompt}],
-                  "max_tokens": 1000},
-            timeout=30)
-        content = resp.json()["choices"][0]["message"]["content"]
-        import re
-        m = re.search(r"\{[\s\S]+\}", content)
-        if m:
-            return json.loads(m.group(0))
+        content = llm_complete(
+            [{"role": "user", "content": prompt}],
+            max_tokens=1000,
+            temperature=0.7,
+            json_mode=True,
+        )
+        return extract_json(content)
     except Exception as e:
-        print(f"  ⚠ Groq error: {e}")
+        print(f"  ⚠ LLM error: {e}")
     return {}
 
 def run():
-    groq_key = os.environ.get("GROQ_API_KEY", "")
-    if not groq_key:
-        print("⚠ GROQ_API_KEY 미설정")
-        return
-
     OUTPUT_DIR.mkdir(exist_ok=True)
     import random
     topic = random.choice(TEMPLATE_IDEAS)
     print(f"📋 Notion 템플릿 생성: {topic}")
 
-    template = generate_template(topic, groq_key)
+    template = generate_template(topic)
     if template:
         filename = OUTPUT_DIR / f"template_{datetime.now().strftime('%Y%m%d')}.json"
         filename.write_text(json.dumps(template, indent=2, ensure_ascii=False))
         print(f"  ✓ 저장: {filename.name}")
         print(f"  ✓ 가격: ${template.get('price_usd', 9)}")
+    else:
+        # 거짓 성공 방지: 템플릿을 못 만들면 워크플로를 실패시킵니다.
+        fail("notion", f"Notion 템플릿 생성 실패: '{topic[:40]}'")
 
 if __name__ == "__main__":
     run()

@@ -8,17 +8,17 @@
   1. 현재 활성화된 수익 스트림 목록 확인
   2. 미활성 스트림 중 우선순위 높은 것 선택
   3. 해당 스트림의 워크플로 파일 + 스크립트 자동 생성
-  4. Groq으로 현재 전략 기반 콘텐츠 최적화 실행
+  4. LLM(Gemini 우선)으로 현재 전략 기반 콘텐츠 최적화 실행
   5. content_strategy.json 업데이트 (수익 모델 추가)
 """
 
 import os, json, sys, subprocess
 from pathlib import Path
 from datetime import datetime
-import requests
 
-GROQ_URL    = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL  = "llama-3.3-70b-versatile"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete  # noqa: E402
+
 STRATEGY    = Path(__file__).parent.parent / "strategy" / "content_strategy.json"
 WORKFLOWS   = Path(__file__).parent.parent.parent / ".github" / "workflows"
 SCRIPTS_DIR = Path(__file__).parent.parent
@@ -129,18 +129,13 @@ STREAM_CATALOG = [
 ]
 
 
-def groq_call(prompt: str, groq_key: str) -> str:
+def llm_call(prompt: str) -> str:
     try:
-        resp = requests.post(
-            GROQ_URL,
-            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
-            json={"model": GROQ_MODEL, "messages": [{"role": "user", "content": prompt}],
-                  "max_tokens": 2000, "temperature": 0.7},
-            timeout=30,
+        return llm_complete(
+            [{"role": "user", "content": prompt}], max_tokens=2000, temperature=0.7
         )
-        return resp.json()["choices"][0]["message"]["content"].strip()
     except Exception as e:
-        return f"[Groq error: {e}]"
+        return f"[LLM error: {e}]"
 
 
 def load_strategy() -> dict:
@@ -243,17 +238,18 @@ def generate_notion_template_generator():
     script_path.write_text('''"""
 Notion 템플릿 자동 생성기
 ==========================
-Groq AI로 Notion 템플릿을 자동 생성하고
+LLM(Gemini 무료 티어 우선)으로 Notion 템플릿을 자동 생성하고
 Etsy/Lemon Squeezy에 디지털 상품으로 등록합니다.
 
 수익: Notion 템플릿은 Etsy에서 $5-25에 판매, 월 수백 달러 가능
 """
-import os, json, requests
+import os, sys, json
 from pathlib import Path
 from datetime import datetime
 
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from llm import complete as llm_complete, extract_json
+
 OUTPUT_DIR = Path(__file__).parent / "notion_templates"
 
 TEMPLATE_IDEAS = [
@@ -264,7 +260,7 @@ TEMPLATE_IDEAS = [
     "Freelance Client CRM — 고객 관리 + 인보이스 추적",
 ]
 
-def generate_template(topic: str, groq_key: str) -> dict:
+def generate_template(topic: str) -> dict:
     prompt = f"""Create a detailed Notion template specification for: "{topic}"
 
 Return JSON with:
@@ -280,32 +276,25 @@ Return JSON with:
 }}"""
 
     try:
-        resp = requests.post(GROQ_URL,
-            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
-            json={"model": GROQ_MODEL, "messages": [{"role": "user", "content": prompt}],
-                  "max_tokens": 1000},
-            timeout=30)
-        content = resp.json()["choices"][0]["message"]["content"]
-        import re
-        m = re.search(r"\\{[\\s\\S]+\\}", content)
-        if m:
-            return json.loads(m.group(0))
+        content = llm_complete(
+            [{"role": "user", "content": prompt}],
+            max_tokens=1000,
+            temperature=0.7,
+            json_mode=True,
+        )
+        return extract_json(content)
     except Exception as e:
-        print(f"  ⚠ Groq error: {e}")
+        print(f"  ⚠ LLM error: {e}")
     return {}
 
 def run():
-    groq_key = os.environ.get("GROQ_API_KEY", "")
-    if not groq_key:
-        print("⚠ GROQ_API_KEY 미설정")
-        return
 
     OUTPUT_DIR.mkdir(exist_ok=True)
     import random
     topic = random.choice(TEMPLATE_IDEAS)
     print(f"📋 Notion 템플릿 생성: {topic}")
 
-    template = generate_template(topic, groq_key)
+    template = generate_template(topic)
     if template:
         filename = OUTPUT_DIR / f"template_{datetime.now().strftime('%Y%m%d')}.json"
         filename.write_text(json.dumps(template, indent=2, ensure_ascii=False))
@@ -363,8 +352,8 @@ if __name__ == "__main__":
     print(f"  ✓ TikTok 포스터 생성: {script_path}")
 
 
-def update_strategy_with_expansion(strategy: dict, groq_key: str):
-    """Groq으로 현재 전략 분석 후 수익 모델 개선 제안"""
+def update_strategy_with_expansion(strategy: dict):
+    """LLM으로 현재 전략 분석 후 수익 모델 개선 제안"""
     topics = strategy.get("top_performing_topics", [])
     weekly_stats = strategy.get("weekly_stats", {})
     activated = strategy.get("activated_streams", [])
@@ -385,7 +374,7 @@ Based on the top performing topics and current performance, suggest:
 Keep suggestions specific, actionable, and focused on maximum revenue.
 Return as JSON: {{"content_angles": [], "product_ideas": [], "new_stream": ""}}"""
 
-    response = groq_call(prompt, groq_key)
+    response = llm_call(prompt)
     try:
         import re
         m = re.search(r"\{[\s\S]+\}", response)
@@ -443,15 +432,16 @@ def print_income_map(strategy: dict):
 
 
 def run():
-    groq_key = os.environ.get("GROQ_API_KEY", "")
     strategy = load_strategy()
 
     print("🚀 수익 파이프라인 확장 엔진 시작...")
 
-    # 1. Groq으로 전략 최적화
-    if groq_key:
-        print("\n📊 Groq 전략 분석 중...")
-        update_strategy_with_expansion(strategy, groq_key)
+    # 1. LLM으로 전략 최적화
+    try:
+        print("\n📊 LLM 전략 분석 중...")
+        update_strategy_with_expansion(strategy)
+    except Exception as e:
+        print(f"  ⚠ 전략 분석 생략: {e}")
 
     # 2. 미활성 스트림 중 다음 우선순위 활성화
     activated = get_activated_streams(strategy)

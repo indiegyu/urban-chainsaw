@@ -32,7 +32,9 @@ jobs:
 
       - name: Analyze performance & update strategy
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python -u scripts/analytics/weekly_optimizer.py
 
       - name: Generate revenue dashboard

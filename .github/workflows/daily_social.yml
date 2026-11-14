@@ -27,7 +27,9 @@ jobs:
         env:
           BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
           BEEHIIV_PUB_ID: ${{ secrets.BEEHIIV_PUB_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
           KOFI_USERNAME: ${{ secrets.KOFI_USERNAME }}
           PRINTIFY_AFF_ID: ${{ secrets.PRINTIFY_AFF_ID }}

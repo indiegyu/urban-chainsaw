@@ -50,10 +50,13 @@ jobs:
       - name: Assemble video
         id: assemble
         env:
+          GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           YOUTUBE_API_KEY:    ${{ secrets.YOUTUBE_API_KEY }}
         run: |
+          set -o pipefail
           TOPIC="${{ github.event.inputs.topic }}"
           if [ -z "$TOPIC" ]; then
             # 트렌드 연구 후 최적 주제 자동 선택
@@ -61,22 +64,29 @@ jobs:
           else
             python -u scripts/video/assemble_video.py "$TOPIC" 2>&1 | tee /tmp/assemble.log
           fi
-          # tee 성공 여부와 무관하게 python 종료 코드를 전달
-          exit ${PIPESTATUS[0]}
 
       - name: Upload to YouTube
         id: upload
         env:
           GOOGLE_TOKEN_PATH: token.json
         run: |
+          set -o pipefail
           OUTPUT_DIR=$(ls -td scripts/video/output/*/ 2>/dev/null | head -1)
           if [ -z "$OUTPUT_DIR" ]; then
             echo "ERROR: No video output directory found" | tee /tmp/upload.log
             exit 1
           fi
+          # 저장소에 커밋된 예전 영상을 다시 올리지 않도록 이번 실행 산출물인지 확인
+          if [ ! -f "${OUTPUT_DIR}final.mp4" ]; then
+            echo "ERROR: ${OUTPUT_DIR} has no final.mp4" | tee /tmp/upload.log
+            exit 1
+          fi
+          if [ -n "$(find "${OUTPUT_DIR}final.mp4" -mmin +90 2>/dev/null)" ]; then
+            echo "ERROR: ${OUTPUT_DIR}final.mp4 is older than 90 minutes — stale output, not uploading" | tee /tmp/upload.log
+            exit 1
+          fi
           echo "Uploading from: $OUTPUT_DIR"
           python -u scripts/video/upload_youtube.py "$OUTPUT_DIR" 2>&1 | tee /tmp/upload.log
-          exit ${PIPESTATUS[0]}
 
       - name: Save run status
         if: always()

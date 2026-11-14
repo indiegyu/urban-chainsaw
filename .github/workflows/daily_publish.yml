@@ -40,14 +40,18 @@ jobs:
       - name: Publish to Dev.to
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_PAGES_URL: ${{ secrets.GITHUB_PAGES_URL }}
         run: python scripts/publish/devto_publisher.py
 
       # ── 3. AI Tools 디렉토리 빌드 (SEO 자산) ─────────────────────
       - name: Build AI Tools Directory
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PRINTIFY_AFF_ID: ${{ secrets.PRINTIFY_AFF_ID }}
           FIVERR_AFF_ID: ${{ secrets.FIVERR_AFF_ID }}
           HOSTINGER_AFF_ID: ${{ secrets.HOSTINGER_AFF_ID }}

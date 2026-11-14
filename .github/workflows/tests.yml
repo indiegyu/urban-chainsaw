@@ -1,0 +1,34 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, "refactor/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -q requests python-dotenv Pillow
+
+      - name: Compile all scripts
+        run: python -m compileall -q scripts setup_github_secrets.py
+
+      - name: Run unit + pipeline tests
+        run: python -m unittest discover -s tests -v

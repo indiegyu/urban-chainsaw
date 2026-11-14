@@ -38,31 +38,42 @@ jobs:
       - name: Produce Shorts video
         id: assemble
         env:
+          GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-        run: python -u scripts/video/assemble_shorts.py 2>&1 | tee /tmp/shorts.log
-             && exit ${PIPESTATUS[0]}
+        run: |
+          set -o pipefail
+          python -u scripts/video/assemble_shorts.py 2>&1 | tee /tmp/shorts.log
 
       - name: Upload Shorts to YouTube
         id: upload
         env:
           GOOGLE_TOKEN_PATH: token.json
         run: |
+          set -o pipefail
           OUTPUT_DIR=$(ls -td scripts/video/output_shorts/*/ 2>/dev/null | head -1)
           if [ -z "$OUTPUT_DIR" ]; then
             echo "ERROR: No shorts output directory" | tee /tmp/upload_shorts.log
             exit 1
           fi
+          if [ ! -f "${OUTPUT_DIR}final.mp4" ]; then
+            echo "ERROR: ${OUTPUT_DIR} has no final.mp4" | tee /tmp/upload_shorts.log
+            exit 1
+          fi
           python -u scripts/video/upload_youtube.py "$OUTPUT_DIR" 2>&1 | tee /tmp/upload_shorts.log
-          exit ${PIPESTATUS[0]}
 
       - name: Save run status
         if: always()
         run: |
           mkdir -p .github/run_logs
-          STATUS="success"
-          [ "${{ steps.assemble.outcome }}" != "success" ] && STATUS="assemble_failed"
-          [ "${{ steps.upload.outcome }}"   != "success" ] && STATUS="upload_failed"
+          if [ "${{ steps.assemble.outcome }}" != "success" ]; then
+            STATUS="assemble_failed"
+          elif [ "${{ steps.upload.outcome }}" != "success" ]; then
+            STATUS="upload_failed"
+          else
+            STATUS="success"
+          fi
           {
             echo "type: shorts"
             echo "status: $STATUS"

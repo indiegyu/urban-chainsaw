@@ -1,23 +1,60 @@
 type: shorts
 status: upload_failed
-run: 234
-timestamp: 2026-11-14T19:37:34Z
+run: 235
+timestamp: 2026-11-15T20:03:05Z
 --- shorts log ---
 
 🎬 [Shorts] Generating script...
-Traceback (most recent call last):
-  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 216, in <module>
-    run()
-  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 199, in run
-    meta = generate_shorts_script(groq_key)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 56, in generate_shorts_script
-    meta_raw = _groq_post(headers, [
-               ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/assemble_shorts.py", line 35, in _groq_post
-    r.raise_for_status()
-  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/requests/models.py", line 1167, in raise_for_status
-    raise HTTPError(http_error_msg, response=self)
-requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.groq.com/openai/v1/chat/completions
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 351자 · 0.7s
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 556자 · 1.3s
+  ✓ Title: This AI Side Hustle Pays $1,000/Day 🤯 #Shorts
+
+🎙️  [Shorts] Synthesizing voice...
+  ✓ gTTS voice
+
+🖼️  [Shorts] Assembling vertical video...
+  ✓ Shorts thumbnail: thumbnail.jpg
+  ✓ Shorts video: final.mp4
+
+✅ Shorts ready: 20261115_200250 (0.9 MB)
 --- upload log ---
-(no log)
+  ⚠ Token refresh failed: {
+  "error": "invalid_grant",
+  "error_description": "Bad Request"
+}
+Traceback (most recent call last):
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/upload_youtube.py", line 256, in <module>
+    run(sys.argv[1])
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/upload_youtube.py", line 236, in run
+    video_id = upload_video(
+               ^^^^^^^^^^^^^
+  File "/home/runner/work/urban-chainsaw/urban-chainsaw/scripts/video/upload_youtube.py", line 144, in upload_video
+    raise RuntimeError(f"Failed to initiate upload: {init_resp.status_code} {init_resp.text}")
+RuntimeError: Failed to initiate upload: 401 {
+  "error": {
+    "code": 401,
+    "message": "Request is missing required authentication credential. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+    "errors": [
+      {
+        "message": "Login Required.",
+        "domain": "global",
+        "reason": "required",
+        "location": "Authorization",
+        "locationType": "header"
+      }
+    ],
+    "status": "UNAUTHENTICATED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+        "reason": "CREDENTIALS_MISSING",
+        "domain": "googleapis.com",
+        "metadata": {
+          "method": "youtube.api.v3.V3DataVideoService.Insert",
+          "service": "youtube.googleapis.com"
+        }
+      }
+    ]
+  }
+}
+

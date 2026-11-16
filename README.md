@@ -137,6 +137,15 @@ urban-chainsaw/
 
 ---
 
+## 제품 · 오픈소스
+
+| 이름 | 내용 |
+|---|---|
+| [korean-csv-cleaner-lite](products/korean-csv-cleaner-lite) | CP949·EUC-KR 한글 CSV 인코딩 판별과 기본 정리를 하는 오픈소스 도구 (MIT, 의존성 0, 54 테스트) |
+| [Korean / Global CSV & Excel Cleaner + Batch Processor](https://psgfanatic8.gumroad.com/l/korean-csv-excel-cleaner-batch-processor) | 위 도구의 풀버전 — xlsx, 파일 병합·분할, 전화번호·날짜·금액 정규화, 주민번호 마스킹 |
+
+---
+
 ## 현실적 수익 예측 ($0 예산 기준)
 
 | 기간 | 마일스톤 | 예상 월 수익 |

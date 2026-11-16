@@ -1,8 +1,8 @@
 status: upload_failed
 assemble_outcome: success
 upload_outcome: failure
-run: 495
-timestamp: 2026-11-15T16:04:43Z
+run: 496
+timestamp: 2026-11-16T00:53:49Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -10,19 +10,18 @@ timestamp: 2026-11-15T16:04:43Z
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
   ✓ Google Trends: 5 keywords scored
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 67자 · 0.4s
-  ✅ Topic selected: How To Make $5,000/Month With A Faceless AI YouTube Channel in 2026
-  📊 Trend-selected topic: 'How To Make $5,000/Month With A Faceless AI YouTube Channel '
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 67자 · 0.7s
+  ✅ Topic selected: How to Make $5,000/Month with a Faceless AI YouTube Channel in 2026
+  📊 Trend-selected topic: 'How to Make $5,000/Month with a Faceless AI YouTube Channel '
 
-🎬 Producing video: 'How To Make $5,000/Month With A Faceless AI YouTube Channel in 2026'
+🎬 Producing video: 'How to Make $5,000/Month with a Faceless AI YouTube Channel in 2026'
 
 [1/3] Generating script...
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 2025자 · 1.9s
-  ⚠ gemini/gemini-3.5-flash-lite: 503 서버 오류: { "error": { "code": 503, "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.", "status": "UNAVAILABLE" } } → 2초 후 재시도 (1/3)
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 7921자 · 7.2s
-  ✓ Title:     5 AI Tools To Make $5000/Month Faceless YouTube Channel (2026)
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 2164자 · 2.4s
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 7909자 · 6.9s
+  ✓ Title:     5 AI Tools To Make $5000/Month Faceless YouTube Passive Income (2
   ✓ Tags:      20 tags
-  ✓ Thumbnail: $5000/MO FACELESS AI
+  ✓ Thumbnail: $5000 MONTH FACELESS AI
 
 [2/3] Synthesizing voice...
   ✓ gTTS voice: audio.mp3
@@ -31,8 +30,8 @@ timestamp: 2026-11-15T16:04:43Z
   ✓ Thumbnail: thumbnail.jpg
   ✓ Video assembled: final.mp4
 
-✅ Video ready: 20261115_160342
-   Title:  5 AI Tools To Make $5000/Month Faceless YouTube Channel (2026)
+✅ Video ready: 20261116_005258
+   Title:  5 AI Tools To Make $5000/Month Faceless YouTube Passive Income (2026)
    Size:   5.7 MB
 --- upload log ---
   ⚠ Token refresh failed: {
@@ -67,8 +66,8 @@ RuntimeError: Failed to initiate upload: 401 {
         "reason": "CREDENTIALS_MISSING",
         "domain": "googleapis.com",
         "metadata": {
-          "service": "youtube.googleapis.com",
-          "method": "youtube.api.v3.V3DataVideoService.Insert"
+          "method": "youtube.api.v3.V3DataVideoService.Insert",
+          "service": "youtube.googleapis.com"
         }
       }
     ]

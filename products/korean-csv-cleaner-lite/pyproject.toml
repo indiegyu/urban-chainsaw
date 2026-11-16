@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kcsvlite"
+version = "1.0.0"
+description = "Open and clean Korean CSV exports (CP949/EUC-KR/UTF-8) offline, with no dependencies"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Seonggyu Park" }]
+keywords = ["csv", "cp949", "euc-kr", "encoding", "korean", "excel", "data-cleaning"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Text Processing",
+]
+
+[project.urls]
+"Full version" = "https://psgfanatic8.gumroad.com/l/korean-csv-excel-cleaner-batch-processor"
+
+[tool.setuptools]
+packages = ["kcsvlite"]

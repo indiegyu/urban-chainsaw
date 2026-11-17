@@ -1,0 +1,67 @@
+{
+  "name": "AI Side Hustle Tracker — 월 수익 추적 + 태스크 관리",
+  "description": "Streamline your AI-driven business with this all-in-one Notion template designed for creators and solopreneurs. Effortlessly track monthly revenues, manage AI tool subscriptions, and organize daily growth tasks in one aesthetic dashboard.",
+  "pages": [
+    "01. Dashboard (메인 대시보드)",
+    "02. Revenue & Expense Tracker (수익 및 비용 관리)",
+    "03. Task & Project Board (태스크 및 프로젝트 관리)",
+    "04. AI Tool Stack & ROI (AI 툴 스택 및 투자 대비 수익률)",
+    "05. Content & Prompt Library (콘텐츠 및 프롬프트 라이브러리)"
+  ],
+  "databases": [
+    {
+      "name": "Revenue Tracker",
+      "properties": [
+        "Month",
+        "Source",
+        "Amount (USD)",
+        "Category",
+        "Status",
+        "Date Received"
+      ]
+    },
+    {
+      "name": "Task Manager",
+      "properties": [
+        "Task Name",
+        "Status",
+        "Priority",
+        "Due Date",
+        "Project",
+        "AI Tool Used"
+      ]
+    },
+    {
+      "name": "AI Tool Stack",
+      "properties": [
+        "Tool Name",
+        "Monthly Cost",
+        "Billing Cycle",
+        "Use Case",
+        "ROI Rating",
+        "Active Status"
+      ]
+    },
+    {
+      "name": "Content Pipeline",
+      "properties": [
+        "Title",
+        "Platform",
+        "Stage",
+        "Publish Date",
+        "Prompt Used",
+        "Performance"
+      ]
+    }
+  ],
+  "price_usd": 9,
+  "tags": [
+    "Notion Template",
+    "AI Side Hustle",
+    "Revenue Tracker",
+    "Solopreneur",
+    "Productivity",
+    "Korean English Bilingual",
+    "Business Planner"
+  ]
+}

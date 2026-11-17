@@ -3,6 +3,9 @@
   "last_updated": "2026-11-16",
   "version": 35,
   "top_performing_formats": [
+    "The 2026 'Make Money Online' Blueprint: Building an Automated AI Micro-SaaS Without Writing Code",
+    "Stop Using ChatGPT Wrong: 3 Advanced Prompt Frameworks That Built Me a $5,000/Mo Faceless Business",
+    "I Tested 10 'AI Passive Income' Tools for 30 Days—Here’s the Exact Dollar Amount I Made",
     "X AI Tools That Pay $Y/Month",
     "How to Make $X with [Tool] in 2026",
     "I Tried X AI Side Hustles — Here's What Worked",
@@ -31,7 +34,9 @@
     "Faceless YouTube Blueprint — step-by-step PDF guide",
     "AI Tools Mega List — 100 free AI tools with income use cases",
     "Passive Income Automation Checklist — PDF",
-    "ChatGPT Side Hustle Playbook — 20 proven methods"
+    "ChatGPT Side Hustle Playbook — 20 proven methods",
+    "The Ultimate 2026 AI Prompt Engineering Vault (1,000+ tested prompts for marketing, coding, and faceless video scripts) - $27.00",
+    "Automated Faceless YouTube Channel Standard Operating Procedure (SOP) + Notion Tracker - $49.00"
   ],
   "weekly_stats": {
     "total_videos": 0,
@@ -156,6 +161,12 @@
       "required_secrets": []
     }
   },
-  "last_expansion": "2026-11-10T14:24:28.474691",
-  "total_pipelines": 10
+  "last_expansion": "2026-11-17T15:34:13.543809",
+  "total_pipelines": 10,
+  "groq_suggested_streams": [
+    {
+      "suggestion": "Gumroad",
+      "date": "2026-11-17T15:34:13.543757"
+    }
+  ]
 }

@@ -1,0 +1,162 @@
+AI Income Starter Kit
+============================================================
+Unlock 50 expert ChatGPT prompts designed to help you launch and grow profitable AI-driven side hustles today. Transform your skills into digital income streams with ease.
+
+© 2026 AI Income Daily
+
+============================================================
+
+1. **Niche Market Research**
+Prompt: Identify 10 high-growth, low-competition niches within the [Industry] market that are currently underserved. Provide the target audience demographics and potential monetization strategies for each.
+
+2. **Affiliate Product Selection**
+Prompt: List 10 physical or digital products related to [Niche] that have high affiliate commission rates and strong consumer demand. Include a brief explanation of why these products convert well.
+
+3. **Viral Content Ideation**
+Prompt: Generate 20 viral video hook ideas for [Platform] focused on [Topic] that are designed to maximize watch time and shares.
+
+4. **SEO Keyword Strategy**
+Prompt: Create a list of 30 long-tail SEO keywords for a website about [Topic] that have low difficulty but high commercial intent.
+
+5. **Cold Email Outreach**
+Prompt: Write a cold email template for selling [Service] to [Target Persona] that focuses on pain points and offers a clear, low-friction call to action.
+
+6. **Lead Magnet Creation**
+Prompt: Outline a 5-page PDF lead magnet that provides high value to [Target Audience] and serves as a funnel to sell [Product/Service].
+
+7. **Course Outline Blueprint**
+Prompt: Create a comprehensive 8-module curriculum for an online course teaching [Skill]. Include lesson titles and one key takeaway for each lesson.
+
+8. **Newsletter Growth**
+Prompt: Write 5 catchy subject lines and a 150-word introduction for a newsletter issue about [Topic] designed to increase open rates and click-throughs.
+
+9. **Landing Page Copy**
+Prompt: Write high-converting landing page copy for [Product] using the AIDA (Attention, Interest, Desire, Action) framework.
+
+10. **Pricing Strategy**
+Prompt: Analyze the pricing models of 3 top competitors in the [Industry] and suggest a pricing tier strategy for my new [Product/Service] to maximize profit margins.
+
+11. **E-commerce Product Description**
+Prompt: Write a persuasive product description for [Product] that highlights unique selling points and uses SEO-friendly keywords to drive sales.
+
+12. **Ad Campaign Setup**
+Prompt: Create a 3-variant Facebook ad strategy for [Product]. Include the target audience, ad copy, and a suggestion for the creative visual.
+
+13. **YouTube Scriptwriting**
+Prompt: Write a 5-minute YouTube script for a video titled "[Title]" that includes an engaging intro, a problem-solving body, and a strong call to action.
+
+14. **Service Offering Definition**
+Prompt: Help me package my [Skill] into a high-ticket service offering. Define the scope of work, deliverables, and a value-based pricing structure.
+
+15. **Blog Post Writing**
+Prompt: Write a 1,000-word SEO-optimized blog post about [Topic] that establishes authority and includes an affiliate link placement strategy.
+
+16. **Freelance Proposal**
+Prompt: Write a winning proposal for a freelance job posting about [Project Type]. Focus on demonstrating expertise and solving the client's specific problem.
+
+17. **Client Onboarding**
+Prompt: Draft a professional email sequence for onboarding a new client for [Service]. Include a welcome email, a request for assets, and a project timeline.
+
+18. **Social Media Content Calendar**
+Prompt: Create a 30-day social media content calendar for [Platform] focused on building a personal brand in the [Industry] space.
+
+19. **Podcast Guest Pitch**
+Prompt: Write a compelling pitch email to a podcast host asking to be a guest, highlighting my expertise in [Topic] and the value I can provide to their listeners.
+
+20. **Book/E-book Outline**
+Prompt: Outline a 10-chapter non-fiction book about [Topic] that is designed to position me as an expert and sell back-end consulting services.
+
+21. **Webinar Script**
+Prompt: Write a 45-minute webinar script outline for selling [Product/Service] that builds trust, addresses objections, and ends with a strong sales pitch.
+
+22. **Product Launch Email Sequence**
+Prompt: Write a 5-day email launch sequence for a new [Product] that creates urgency and encourages early-bird signups.
+
+23. **Community Building**
+Prompt: Suggest 10 engagement-driven discussion topics to post in a [Niche] Facebook group to build authority and trust with potential customers.
+
+24. **Competitor Analysis**
+Prompt: Conduct a SWOT analysis (Strengths, Weaknesses, Opportunities, Threats) for [Competitor Name] within the [Industry] market.
+
+25. **Business Plan Summary**
+Prompt: Draft a one-page business model canvas for a [Business Type] that focuses on rapid revenue generation.
+
+26. **Consulting Agreement Terms**
+Prompt: List the essential clauses I should include in a freelance consulting contract to protect my time, intellectual property, and payment terms.
+
+27. **Sales Objection Handling**
+Prompt: List the top 5 most common objections for buying [Product/Service] and provide a scripted, empathetic response for each.
+
+28. **Customer Persona Development**
+Prompt: Create a detailed customer avatar for my [Product], including their motivations, frustrations, and preferred communication channels.
+
+29. **Influencer Outreach**
+Prompt: Write an outreach message to an influencer in the [Niche] space proposing a partnership or sponsorship for my [Product].
+
+30. **Podcast Title Ideas**
+Prompt: Generate 15 creative and catchy podcast titles for a show about [Topic] that would appeal to a professional audience.
+
+31. **Workshop/Event Outline**
+Prompt: Create a 60-minute workshop plan for teaching [Skill] to beginners. Include interactive activities and learning objectives.
+
+32. **Affiliate Program Setup**
+Prompt: Outline the requirements and commission structure for an affiliate program to help scale my [Product] sales.
+
+33. **Newsletter Monetization**
+Prompt: Suggest 5 ways to monetize a newsletter focused on [Niche] that go beyond simple sponsorships.
+
+34. **Sales Call Script**
+Prompt: Write a discovery call script that helps me qualify leads and uncover the budget and pain points of potential consulting clients.
+
+35. **Brand Voice Definition**
+Prompt: Define a brand voice for my [Business Type] that sounds [Adjective] and [Adjective], and provide examples of how to apply this to social media posts.
+
+36. **Time Management Audit**
+Prompt: I spend most of my day doing [Task]. Help me identify which parts of this can be automated or delegated to save 10 hours a week.
+
+37. **Outsourcing Strategy**
+Prompt: Create a job description for a virtual assistant to help with [Task]. Include the specific skills required and key performance indicators (KPIs).
+
+38. **Project Management Workflow**
+Prompt: Create a step-by-step workflow for managing a [Project Type] from start to finish to ensure I meet deadlines and maintain quality.
+
+39. **AI Tool Stack**
+Prompt: Recommend a list of AI tools to streamline [Business Process] to increase efficiency and reduce manual labor.
+
+40. **Meeting Efficiency**
+Prompt: Provide an agenda template for a 30-minute client meeting that ensures we cover all action items without wasting time.
+
+41. **Email Productivity**
+Prompt: Write a set of 5 "canned responses" for common client emails to save me time while maintaining a professional tone.
+
+42. **Task Prioritization**
+Prompt: Using the Eisenhower Matrix, help me prioritize my to-do list: [Insert List of Tasks].
+
+43. **Automation Logic**
+Prompt: Explain how I can use [Tool like Zapier] to automatically sync data between my [App 1] and [App 2] to save time.
+
+44. **Document Templating**
+Prompt: Create a professional invoice template or project status update report template that I can use to save time on administrative tasks.
+
+45. **Delegation Script**
+Prompt: Write a clear instruction guide for a team member to handle [Task] so that I can step back from the daily execution.
+
+46. **Professional Networking**
+Prompt: Write a LinkedIn message template for connecting with potential partners or mentors in the [Industry] without sounding spammy.
+
+47. **Content Repurposing**
+Prompt: Tell me 5 different ways I can repurpose a single long-form blog post about [Topic] into smaller social media assets.
+
+48. **Decision Making Framework**
+Prompt: Help me evaluate the decision of [Decision] using a pros and cons framework focused on long-term ROI.
+
+49. **Digital Asset Organization**
+Prompt: Suggest a folder structure and naming convention system for organizing my digital business assets to save time searching for files.
+
+50. **Personal Goal Setting**
+Prompt: Help me set a 90-day goal for [Business Outcome] and break it down into weekly actionable milestones.
+
+============================================================
+BONUS: Join AI Income Daily for daily strategies
+
+============================================================

@@ -1,32 +1,27 @@
 status: upload_failed
 assemble_outcome: success
 upload_outcome: failure
-run: 501
-timestamp: 2026-11-18T17:48:15Z
+run: 502
+timestamp: 2026-11-19T02:26:08Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
 🔍 Researching trending topics...
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
-  ✓ Google Trends: 0 keywords scored
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 66자 · 5.6s
-  ✅ Topic selected: How to Make $5,000/Month with Faceless AI YouTube Channels in 2024
-  📊 Trend-selected topic: 'How to Make $5,000/Month with Faceless AI YouTube Channels i'
+  ✓ Google Trends: 5 keywords scored
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 66자 · 7.3s
+  ✅ Topic selected: How to Make $5,000/Month With Faceless AI YouTube Channels in 2026
+  📊 Trend-selected topic: 'How to Make $5,000/Month With Faceless AI YouTube Channels i'
 
-🎬 Producing video: 'How to Make $5,000/Month with Faceless AI YouTube Channels in 2024'
+🎬 Producing video: 'How to Make $5,000/Month With Faceless AI YouTube Channels in 2026'
 
 [1/3] Generating script...
-  ⚠ gemini/gemini-3.5-flash-lite: 503 서버 오류: { "error": { "code": 503, "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.", "status": "UNAVAILABLE" } } → 2초 후 재시도 (1/3)
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 2165자 · 6.1s
-  ⚠ gemini/gemini-3.5-flash-lite: 503 서버 오류: { "error": { "code": 503, "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.", "status": "UNAVAILABLE" } } → 2초 후 재시도 (1/3)
-  ⚠ gemini/gemini-3.5-flash-lite: 503 서버 오류: { "error": { "code": 503, "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.", "status": "UNAVAILABLE" } } → 4초 후 재시도 (2/3)
-  ⚠ gemini/gemini-3.5-flash-lite: 503 서버 오류: { "error": { "code": 503, "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.", "status": "UNAVAILABLE" } } → 8초 후 재시도 (3/3)
-  ⚠ gemini/gemini-3.5-flash-lite 재시도 소진 — 다음 provider로 폴백
-  ⚙ LLM gemini/gemini-3.1-flash-lite · 6526자 · 10.9s
-  ✓ Title:     7 AI Steps to $5,000/Month Faceless YouTube Channels (2026)
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 1961자 · 7.8s
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 6882자 · 16.9s
+  ✓ Title:     5 AI Tools To Make $5,000/Month With Faceless Channels (2026)
   ✓ Tags:      20 tags
-  ✓ Thumbnail: $5,000 FACELESS AI
+  ✓ Thumbnail: $5,000 AI FACLESS
 
 [2/3] Synthesizing voice...
   ✓ gTTS voice: audio.mp3
@@ -35,8 +30,8 @@ timestamp: 2026-11-18T17:48:15Z
   ✓ Thumbnail: thumbnail.jpg
   ✓ Video assembled: final.mp4
 
-✅ Video ready: 20261118_174634
-   Title:  7 AI Steps to $5,000/Month Faceless YouTube Channels (2026)
+✅ Video ready: 20261119_022509
+   Title:  5 AI Tools To Make $5,000/Month With Faceless Channels (2026)
    Size:   5.4 MB
 --- upload log ---
   ⚠ Token refresh failed: {
@@ -71,8 +66,8 @@ RuntimeError: Failed to initiate upload: 401 {
         "reason": "CREDENTIALS_MISSING",
         "domain": "googleapis.com",
         "metadata": {
-          "service": "youtube.googleapis.com",
-          "method": "youtube.api.v3.V3DataVideoService.Insert"
+          "method": "youtube.api.v3.V3DataVideoService.Insert",
+          "service": "youtube.googleapis.com"
         }
       }
     ]

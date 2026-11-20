@@ -1,13 +1,13 @@
 type: shorts
 status: upload_failed
-run: 239
-timestamp: 2026-11-19T22:31:13Z
+run: 240
+timestamp: 2026-11-20T22:03:37Z
 --- shorts log ---
 
 🎬 [Shorts] Generating script...
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 360자 · 1.1s
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 643자 · 1.3s
-  ✓ Title: This AI makes $1,000/day on Autopilot! 🤯 #Shorts
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 367자 · 0.8s
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 625자 · 0.9s
+  ✓ Title: This AI side hustle prints $1,000/week! 🤯 #Shorts
 
 🎙️  [Shorts] Synthesizing voice...
   ✓ gTTS voice
@@ -16,7 +16,7 @@ timestamp: 2026-11-19T22:31:13Z
   ✓ Shorts thumbnail: thumbnail.jpg
   ✓ Shorts video: final.mp4
 
-✅ Shorts ready: 20261119_223057 (1.0 MB)
+✅ Shorts ready: 20261120_220325 (0.8 MB)
 --- upload log ---
   ⚠ Token refresh failed: {
   "error": "invalid_grant",

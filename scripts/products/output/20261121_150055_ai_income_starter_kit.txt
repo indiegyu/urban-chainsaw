@@ -1,0 +1,162 @@
+AI Income Starter Kit
+============================================================
+Unlock 50 expert ChatGPT prompts designed to help you launch and grow profitable AI side hustles. Start generating revenue streams quickly with proven, ready-to-use monetization strategies.
+
+© 2026 AI Income Daily
+
+============================================================
+
+1. Freelance Upwork Proposal Generator
+Prompt: Act as a top-rated Upwork freelancer. Write a personalized, high-converting proposal for this job description: [Insert Job Description]. Emphasize my experience in [Insert Skill] and keep it under 150 words.
+
+2. Niche Blog Post Outline Creator
+Prompt: Create a detailed, SEO-optimized blog post outline for the keyword "[Insert Keyword]". Include an engaging hook, 5 main H2 headings with bullet points for each, and a high-converting call-to-action at the end.
+
+3. Cold Email Sales Outreach
+Prompt: Write a short, persuasive cold email to [Insert Target Audience, e.g., local gym owners] offering [Insert Service, e.g., lead generation]. Focus on their pain points, include one compelling statistic, and end with a low-friction call-to-action.
+
+4. High-Converting Landing Page Copy
+Prompt: Write the copy for a landing page selling [Insert Product/Service]. Structure it following the PAS (Problem-Agitate-Solve) framework, and include a punchy headline, 3 key benefits, and a strong CTA button.
+
+5. Digital Product Idea Generator
+Prompt: Generate 5 profitable digital product ideas that I can create and sell in the [Insert Niche, e.g., personal finance for millennials] market. For each idea, include the target audience, pricing strategy, and a quick validation method.
+
+6. Automated Customer Support FAQ
+Prompt: Draft 10 comprehensive FAQs and answers for my e-commerce store selling [Insert Product]. Ensure the tone is friendly, reassuring, and designed to reduce refund requests and cart abandonment.
+
+7. Twitter/X Thread for Lead Generation
+Prompt: Write a 5-part Twitter/X thread about [Insert Industry Topic] that establishes authority and drives traffic to my lead magnet: [Insert Lead Magnet]. Make the first tweet a scroll-stopping hook.
+
+8. YouTube Video Script Hook and Body
+Prompt: Write a high-retention YouTube video script for the title "[Insert Video Title]". Provide an engaging 15-second hook, a structured body with 3 main talking points, and a seamless transition to a sponsor message.
+
+9. Automated Content Repurposing
+Prompt: Take this long-form article [Paste Article text or link] and rewrite it into 3 distinct LinkedIn posts, 5 punchy tweets, and a short script for a 60-second Instagram Reel.
+
+10. Facebook Ad Copy Variations
+Prompt: Write 3 different Facebook ad variations (A/B testing angles: Pain-point focused, Benefit-driven, and Social Proof) for my product [Insert Product Name and Description]. Keep the primary text under 125 words.
+
+11. Pinterest Pin Description Optimizer
+Prompt: Write 5 SEO-optimized Pinterest pin descriptions for my blog post about [Insert Topic]. Include relevant keywords, a clear value proposition, and a call-to-action to click the link.
+
+12. Newsletter Welcome Sequence (Email 1)
+Prompt: Write the first welcome email for my newsletter about [Insert Niche]. Deliver the promised freebie right away, share a brief, compelling origin story, and set expectations for future emails.
+
+13. Podcast Guest Pitch Email
+Prompt: Write a pitch email to a popular podcast host in the [Insert Niche] space. Propose 3 unique, high-value episode topics I can speak on that will directly benefit their specific audience.
+
+14. Etsy Product Description
+Prompt: Write an SEO-optimized Etsy product description for [Insert Handmade Item]. Highlight the materials, dimensions, and unique selling proposition while naturally integrating search keywords to maximize visibility.
+
+15. Resume Bullet Point Enhancer
+Prompt: Rewrite these boring resume bullet points [Paste Bullet Points] to focus on achievements, metrics, and high-impact action verbs tailored for a [Insert Job Title] role.
+
+16. Salary Negotiation Script
+Prompt: Write a professional and firm salary negotiation email to my manager requesting a raise for [Insert Job Title]. Include evidence of my recent achievements and propose a 15% increase.
+
+17. Affiliate Marketing Review Post
+Prompt: Write an unbiased, conversion-focused product review for [Insert Product Name] highlighting its top 3 pros, 2 cons, and a final verdict on who should buy it. Naturally weave in space for an affiliate link.
+
+18. Online Course Curriculum Builder
+Prompt: Create a comprehensive 4-week module curriculum for an online course teaching people how to [Insert Skill]. Include lesson titles, homework assignments, and downloadable resources for each module.
+
+19. Newsletter Sponsorship Pitch
+Prompt: Write a persuasive pitch deck email to potential sponsors trying to get them to buy ad space in my weekly newsletter, which has [Insert Subscriber Count] subscribers in the [Insert Niche] industry.
+
+20. E-commerce Product Bundling Strategy
+Prompt: Analyze my product [Insert Product Name] and suggest 3 logical product bundles I can create with other items to increase my average order value (AOV) and profit margins.
+
+21. Grant Proposal Executive Summary
+Prompt: Write a compelling executive summary for a grant proposal seeking funding for [Insert Project/Non-profit]. Highlight the problem, our unique solution, and the measurable impact we will achieve.
+
+22. Client Onboarding Questionnaire
+Prompt: Create a 10-question intake form for new freelance clients in [Insert Niche] to extract all necessary project details, brand guidelines, and expectations upfront to save time.
+
+23. Local SEO GMB Post
+Prompt: Write a Google My Business update post for my local business [Insert Business Type] offering a seasonal promotion for [Insert Service/Product]. Include a clear CTA to call or visit our website.
+
+24. Problem-Solving Knowledge Base Article
+Prompt: Write a step-by-step troubleshooting knowledge base article for software users experiencing the error [Insert Error Message]. Make the instructions clear, concise, and easy for non-technical users to follow.
+
+25. Instagram Caption Hook Generator
+Prompt: Generate 10 attention-grabbing hooks for Instagram captions in the [Insert Niche] space that stop the scroll and encourage users to read the full caption.
+
+26. Webinar Presentation Outline
+Prompt: Outline a 45-minute high-converting sales webinar for my product [Insert Product]. Use the structure: Hook (0-5m), Value/Content (5-30m), Pitch Transition (30-40m), and Q&A/Close (40-45m).
+
+27. Competitor Analysis Framework
+Prompt: Act as a business strategist. Analyze the strengths, weaknesses, pricing models, and marketing angles of my top competitor [Insert Competitor Name] in the [Insert Industry] market.
+
+28. LinkedIn Profile Optimization
+Prompt: Rewrite my LinkedIn headline and "About" section to position me as an expert in [Insert Niche]. Use industry keywords and structure it to attract recruiters or high-paying clients.
+
+29. High-Ticket Sales Call Script
+Prompt: Write a 5-step consultative sales call script for closing high-ticket services worth [Insert Price]. Include open-ended discovery questions and a framework for handling the "I need to think about it" objection.
+
+30. Time-Blocking Weekly Schedule
+Prompt: Act as a productivity coach. Design a realistic weekly time-blocking schedule for a solopreneur balancing client work, content creation, and business growth, assuming a 40-hour workweek.
+
+31. Standard Operating Procedure (SOP) Writer
+Prompt: Write a step-by-step Standard Operating Procedure (SOP) document for [Insert Task, e.g., publishing a weekly blog post] so I can easily delegate it to a virtual assistant.
+
+32. TikTok/Reels Script for Virality
+Prompt: Write a 30-second short-form video script about [Insert Topic] that uses a controversial or curiosity-driven hook in the first 3 seconds to maximize watch time and shares.
+
+33. Book Chapter Summary and Action Plan
+Prompt: Summarize the core concepts of the business book [Insert Book Title] into 5 key takeaways, and provide a 3-step action plan I can implement today to grow my business.
+
+34. Partnership Proposal Email
+Prompt: Write a collaborative partnership outreach email to a complementary brand in my space, proposing a joint giveaway or cross-promotion that benefits both of our email lists.
+
+35. Case Study Structure Template
+Prompt: Write a compelling customer case study for [Insert Product/Service] using the Problem-Solution-Result framework. Include placeholders for specific metrics and a customer quote.
+
+36. FAQ Page Schema Markup Generator
+Prompt: Write JSON-LD schema markup code for an FAQ section answering these three questions about [Insert Topic]: [Insert Question 1], [Insert Question 2], [Insert Question 3].
+
+37. Client Retention Email Template
+Prompt: Write an email checking in on a past client 30 days after completing a project for them. Offer a quick tip to help them further, and subtly plant the seed for an upsell or retainer contract.
+
+38. Pricing Page Tier Strategy
+Prompt: Design a 3-tier pricing page strategy (Starter, Growth, Enterprise) for my SaaS/Service [Insert Name], clearly defining the features and psychological triggers for each tier.
+
+39. Press Release Distribution Draft
+Prompt: Write a professional press release announcing the launch of [Insert New Product/Company]. Include an eye-catching headline, dateline, boilerplate, and media contact info.
+
+40. AI Prompt Engineering for Specific Tasks
+Prompt: Act as an expert prompt engineer. Write a detailed, highly effective system prompt for ChatGPT that will consistently generate high-quality [Insert Output Type, e.g., real estate property descriptions].
+
+41. Ghostwriting Sample Creator
+Prompt: Write a 300-word LinkedIn thought-leadership post in the voice of a visionary tech founder discussing the future of [Insert Industry Trend].
+
+42. Refund Request Defusal Response
+Prompt: Write a polite, empathetic customer support response to an angry customer demanding a refund, offering a practical alternative or resolution to save the sale while maintaining brand reputation.
+
+43. Lead Magnet Concept & Outline
+Prompt: Brainstorm 3 lead magnet concepts for my target audience of [Insert Audience] who struggle with [Insert Pain Point], and provide a detailed outline for the winning idea.
+
+44. Event Promotion Email Sequence (Email 1)
+Prompt: Write the first promotional email for an upcoming live webinar or workshop titled [Insert Title]. Focus on the scarcity, urgency, and transformation attendees will experience.
+
+45. Client Discovery Call Questionnaire
+Prompt: Create a 5-question pre-call questionnaire to send to potential consulting clients so I can assess their budget, timeline, and readiness before wasting time on a live call.
+
+46. Community Engagement Prompts
+Prompt: Write 5 engaging discussion prompts or questions to post in my private Facebook/Discord community for [Insert Niche] to spark conversation and active participation.
+
+47. Personal Branding Content Pillars
+Prompt: Define 4 core content pillars for my personal brand as a [Insert Profession/Creator], including 3 specific content ideas for each pillar to ensure I never run out of things to post.
+
+48. Annual Business Review Template
+Prompt: Create a framework and questionnaire for conducting an annual business review to analyze revenue, failed experiments, operational bottlenecks, and goals for the next year.
+
+49. Cold DM Outreaching (Instagram/LinkedIn)
+Prompt: Write a short, non-spammy direct message (DM) to introduce myself to potential B2B clients on [Instagram/LinkedIn] without pitching immediately, focusing instead on starting a genuine conversation.
+
+50. Exit Intent Popup Copy
+Prompt: Write high-converting copy for an exit-intent popup on my e-commerce store offering a [Insert Discount, e.g., 10% off] discount in exchange for an email address. Keep it punchy and urgent.
+
+============================================================
+BONUS: Join AI Income Daily for daily strategies
+
+============================================================

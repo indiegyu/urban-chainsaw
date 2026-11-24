@@ -1,13 +1,13 @@
 type: shorts
 status: upload_failed
-run: 242
-timestamp: 2026-11-22T20:53:42Z
+run: 243
+timestamp: 2026-11-24T01:58:04Z
 --- shorts log ---
 
 🎬 [Shorts] Generating script...
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 353자 · 1.3s
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 620자 · 1.0s
-  ✓ Title: Make $1,000/Day With This Free AI Tool! 🤯 #Shorts
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 358자 · 1.1s
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 803자 · 1.2s
+  ✓ Title: This Free AI Side Hustle Pays $500/Day 🤯 #Shorts
 
 🎙️  [Shorts] Synthesizing voice...
   ✓ gTTS voice
@@ -16,7 +16,7 @@ timestamp: 2026-11-22T20:53:42Z
   ✓ Shorts thumbnail: thumbnail.jpg
   ✓ Shorts video: final.mp4
 
-✅ Shorts ready: 20261122_205328 (0.9 MB)
+✅ Shorts ready: 20261124_015749 (1.1 MB)
 --- upload log ---
   ⚠ Token refresh failed: {
   "error": "invalid_grant",
@@ -50,8 +50,8 @@ RuntimeError: Failed to initiate upload: 401 {
         "reason": "CREDENTIALS_MISSING",
         "domain": "googleapis.com",
         "metadata": {
-          "method": "youtube.api.v3.V3DataVideoService.Insert",
-          "service": "youtube.googleapis.com"
+          "service": "youtube.googleapis.com",
+          "method": "youtube.api.v3.V3DataVideoService.Insert"
         }
       }
     ]

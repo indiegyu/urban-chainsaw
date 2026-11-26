@@ -1,8 +1,8 @@
 status: upload_failed
 assemble_outcome: success
 upload_outcome: failure
-run: 516
-timestamp: 2026-11-26T03:31:12Z
+run: 517
+timestamp: 2026-11-26T18:49:53Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
@@ -10,18 +10,19 @@ timestamp: 2026-11-26T03:31:12Z
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
   ✓ Google Trends: 5 keywords scored
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 66자 · 3.5s
-  ✅ Topic selected: How I Made $5,000/Month With A Faceless AI YouTube Channel in 2026
-  📊 Trend-selected topic: 'How I Made $5,000/Month With A Faceless AI YouTube Channel i'
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 58자 · 3.9s
+  ✅ Topic selected: How To Make $5,000/Month With Faceless AI Channels In 2026
+  📊 Trend-selected topic: 'How To Make $5,000/Month With Faceless AI Channels In 2026'
 
-🎬 Producing video: 'How I Made $5,000/Month With A Faceless AI YouTube Channel in 2026'
+🎬 Producing video: 'How To Make $5,000/Month With Faceless AI Channels In 2026'
 
 [1/3] Generating script...
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 2123자 · 5.0s
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 7421자 · 8.8s
-  ✓ Title:     5 AI Tools To Make $5000/Month Passive Income (2026)
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 2078자 · 2.1s
+  ⚠ gemini/gemini-3.5-flash-lite: 503 서버 오류: { "error": { "code": 503, "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.", "status": "UNAVAILABLE" } } → 2초 후 재시도 (1/3)
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 8440자 · 7.9s
+  ✓ Title:     5 AI Tools To Make $5,000/Month Faceless (2026)
   ✓ Tags:      20 tags
-  ✓ Thumbnail: MAKE $5000 FACEELESS AI
+  ✓ Thumbnail: $5,000 FACLESS AI
 
 [2/3] Synthesizing voice...
   ✓ gTTS voice: audio.mp3
@@ -30,9 +31,9 @@ timestamp: 2026-11-26T03:31:12Z
   ✓ Thumbnail: thumbnail.jpg
   ✓ Video assembled: final.mp4
 
-✅ Video ready: 20261126_033014
-   Title:  5 AI Tools To Make $5000/Month Passive Income (2026)
-   Size:   5.9 MB
+✅ Video ready: 20261126_184855
+   Title:  5 AI Tools To Make $5,000/Month Faceless (2026)
+   Size:   5.4 MB
 --- upload log ---
   ⚠ Token refresh failed: {
   "error": "invalid_grant",
@@ -66,8 +67,8 @@ RuntimeError: Failed to initiate upload: 401 {
         "reason": "CREDENTIALS_MISSING",
         "domain": "googleapis.com",
         "metadata": {
-          "method": "youtube.api.v3.V3DataVideoService.Insert",
-          "service": "youtube.googleapis.com"
+          "service": "youtube.googleapis.com",
+          "method": "youtube.api.v3.V3DataVideoService.Insert"
         }
       }
     ]

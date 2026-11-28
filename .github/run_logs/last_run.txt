@@ -1,27 +1,28 @@
 status: upload_failed
 assemble_outcome: success
 upload_outcome: failure
-run: 520
-timestamp: 2026-11-28T03:11:43Z
+run: 521
+timestamp: 2026-11-28T17:22:24Z
 --- assemble log ---
 
 [0/3] Researching trending topics...
 🔍 Researching trending topics...
   ✓ YouTube: 0 trending titles
   ✓ Reddit: 0 hot posts
-  ✓ Google Trends: 5 keywords scored
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 58자 · 0.6s
-  ✅ Topic selected: How To Make $5,000/Month With Faceless AI Channels In 2026
-  📊 Trend-selected topic: 'How To Make $5,000/Month With Faceless AI Channels In 2026'
+  ⚠ pytrends: HTTPSConnectionPool(host='trends.google.com', port=443): Max retries exceeded with url: /trends/api/explore?hl=en-US&tz=360&req=%7B%22comparisonItem%22%3A+%5B%7B%22keyword%22%3A+%22AI+tools+make+money+2026%22%2C+%22time%22%3A+%22now+7-d%22%2C+%22geo%22%3A+%22%22%7D%2C+%7B%22keyword%22%3A+%22passive+income+automation+2026%22%2C+%22time%22%3A+%22now+7-d%22%2C+%22geo%22%3A+%22%22%7D%2C+%7B%22keyword%22%3A+%22ChatGPT+side+hustle%22%2C+%22time%22%3A+%22now+7-d%22%2C+%22geo%22%3A+%22%22%7D%2C+%7B%22keyword%22%3A+%22faceless+YouTube+income%22%2C+%22time%22%3A+%22now+7-d%22%2C+%22geo%22%3A+%22%22%7D%2C+%7B%22keyword%22%3A+%22AI+side+hustle+beginner%22%2C+%22time%22%3A+%22now+7-d%22%2C+%22geo%22%3A+%22%22%7D%5D%2C+%22category%22%3A+0%2C+%22property%22%3A+%22%22%7D (Caused by ResponseError('too many 429 error responses'))
+  ✓ Google Trends: 0 keywords scored
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 58자 · 0.8s
+  ✅ Topic selected: How To Make $5,000/Month With AI Faceless Channels in 2024
+  📊 Trend-selected topic: 'How To Make $5,000/Month With AI Faceless Channels in 2024'
 
-🎬 Producing video: 'How To Make $5,000/Month With Faceless AI Channels In 2026'
+🎬 Producing video: 'How To Make $5,000/Month With AI Faceless Channels in 2024'
 
 [1/3] Generating script...
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 1893자 · 1.8s
-  ⚙ LLM gemini/gemini-3.5-flash-lite · 7126자 · 5.7s
-  ✓ Title:     5 AI Tools To Make $5,000/Month With Faceless Channels (2026)
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 2148자 · 1.9s
+  ⚙ LLM gemini/gemini-3.5-flash-lite · 6729자 · 5.1s
+  ✓ Title:     7 AI Tools To Make $5000/Month With Faceless Channels (2026)
   ✓ Tags:      20 tags
-  ✓ Thumbnail: $5,000 AI CHANNEL
+  ✓ Thumbnail: $5,000 FACELESS AI
 
 [2/3] Synthesizing voice...
   ✓ gTTS voice: audio.mp3
@@ -30,9 +31,9 @@ timestamp: 2026-11-28T03:11:43Z
   ✓ Thumbnail: thumbnail.jpg
   ✓ Video assembled: final.mp4
 
-✅ Video ready: 20261128_031055
-   Title:  5 AI Tools To Make $5,000/Month With Faceless Channels (2026)
-   Size:   5.4 MB
+✅ Video ready: 20261128_172139
+   Title:  7 AI Tools To Make $5000/Month With Faceless Channels (2026)
+   Size:   5.5 MB
 --- upload log ---
   ⚠ Token refresh failed: {
   "error": "invalid_grant",
@@ -66,8 +67,8 @@ RuntimeError: Failed to initiate upload: 401 {
         "reason": "CREDENTIALS_MISSING",
         "domain": "googleapis.com",
         "metadata": {
-          "service": "youtube.googleapis.com",
-          "method": "youtube.api.v3.V3DataVideoService.Insert"
+          "method": "youtube.api.v3.V3DataVideoService.Insert",
+          "service": "youtube.googleapis.com"
         }
       }
     ]
